@@ -20,7 +20,6 @@ function primsAlgorithm(graph) {
                 duration: 1000
             });
         }, 1000 * (i + 1));
-        
     }
     
 
