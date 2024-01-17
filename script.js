@@ -1,5 +1,10 @@
 let storedGraphs = [];
 
+function primsAlgorithm(graph) {
+    let edges = graph.edges();
+    console.log(edges);
+}
+
 var cy1 = cytoscape({
     container: document.getElementById('cy'), // container to render in
 
@@ -100,6 +105,8 @@ var cy1 = cytoscape({
     }
 });
 
+primsAlgorithm(cy1);
+
 // storedGraphs.push(cy1.json());
 // cy1.destroy();
 // var cy2 = cytoscape({
@@ -108,9 +115,3 @@ var cy1 = cytoscape({
 // cy2.json(storedGraphs[0]);
 // // const img = cy2.jpg();
 // // document.getElementById('cy').innerHTML = '<img src="' + img + '" />';
-
-/////////////////////////////////////////////
-
-function prims(graph) {
-    
-}
