@@ -1,11 +1,34 @@
 let storedGraphs = [];
 
 function primsAlgorithm(graph) {
-    let edges = graph.edges();
-    console.log(edges);
+    // let edgeQueue = [];
+    // visitedEdges = [];
+    // let unvisitedNodes = graph.nodes();
+    // let visitedNotes = [];
+    // const initialNode = unvisitedNodes[0];
+    // initialNode.style('background-color', 'blue');
+    // while (!unvisitedNodes.empty()) {
+
+    // }
+    
+    
+    const edges = graph.edges();
+    for (let i = 0; i < edges.length; i++) {
+        setTimeout(() => {
+            edges[i].animate({
+                style: {'line-color': 'blue'},
+                duration: 1000
+            });
+        }, 1000 * (i + 1));
+        
+    }
+    
+
+    // src.style('background-color', 'blue');
+    // edges[0].style('line-color', 'blue');
 }
 
-var cy1 = cytoscape({
+let cy1 = cytoscape({
     container: document.getElementById('cy'), // container to render in
 
     elements: [
@@ -34,7 +57,7 @@ var cy1 = cytoscape({
                 id: 'ab',
                 source: 'a',
                 target: 'b',
-                weight: 3
+                weight: 78
             }
         },
         {
@@ -42,7 +65,7 @@ var cy1 = cytoscape({
                 id: 'ac',
                 source: 'a',
                 target: 'c',
-                weight: 4
+                weight: 44
             }
         },
         {
@@ -50,7 +73,63 @@ var cy1 = cytoscape({
                 id: 'ad',
                 source: 'a',
                 target: 'd',
-                weight: 2
+                weight: 11
+            }
+        },
+        {
+            data: {
+                id: 'ae',
+                source: 'a',
+                target: 'e',
+                weight: 40
+            }
+        },
+        {
+            data: {
+                id: 'af',
+                source: 'a',
+                target: 'f',
+                weight: 61
+            }
+        },
+        {
+            data: {
+                id: 'bc',
+                source: 'b',
+                target: 'c',
+                weight: 71
+            }
+        },
+        {
+            data: {
+                id: 'bd',
+                source: 'b',
+                target: 'd',
+                weight: 93
+            }
+        },
+        {
+            data: {
+                id: 'be',
+                source: 'b',
+                target: 'e',
+                weight: 63
+            }
+        },
+        {
+            data: {
+                id: 'bf',
+                source: 'b',
+                target: 'f',
+                weight: 29
+            }
+        },
+        {
+            data: {
+                id: 'cd',
+                source: 'c',
+                target: 'd',
+                weight: 81
             }
         },
         {
@@ -63,10 +142,18 @@ var cy1 = cytoscape({
         },
         {
             data: {
+                id: 'cf',
+                source: 'c',
+                target: 'f',
+                weight: 11
+            }
+        },
+        {
+            data: {
                 id: 'de',
                 source: 'd',
                 target: 'e',
-                weight: 2
+                weight: 33
             }
         },
         {
@@ -74,9 +161,18 @@ var cy1 = cytoscape({
                 id: 'df',
                 source: 'd',
                 target: 'f',
-                weight: 5
+                weight: 20
             }
-        }  
+        },
+        {
+            data: {
+                id: 'ef',
+                source: 'e',
+                target: 'f',
+                weight: 87
+            }
+        },
+        
     ],
 
     style: [ // the stylesheet for the graph
@@ -100,12 +196,20 @@ var cy1 = cytoscape({
     ],
 
     layout: {
-        name: 'grid',
+        name: 'circle', // cose?
         rows: 2
     }
 });
 
 primsAlgorithm(cy1);
+
+// // Calculate kruskal mst: (doesn't work)
+// let mst = cy1.elements().kruskal();
+// mst.edges().style('line-color', 'blue');
+// mst.nodes().style('background-color', 'blue'); 
+// cy1.elements().difference(mst).remove();
+
+
 
 // storedGraphs.push(cy1.json());
 // cy1.destroy();
