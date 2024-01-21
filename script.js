@@ -10,25 +10,11 @@ function primsAlgorithm(graph) {
     let i = 0;
     while (!unvisitedNodes.empty()) {
         i++;
-        console.log("\n\n\n\nIteration: " + i);
-
-        console.log("Current node: " + currNode.data('id'));
-        // for (let i = 0; i < unvisitedNodes.length; i++) {
-        //     console.log(unvisitedNodes[i].data());
-        // }
 
         // Adding adjacent edges to edgeQueue and sorting edgeQueue by weight
         const adjacentEdges = currNode.connectedEdges().filter(edge => !visitedEdges.includes(edge) && (unvisitedNodes.includes(edge.source()) != unvisitedNodes.includes(edge.target()))).toArray();
-        console.log("Adjacent edges: ");
-        for (let i = 0; i < adjacentEdges.length; i++) {
-            console.log(adjacentEdges[i].data());
-        }
         edgeQueue.push(...adjacentEdges);
         edgeQueue.sort((a, b) => a.data('weight') - b.data('weight'));
-        console.log("Edge queue (" + edgeQueue.length + "):");
-        for (let i = 0; i < edgeQueue.length; i++) {
-            console.log(edgeQueue[i].data());
-        }
 
         // Choosing edge
         let nextEdge = null;
@@ -38,12 +24,7 @@ function primsAlgorithm(graph) {
                 nextEdge = edge;
             }
         }
-        console.log("Next edge: " + nextEdge.data('id'));
         visitedEdges.push(nextEdge);
-        console.log("Visited edges: ");
-        for (let i = 0; i < visitedEdges.length; i++) {
-            console.log(visitedEdges[i].data());
-        }
         setTimeout(() => {
             nextEdge.animate({
                 style: {'line-color': 'blue'},
@@ -59,12 +40,6 @@ function primsAlgorithm(graph) {
         else {
             nextNode = nextEdge.target();
         }
-        console.log("Next node: " + nextNode.data('id'));
-        console.log("Unvisited nodes (before removal): ");
-        for (let i = 0; i < unvisitedNodes.length; i++) {
-            console.log(unvisitedNodes[i].data());
-        }
-        console.log(unvisitedNodes);
         let nextNodeIndex = -1;
         for (let i = 0; i < unvisitedNodes.length; i++) {
             if (unvisitedNodes[i].data('id') == nextNode.data('id')) {
@@ -72,12 +47,7 @@ function primsAlgorithm(graph) {
                 break;
             }
         }
-        console.log("Next node index: " + nextNodeIndex);
         unvisitedNodes.splice(nextNodeIndex, 1);
-        console.log("Unvisited nodes (after removal): ");
-        for (let i = 0; i < unvisitedNodes.length; i++) {
-            console.log(unvisitedNodes[i].data());
-        }
         setTimeout(() => {
             nextNode.animate({
                 style: {'background-color': 'blue'},
@@ -86,7 +56,6 @@ function primsAlgorithm(graph) {
         }, 2000 * (i + 1));
         currNode = nextNode;
     }
-    console.log("\n\n##########\nCOMPLETE!!!\n##########");
 }
 
 // Creating initial graphs
