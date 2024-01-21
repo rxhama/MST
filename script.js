@@ -58,6 +58,67 @@ function primsAlgorithm(graph) {
     }
 }
 
+function kruskalsAlgorithm(graph) {
+    let edgeQueue = graph.edges().toArray();
+    edgeQueue.sort((a, b) => a.data('weight') - b.data('weight'));
+    let unvisitedNodes = graph.nodes();
+    let i = 0;
+    while (!unvisitedNodes.empty()) {
+        i++;
+
+        // Choosing edge
+        let nextEdge = null;
+        while (nextEdge == null) {
+            const edge = edgeQueue.shift();
+            if (unvisitedNodes.includes(edge.source()) || unvisitedNodes.includes(edge.target())) {
+                nextEdge = edge;
+            }
+        }
+        setTimeout(() => {
+            nextEdge.animate({
+                style: {'line-color': 'blue'},
+                duration: 1000
+            });
+        }, 2000 * (i + 1));
+        
+        // Getting source and target nodes of edge
+        let sourceNode = nextEdge.source();
+        let targetNode = nextEdge.target();
+        if (unvisitedNodes.includes(sourceNode)) {
+            let sourceIndex = -1;
+            for (let i = 0; i < unvisitedNodes.length; i++) {
+                if (unvisitedNodes[i].data('id') == sourceNode.data('id')) {
+                    sourceIndex = i;
+                    break;
+                }
+            }
+            unvisitedNodes.splice(sourceIndex, 1);
+            setTimeout(() => {
+                sourceNode.animate({
+                    style: {'background-color': 'blue'},
+                    duration: 1000
+                });
+            }, 2000 * (i + 1));
+        }
+        if (unvisitedNodes.includes(targetNode)) {
+            let targetIndex = -1;
+            for (let i = 0; i < unvisitedNodes.length; i++) {
+                if (unvisitedNodes[i].data('id') == targetNode.data('id')) {
+                    targetIndex = i;
+                    break;
+                }
+            }
+            unvisitedNodes.splice(targetIndex, 1);
+            setTimeout(() => {
+                targetNode.animate({
+                    style: {'background-color': 'blue'},
+                    duration: 1000
+                });
+            }, 2000 * (i + 1));
+        }
+    }
+}
+
 // Creating initial graphs
 let cy1 = cytoscape({
     container: document.getElementById('cy'), // container to render in
@@ -231,14 +292,25 @@ let cy1 = cytoscape({
     }
 });
 
-primsAlgorithm(cy1);
+storedGraphs.push(cy1.json());
 
-// // Calculate kruskal mst: (doesn't work)
-// let mst = cy1.elements().kruskal();
-// mst.edges().style('line-color', 'blue');
-// mst.nodes().style('background-color', 'blue'); 
-// cy1.elements().difference(mst).remove();
+function reset() {
+    cy1.destroy();
+    cy1 = cytoscape({
+        container: document.getElementById('cy')
+    });
+    cy1.json(storedGraphs[0]);
+}
 
+document.getElementById('algoDropdown').addEventListener('change', function() {
+    let selectedAlgo = this.value;
+    if (selectedAlgo == 'prims') {
+        primsAlgorithm(cy1);
+    }
+    else if (selectedAlgo == 'kruskals') {
+        kruskalsAlgorithm(cy1);
+    }
+});
 
 
 // storedGraphs.push(cy1.json());

@@ -4,14 +4,15 @@
         <style>
             /* Basic styling for the graph container */
             #cy {
-                width: 100vw; /* 800px */
-                height: 100vh; /* 600px */
+                width: 800px; /* 800px */
+                height: 600px; /* 600px */
                 position: absolute;
                 left: 0;
                 right: 0;
                 top: 0;
                 bottom: 0;
                 margin: auto;
+                border: 1px solid black;
             }
         </style>
         <!-- Cytoscape.js Script -->
@@ -19,6 +20,11 @@
     </head>
     <body>
         <div class="container">
+            <button id="resetBtn" onclick="reset()">Reset</button>
+            <select id="algoDropdown">
+                <option value="prims">Prim's</option>
+                <option value="kruskals">Kruskal's</option>
+            </select>
             <div id="cy"></div>
         </div>
         
