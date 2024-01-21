@@ -1,6 +1,6 @@
 let storedGraphs = [];
 
-function primsAlgorithm(graph) { // problem: previous edges in edgeQueue not removed && nextNodeIndex returning +1 than it should be after first iteration (wrong: ad,df,de,ae,ac,ce,bc)
+function primsAlgorithm(graph) {
     let edgeQueue = [];
     let visitedEdges = [];
     let unvisitedNodes = graph.nodes();
@@ -25,24 +25,19 @@ function primsAlgorithm(graph) { // problem: previous edges in edgeQueue not rem
         }
         edgeQueue.push(...adjacentEdges);
         edgeQueue.sort((a, b) => a.data('weight') - b.data('weight'));
-        console.log("Edge queue (" + edgeQueue.length + ") (before removal): ");
-        for (let i = 0; i < edgeQueue.length; i++) {
-            console.log(edgeQueue[i].data());
-        }
-        for (let i = 0; i < edgeQueue.length; i++) {
-            const edge = edgeQueue[i];
-            if (!unvisitedNodes.includes(edge.source()) && !unvisitedNodes.includes(edge.target())) {
-                edgeQueue.splice(i, 1);
-                i--;
-            }
-        }
-        console.log("Edge queue (" + edgeQueue.length + ") (after removal):");
+        console.log("Edge queue (" + edgeQueue.length + "):");
         for (let i = 0; i < edgeQueue.length; i++) {
             console.log(edgeQueue[i].data());
         }
 
         // Choosing edge
-        const nextEdge = edgeQueue.shift();
+        let nextEdge = null;
+        while (nextEdge == null) {
+            const edge = edgeQueue.shift();
+            if (unvisitedNodes.includes(edge.source()) || unvisitedNodes.includes(edge.target())) {
+                nextEdge = edge;
+            }
+        }
         console.log("Next edge: " + nextEdge.data('id'));
         visitedEdges.push(nextEdge);
         console.log("Visited edges: ");
@@ -70,7 +65,13 @@ function primsAlgorithm(graph) { // problem: previous edges in edgeQueue not rem
             console.log(unvisitedNodes[i].data());
         }
         console.log(unvisitedNodes);
-        const nextNodeIndex = unvisitedNodes.indexOf(nextNode);
+        let nextNodeIndex = -1;
+        for (let i = 0; i < unvisitedNodes.length; i++) {
+            if (unvisitedNodes[i].data('id') == nextNode.data('id')) {
+                nextNodeIndex = i;
+                break;
+            }
+        }
         console.log("Next node index: " + nextNodeIndex);
         unvisitedNodes.splice(nextNodeIndex, 1);
         console.log("Unvisited nodes (after removal): ");
@@ -85,6 +86,7 @@ function primsAlgorithm(graph) { // problem: previous edges in edgeQueue not rem
         }, 2000 * (i + 1));
         currNode = nextNode;
     }
+    console.log("\n\n##########\nCOMPLETE!!!\n##########");
 }
 
 // Creating initial graphs
