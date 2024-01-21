@@ -227,7 +227,7 @@ let cy1 = cytoscape({
     ],
 
     layout: {
-        name: 'circle', // cose?
+        name: 'circle',
         rows: 2
     }
 });
