@@ -120,6 +120,178 @@ function kruskalsAlgorithm(graph) {
 }
 
 // Creating initial graphs
+// let cy1 = cytoscape({
+//     container: document.getElementById('cy'), // container to render in
+
+//     elements: [
+//         // Nodes
+//         {
+//             data: { id : 'a' }
+//         },
+//         {
+//             data: { id : 'b' }
+//         },
+//         {
+//             data: { id : 'c' }
+//         },
+//         {
+//             data: { id : 'd' }
+//         },
+//         {
+//             data: { id : 'e' }
+//         },
+//         {
+//             data: { id : 'f' }
+//         },
+//         // Edges
+//         {
+//             data: {
+//                 id: 'ab',
+//                 source: 'a',
+//                 target: 'b',
+//                 weight: 78
+//             }
+//         },
+//         {
+//             data: {
+//                 id: 'ac',
+//                 source: 'a',
+//                 target: 'c',
+//                 weight: 44
+//             }
+//         },
+//         {
+//             data: {
+//                 id: 'ad',
+//                 source: 'a',
+//                 target: 'd',
+//                 weight: 11
+//             }
+//         },
+//         {
+//             data: {
+//                 id: 'ae',
+//                 source: 'a',
+//                 target: 'e',
+//                 weight: 40
+//             }
+//         },
+//         {
+//             data: {
+//                 id: 'af',
+//                 source: 'a',
+//                 target: 'f',
+//                 weight: 61
+//             }
+//         },
+//         {
+//             data: {
+//                 id: 'bc',
+//                 source: 'b',
+//                 target: 'c',
+//                 weight: 71
+//             }
+//         },
+//         {
+//             data: {
+//                 id: 'bd',
+//                 source: 'b',
+//                 target: 'd',
+//                 weight: 93
+//             }
+//         },
+//         {
+//             data: {
+//                 id: 'be',
+//                 source: 'b',
+//                 target: 'e',
+//                 weight: 63
+//             }
+//         },
+//         {
+//             data: {
+//                 id: 'bf',
+//                 source: 'b',
+//                 target: 'f',
+//                 weight: 29
+//             }
+//         },
+//         {
+//             data: {
+//                 id: 'cd',
+//                 source: 'c',
+//                 target: 'd',
+//                 weight: 81
+//             }
+//         },
+//         {
+//             data: {
+//                 id: 'ce',
+//                 source: 'c',
+//                 target: 'e',
+//                 weight: 1
+//             }
+//         },
+//         {
+//             data: {
+//                 id: 'cf',
+//                 source: 'c',
+//                 target: 'f',
+//                 weight: 11
+//             }
+//         },
+//         {
+//             data: {
+//                 id: 'de',
+//                 source: 'd',
+//                 target: 'e',
+//                 weight: 33
+//             }
+//         },
+//         {
+//             data: {
+//                 id: 'df',
+//                 source: 'd',
+//                 target: 'f',
+//                 weight: 20
+//             }
+//         },
+//         {
+//             data: {
+//                 id: 'ef',
+//                 source: 'e',
+//                 target: 'f',
+//                 weight: 87
+//             }
+//         },
+        
+//     ],
+
+//     style: [ // the stylesheet for the graph
+//         {
+//             selector: 'node',
+//             style: {
+//                 'background-color': '#666',
+//                 'label': 'data(id)'
+//             }
+//         },
+
+//         {
+//             selector: 'edge',
+//             style: {
+//                 'width': 3,
+//                 'line-color': '#ccc',
+//                 'curve-style': 'bezier',
+//                 'label': 'data(weight)'
+//             }
+//         }
+//     ],
+
+//     layout: {
+//         name: 'circle'
+//     }
+// });
+
 let cy1 = cytoscape({
     container: document.getElementById('cy'), // container to render in
 
@@ -143,45 +315,38 @@ let cy1 = cytoscape({
         {
             data: { id : 'f' }
         },
+        {
+            data: { id : 'g' }
+        },
+        {
+            data: { id : 'h' }
+        },
+        {
+            data: { id : 'i' }
+        },
         // Edges
         {
             data: {
                 id: 'ab',
                 source: 'a',
                 target: 'b',
-                weight: 78
+                weight: 4
             }
         },
         {
             data: {
-                id: 'ac',
+                id: 'ah',
                 source: 'a',
-                target: 'c',
-                weight: 44
+                target: 'h',
+                weight: 8
             }
         },
         {
             data: {
-                id: 'ad',
-                source: 'a',
-                target: 'd',
+                id: 'bh',
+                source: 'b',
+                target: 'h',
                 weight: 11
-            }
-        },
-        {
-            data: {
-                id: 'ae',
-                source: 'a',
-                target: 'e',
-                weight: 40
-            }
-        },
-        {
-            data: {
-                id: 'af',
-                source: 'a',
-                target: 'f',
-                weight: 61
             }
         },
         {
@@ -189,31 +354,47 @@ let cy1 = cytoscape({
                 id: 'bc',
                 source: 'b',
                 target: 'c',
-                weight: 71
+                weight: 8
             }
         },
         {
             data: {
-                id: 'bd',
-                source: 'b',
-                target: 'd',
-                weight: 93
+                id: 'hi',
+                source: 'h',
+                target: 'i',
+                weight: 7
             }
         },
         {
             data: {
-                id: 'be',
-                source: 'b',
-                target: 'e',
-                weight: 63
+                id: 'hg',
+                source: 'h',
+                target: 'g',
+                weight: 1
             }
         },
         {
             data: {
-                id: 'bf',
-                source: 'b',
+                id: 'ic',
+                source: 'i',
+                target: 'c',
+                weight: 2
+            }
+        },
+        {
+            data: {
+                id: 'ig',
+                source: 'i',
+                target: 'g',
+                weight: 6
+            }
+        },
+        {
+            data: {
+                id: 'gf',
+                source: 'g',
                 target: 'f',
-                weight: 29
+                weight: 2
             }
         },
         {
@@ -221,15 +402,7 @@ let cy1 = cytoscape({
                 id: 'cd',
                 source: 'c',
                 target: 'd',
-                weight: 81
-            }
-        },
-        {
-            data: {
-                id: 'ce',
-                source: 'c',
-                target: 'e',
-                weight: 1
+                weight: 7
             }
         },
         {
@@ -237,15 +410,7 @@ let cy1 = cytoscape({
                 id: 'cf',
                 source: 'c',
                 target: 'f',
-                weight: 11
-            }
-        },
-        {
-            data: {
-                id: 'de',
-                source: 'd',
-                target: 'e',
-                weight: 33
+                weight: 4
             }
         },
         {
@@ -253,18 +418,25 @@ let cy1 = cytoscape({
                 id: 'df',
                 source: 'd',
                 target: 'f',
-                weight: 20
+                weight: 14
             }
         },
         {
             data: {
-                id: 'ef',
-                source: 'e',
-                target: 'f',
-                weight: 87
+                id: 'de',
+                source: 'd',
+                target: 'e',
+                weight: 9
             }
         },
-        
+        {
+            data: {
+                id: 'fe',
+                source: 'f',
+                target: 'e',
+                weight: 10
+            }
+        }
     ],
 
     style: [ // the stylesheet for the graph
@@ -311,6 +483,8 @@ function start() {
         kruskalsAlgorithm(cy1);
     }
 };
+
+// console.log(cy1.getElementById('a').descendants());
 
 // storedGraphs.push(cy1.json());
 // cy1.destroy();
