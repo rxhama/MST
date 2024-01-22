@@ -312,7 +312,6 @@ function start() {
     }
 };
 
-
 // storedGraphs.push(cy1.json());
 // cy1.destroy();
 // var cy2 = cytoscape({
