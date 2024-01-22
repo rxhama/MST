@@ -302,15 +302,15 @@ function reset() {
     cy1.json(storedGraphs[0]);
 }
 
-document.getElementById('algoDropdown').addEventListener('change', function() {
-    let selectedAlgo = this.value;
+function start() {
+    const selectedAlgo = document.getElementById('algoDropdown').value;
     if (selectedAlgo == 'prims') {
         primsAlgorithm(cy1);
     }
     else if (selectedAlgo == 'kruskals') {
         kruskalsAlgorithm(cy1);
     }
-});
+};
 
 
 // storedGraphs.push(cy1.json());
