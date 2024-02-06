@@ -1,20 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <style>
-            /* Basic styling for the graph container */
-            #cy {
-                width: 800px; /* 800px */
-                height: 600px; /* 600px */
-                position: absolute;
-                left: 0;
-                right: 0;
-                top: 0;
-                bottom: 0;
-                margin: auto;
-                border: 1px solid black;
-            }
-        </style>
+        <link href="./style.css" rel="stylesheet">
         <!-- Cytoscape.js Script -->
         <script src="cytoscape.min.js"></script>
     </head>
@@ -28,8 +15,8 @@
             <button id="startBtn" onclick="start()">Start</button>
             <div id="cy"></div>
         </div>
-        
+
         <!-- Initialize Cytoscape.js -->
-        <script src="script.js"></script>
+        <script src="./script.js"></script>
     </body>
 </html>
