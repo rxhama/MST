@@ -2,43 +2,41 @@ let storedGraphs = [];
 
 function primsAlgorithm(graph) {
     if (graph.nodes(':selected').length != 1) {
-        alert('Please select exactly one node to start from');
+        alert('Please select a starting node');
         return;
     }
 
-    let edgeQueue = [];
-    let visitedEdges = [];
+    let edgeQueue = graph.collection();
+    let visitedEdges = graph.collection();
     let unvisitedNodes = graph.nodes();
 
     let currNode = graph.nodes(':selected');
-    let currNodeIndex = -1;
-    for (let i = 0; i < unvisitedNodes.length; i++) {
-        if (unvisitedNodes[i].data('id') == graph.nodes(':selected').data('id')) {
-            currNodeIndex = i;
-            break;
-        }
-    }
-    unvisitedNodes.splice(currNodeIndex, 1);
+    unvisitedNodes = unvisitedNodes.difference(currNode);
     currNode.style('background-color', 'blue');
-    
+
+
     let i = 0;
     while (!unvisitedNodes.empty()) {
         i++;
 
         // Adding adjacent edges to edgeQueue and sorting edgeQueue by weight
-        const adjacentEdges = currNode.connectedEdges().filter(edge => !visitedEdges.includes(edge) && (unvisitedNodes.includes(edge.source()) != unvisitedNodes.includes(edge.target()))).toArray();
-        edgeQueue.push(...adjacentEdges);
-        edgeQueue.sort((a, b) => a.data('weight') - b.data('weight'));
+        const adjacentEdges = currNode.connectedEdges().filter(edge => !visitedEdges.contains(edge) && (unvisitedNodes.contains(edge.source()) != unvisitedNodes.contains(edge.target())));
+        edgeQueue = edgeQueue.union(adjacentEdges);
+        edgeQueue = edgeQueue.sort(function(a, b) {
+            return a.data('weight') - b.data('weight')
+        });
 
         // Choosing edge
         let nextEdge = null;
         while (nextEdge == null) {
-            const edge = edgeQueue.shift();
-            if (unvisitedNodes.includes(edge.source()) || unvisitedNodes.includes(edge.target())) {
+            const edge = edgeQueue[0];
+            if (unvisitedNodes.contains(edge.source()) || unvisitedNodes.contains(edge.target())) {
                 nextEdge = edge;
+                break;
             }
+            edgeQueue = edgeQueue.difference(edge);
         }
-        visitedEdges.push(nextEdge);
+        visitedEdges = visitedEdges.union(nextEdge);
         setTimeout(() => {
             nextEdge.animate({
                 style: {'line-color': 'blue'},
@@ -48,20 +46,13 @@ function primsAlgorithm(graph) {
         
         // Getting next node edge will take us to
         let nextNode = null;
-        if (unvisitedNodes.includes(nextEdge.source())) {
+        if (unvisitedNodes.contains(nextEdge.source())) {
             nextNode = nextEdge.source();
         }
         else {
             nextNode = nextEdge.target();
         }
-        let nextNodeIndex = -1;
-        for (let i = 0; i < unvisitedNodes.length; i++) {
-            if (unvisitedNodes[i].data('id') == nextNode.data('id')) {
-                nextNodeIndex = i;
-                break;
-            }
-        }
-        unvisitedNodes.splice(nextNodeIndex, 1);
+        unvisitedNodes = unvisitedNodes.difference(nextNode);
         setTimeout(() => {
             nextNode.animate({
                 style: {'background-color': 'blue'},
@@ -73,8 +64,10 @@ function primsAlgorithm(graph) {
 }
 
 function kruskalsAlgorithm(graph) {
-    let edgeQueue = graph.edges().toArray();
-    edgeQueue.sort((a, b) => a.data('weight') - b.data('weight'));
+    let edgeQueue = graph.edges()
+    edgeQueue = edgeQueue.sort(function(a, b) {
+        return a.data('weight') - b.data('weight')
+    });
     let unvisitedNodes = graph.nodes();
     let i = 0;
     while (!unvisitedNodes.empty()) {
@@ -83,9 +76,10 @@ function kruskalsAlgorithm(graph) {
         // Choosing edge
         let nextEdge = null;
         while (nextEdge == null) {
-            const edge = edgeQueue.shift();
-            if (unvisitedNodes.includes(edge.source()) || unvisitedNodes.includes(edge.target())) {
+            const edge = edgeQueue[0];
+            if (unvisitedNodes.contains(edge.source()) || unvisitedNodes.contains(edge.target())) {
                 nextEdge = edge;
+                break;
             }
         }
         setTimeout(() => {
@@ -96,17 +90,11 @@ function kruskalsAlgorithm(graph) {
         }, 2000 * (i + 1));
         
         // Getting source and target nodes of edge
-        let sourceNode = nextEdge.source();
-        let targetNode = nextEdge.target();
-        if (unvisitedNodes.includes(sourceNode)) {
-            let sourceIndex = -1;
-            for (let i = 0; i < unvisitedNodes.length; i++) {
-                if (unvisitedNodes[i].data('id') == sourceNode.data('id')) {
-                    sourceIndex = i;
-                    break;
-                }
-            }
-            unvisitedNodes.splice(sourceIndex, 1);
+        const sourceNode = nextEdge.source();
+        const targetNode = nextEdge.target();
+        if (unvisitedNodes.contains(sourceNode)) {
+            unvisitedNodes = unvisitedNodes.difference(sourceNode);
+
             setTimeout(() => {
                 sourceNode.animate({
                     style: {'background-color': 'blue'},
@@ -114,15 +102,9 @@ function kruskalsAlgorithm(graph) {
                 });
             }, 2000 * (i + 1));
         }
-        if (unvisitedNodes.includes(targetNode)) {
-            let targetIndex = -1;
-            for (let i = 0; i < unvisitedNodes.length; i++) {
-                if (unvisitedNodes[i].data('id') == targetNode.data('id')) {
-                    targetIndex = i;
-                    break;
-                }
-            }
-            unvisitedNodes.splice(targetIndex, 1);
+        if (unvisitedNodes.contains(targetNode)) {
+            unvisitedNodes = unvisitedNodes.difference(targetNode);
+
             setTimeout(() => {
                 targetNode.animate({
                     style: {'background-color': 'blue'},
@@ -506,11 +488,11 @@ function start() {
     }
 };
 
-function uuidv4() {
-    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-    );
-}  
+// function uuidv4() {
+//     return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+//         (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+//     );
+// }  
 
 function createGraph() {
     cy1.destroy();
@@ -554,7 +536,7 @@ function createGraph() {
 
 function addNode() {
     cy1.add({
-        data: { id : uuidv4() },
+        data: { id : crypto.randomUUID() },
         position: { x : cy1.container().clientWidth / 2, y : cy1.container().clientHeight / 2 }
     })
 }
@@ -567,26 +549,16 @@ function saveGraph() {
     storedGraphs.push(cy1.json());
 }
 
-console.log("uuidv4: " + uuidv4());
-console.log("uuidv4: " + uuidv4());
-console.log("uuidv4: " + uuidv4());
-console.log("uuidv4: " + uuidv4());
-console.log("crpto uuid: " + crypto.randomUUID());
-console.log("crpto uuid: " + crypto.randomUUID());
-console.log("crpto uuid: " + crypto.randomUUID());
-console.log("crpto uuid: " + crypto.randomUUID());
-
-// temp = cy1.elements().kruskal([function(edge) {
+// // To verify kruskals
+// cy1.elements().kruskal(function(edge) {
 //     return edge.data('weight');
-// }]);
-
-// console.log(cy1.getElementById('a').descendants());
-
-// storedGraphs.push(cy1.json());
-// cy1.destroy();
-// var cy2 = cytoscape({
-//     container: document.getElementById('cy')
+// }).style({
+//     'line-color': 'blue',
+//     'background-color': 'blue'
 // });
-// cy2.json(storedGraphs[0]);
-// // const img = cy2.jpg();
-// // document.getElementById('cy').innerHTML = '<img src="' + img + '" />';
+
+/*
+    For kruskals:
+    - Loop checking function in cytoscape docs?
+    - Descendants?
+*/
