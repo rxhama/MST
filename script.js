@@ -1,12 +1,26 @@
 let storedGraphs = [];
 
 function primsAlgorithm(graph) {
+    if (graph.nodes(':selected').length != 1) {
+        alert('Please select exactly one node to start from');
+        return;
+    }
+
     let edgeQueue = [];
     let visitedEdges = [];
     let unvisitedNodes = graph.nodes();
-    let currNode = unvisitedNodes[0];
-    unvisitedNodes.splice(0, 1);
+
+    let currNode = graph.nodes(':selected');
+    let currNodeIndex = -1;
+    for (let i = 0; i < unvisitedNodes.length; i++) {
+        if (unvisitedNodes[i].data('id') == graph.nodes(':selected').data('id')) {
+            currNodeIndex = i;
+            break;
+        }
+    }
+    unvisitedNodes.splice(currNodeIndex, 1);
     currNode.style('background-color', 'blue');
+    
     let i = 0;
     while (!unvisitedNodes.empty()) {
         i++;
@@ -546,7 +560,7 @@ function addNode() {
 }
 
 function removeElement() {
-    cy1.remove(cy1.$(':selected')); // cy1.remove(cy1.$(':selected'))
+    cy1.$(':selected').remove();
 }
 
 function saveGraph() {
@@ -565,7 +579,6 @@ console.log("crpto uuid: " + crypto.randomUUID());
 // temp = cy1.elements().kruskal([function(edge) {
 //     return edge.data('weight');
 // }]);
-// cy1.remove(cy1.$('#a')); //////////////////////////////////// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 // console.log(cy1.getElementById('a').descendants());
 
