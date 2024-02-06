@@ -456,6 +456,14 @@ let cy1 = cytoscape({
                 'curve-style': 'bezier',
                 'label': 'data(weight)'
             }
+        },
+
+        {
+            selector: ':selected',
+            style: {
+                'background-color': 'black',
+                'line-color': 'black',
+            }
         }
     ],
 
@@ -511,6 +519,14 @@ function createGraph() {
                     'curve-style': 'bezier',
                     'label': 'data(weight)'
                 }
+            },
+
+            {
+                selector: ':selected',
+                style: {
+                    'background-color': 'black',
+                    'line-color': 'black',
+                }
             }
         ],
 
@@ -529,9 +545,27 @@ function addNode() {
     })
 }
 
+function removeElement() {
+    cy1.remove(cy1.$(':selected')); // cy1.remove(cy1.$(':selected'))
+}
+
 function saveGraph() {
     storedGraphs.push(cy1.json());
 }
+
+console.log("uuidv4: " + uuidv4());
+console.log("uuidv4: " + uuidv4());
+console.log("uuidv4: " + uuidv4());
+console.log("uuidv4: " + uuidv4());
+console.log("crpto uuid: " + crypto.randomUUID());
+console.log("crpto uuid: " + crypto.randomUUID());
+console.log("crpto uuid: " + crypto.randomUUID());
+console.log("crpto uuid: " + crypto.randomUUID());
+
+// temp = cy1.elements().kruskal([function(edge) {
+//     return edge.data('weight');
+// }]);
+// cy1.remove(cy1.$('#a')); //////////////////////////////////// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 // console.log(cy1.getElementById('a').descendants());
 
