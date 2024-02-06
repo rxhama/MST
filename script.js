@@ -484,6 +484,55 @@ function start() {
     }
 };
 
+function uuidv4() {
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    );
+}  
+
+function createGraph() {
+    cy1.destroy();
+    cy1 = cytoscape({
+        container: document.getElementById('cy'),
+
+        style: [
+            {
+                selector: 'node',
+                style: {
+                    'background-color': '#666'
+                }
+            },
+
+            {
+                selector: 'edge',
+                style: {
+                    'width': 3,
+                    'line-color': '#ccc',
+                    'curve-style': 'bezier',
+                    'label': 'data(weight)'
+                }
+            }
+        ],
+
+        layout: {
+            name: 'circle'
+        }
+
+        // NEED TO IMPORT EDGEHANDLES EXTENSION TO ADD TOGGLE BETWEEN NODE MOVEMENT/DRAW EDGE MODE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    });
+}
+
+function addNode() {
+    cy1.add({
+        data: { id : uuidv4() },
+        position: { x : cy1.container().clientWidth / 2, y : cy1.container().clientHeight / 2 }
+    })
+}
+
+function saveGraph() {
+    storedGraphs.push(cy1.json());
+}
+
 // console.log(cy1.getElementById('a').descendants());
 
 // storedGraphs.push(cy1.json());
