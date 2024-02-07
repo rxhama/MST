@@ -117,21 +117,43 @@ function primsAlgorithmQuick(graph) {
 }
 
 function kruskalsAlgorithm(graph) {
-    let edgeQueue = graph.edges()
+    let unvisitedNodes = graph.nodes();
+    const targetEdgeCount = unvisitedNodes.length - 1;
+    let edgeCount = 0;
+
+    // For each node:
+    // Key = node id and value = collection of nodes the key node is in
+    let groupDict = {};
+    graph.nodes().forEach(node => {
+        const nodeId = node.data('id');
+        groupDict[nodeId] = graph.collection();
+        groupDict[nodeId] = groupDict[nodeId].union(node);
+    });
+
+    // Sorting edge queue by weight
+    let edgeQueue = graph.edges();
     edgeQueue = edgeQueue.sort(function(a, b) {
         return a.data('weight') - b.data('weight')
     });
-    let unvisitedNodes = graph.nodes();
+    
     let i = 0;
-    while (!unvisitedNodes.empty()) {
+    while (edgeCount < targetEdgeCount) {
         i++;
 
         // Choosing edge
         let nextEdge = null;
         while (nextEdge == null) {
             const edge = edgeQueue[0];
-            if (unvisitedNodes.contains(edge.source()) || unvisitedNodes.contains(edge.target())) {
+            const sourceId = edge.source().data('id');
+            const targetId = edge.target().data('id');
+            if (groupDict[sourceId].intersection(groupDict[targetId]).empty()) {
                 nextEdge = edge;
+                edgeCount++;
+                groupDict[sourceId] = groupDict[sourceId].union(groupDict[targetId]);
+                groupDict[sourceId].forEach(function(node) {
+                    groupDict[node.data('id')] = groupDict[sourceId];
+                });
+
                 break;
             }
             edgeQueue = edgeQueue.difference(edge);
@@ -165,6 +187,67 @@ function kruskalsAlgorithm(graph) {
                     duration: 1000
                 });
             }, 2000 * (i + 1));
+        }
+    }
+    console.log("KRUSKALS COMPLETED!!!");
+}
+
+function kruskalsAlgorithmQuick(graph) {
+    let unvisitedNodes = graph.nodes();
+    const targetEdgeCount = unvisitedNodes.length - 1;
+    let edgeCount = 0;
+
+    // For each node:
+    // Key = node id and value = collection of nodes the key node is in
+    let groupDict = {};
+    graph.nodes().forEach(node => {
+        const nodeId = node.data('id');
+        groupDict[nodeId] = graph.collection();
+        groupDict[nodeId] = groupDict[nodeId].union(node);
+    });
+
+    // Sorting edge queue by weight
+    let edgeQueue = graph.edges();
+    edgeQueue = edgeQueue.sort(function(a, b) {
+        return a.data('weight') - b.data('weight')
+    });
+    
+    let i = 0;
+    while (edgeCount < targetEdgeCount) {
+        i++;
+
+        // Choosing edge
+        let nextEdge = null;
+        while (nextEdge == null) {
+            const edge = edgeQueue[0];
+            const sourceId = edge.source().data('id');
+            const targetId = edge.target().data('id');
+            if (groupDict[sourceId].intersection(groupDict[targetId]).empty()) {
+                nextEdge = edge;
+                edgeCount++;
+                groupDict[sourceId] = groupDict[sourceId].union(groupDict[targetId]);
+                groupDict[sourceId].forEach(function(node) {
+                    groupDict[node.data('id')] = groupDict[sourceId];
+                });
+
+                break;
+            }
+            edgeQueue = edgeQueue.difference(edge);
+        }
+        nextEdge.style('line-color', 'blue');
+        
+        // Getting source and target nodes of edge
+        const sourceNode = nextEdge.source();
+        const targetNode = nextEdge.target();
+        if (unvisitedNodes.contains(sourceNode)) {
+            unvisitedNodes = unvisitedNodes.difference(sourceNode);
+
+            sourceNode.style('background-color', 'blue');
+        }
+        if (unvisitedNodes.contains(targetNode)) {
+            unvisitedNodes = unvisitedNodes.difference(targetNode);
+
+            targetNode.style('background-color', 'blue');
         }
     }
     console.log("KRUSKALS COMPLETED!!!");
@@ -526,7 +609,7 @@ let cy1 = cytoscape({
 storedGraphs.push(cy1.json());
 updateVals();
 
-function reset() {
+function firstGraph() {
     cy1.destroy();
     cy1 = cytoscape({
         container: document.getElementById('cy')
@@ -534,6 +617,11 @@ function reset() {
     cy1.json(storedGraphs[0]);
     
     updateVals();
+}
+
+function reset() {
+    cy1.nodes().style('background-color', '#666');
+    cy1.edges().style('line-color', '#ccc');
 }
 
 function start() {
@@ -547,13 +635,10 @@ function start() {
     else if (selectedAlgo == 'kruskals') {
         kruskalsAlgorithm(cy1);
     }
+    else if (selectedAlgo == 'kruskalsq') {
+        kruskalsAlgorithmQuick(cy1);
+    }
 };
-
-// function uuidv4() {
-//     return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-//         (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-//     );
-// }  
 
 function createGraph() {
     cy1.destroy();
@@ -593,6 +678,8 @@ function createGraph() {
 
         // NEED TO IMPORT EDGEHANDLES EXTENSION TO ADD TOGGLE BETWEEN NODE MOVEMENT/DRAW EDGE MODE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     });
+
+    updateVals();
 }
 
 function addNode() {
@@ -613,7 +700,15 @@ function saveGraph() {
 }
 
 function generateGraph() {
-    for (let i = 0; i < 100; i++) {
+    const nodeCount = document.getElementById('nodeCountInput').value;
+
+    if (nodeCount < 1 || nodeCount > 100) {
+        alert('Please enter a number between 1 and 100');
+        return;
+    }
+
+    // Generate nodes with random position in cy container
+    for (let i = 0; i < nodeCount; i++) {
         cy1.add({
             group: 'nodes',
             data: { id: crypto.randomUUID() },
@@ -623,6 +718,7 @@ function generateGraph() {
   
     const nodes = cy1.nodes();
     
+    // Generate edges between all nodes
     for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
             cy1.add({
@@ -652,9 +748,3 @@ function updateVals() {
 //     'line-color': 'blue',
 //     'background-color': 'blue'
 // });
-
-/*
-    For kruskals:
-    - Loop checking function in cytoscape docs?
-    - Descendants?
-*/
