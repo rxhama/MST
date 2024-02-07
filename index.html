@@ -10,6 +10,7 @@
             <button id="resetBtn" onclick="reset()">Reset</button>
             <select id="algoDropdown">
                 <option value="prims">Prim's</option>
+                <option value="primsq">Prim's Quick (no animations)</option>
                 <option value="kruskals">Kruskal's</option>
             </select>
             <button id="startBtn" onclick="start()">Start</button>
@@ -20,6 +21,13 @@
             <br>
             <button id="addNodeBtn" onclick="addNode()">+</button>
             <button id="removeElementBtn" onclick="removeElement()">-</button>
+            <button id="generateGraphBtn" onclick="generateGraph()">Gen</button>
+            <br>
+            <span>Nodes: </span>
+            <span id="nodeCount"></span>
+            <br>
+            <span>Edges: </span>
+            <span id="edgeCount"></span>
             <div id="cy"></div>
         </div>
 

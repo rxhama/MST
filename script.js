@@ -61,17 +61,32 @@ function primsAlgorithm(graph) {
         }, 2000 * (i + 1));
         currNode = nextNode;
     }
+    console.log("PRIMS COMPLETED!!!");
 }
 
-function kruskalsAlgorithm(graph) {
-    let edgeQueue = graph.edges()
-    edgeQueue = edgeQueue.sort(function(a, b) {
-        return a.data('weight') - b.data('weight')
-    });
+function primsAlgorithmQuick(graph) {
+    if (graph.nodes(':selected').length != 1) {
+        alert('Please select a starting node');
+        return;
+    }
+
+    let edgeQueue = graph.collection();
+    let visitedEdges = graph.collection();
     let unvisitedNodes = graph.nodes();
-    let i = 0;
+
+    let currNode = graph.nodes(':selected');
+    unvisitedNodes = unvisitedNodes.difference(currNode);
+    currNode.style('background-color', 'blue');
+
+
     while (!unvisitedNodes.empty()) {
-        i++;
+
+        // Adding adjacent edges to edgeQueue and sorting edgeQueue by weight
+        const adjacentEdges = currNode.connectedEdges().filter(edge => !visitedEdges.contains(edge) && (unvisitedNodes.contains(edge.source()) != unvisitedNodes.contains(edge.target())));
+        edgeQueue = edgeQueue.union(adjacentEdges);
+        edgeQueue = edgeQueue.sort(function(a, b) {
+            return a.data('weight') - b.data('weight')
+        });
 
         // Choosing edge
         let nextEdge = null;
@@ -80,6 +95,41 @@ function kruskalsAlgorithm(graph) {
             if (unvisitedNodes.contains(edge.source()) || unvisitedNodes.contains(edge.target())) {
                 nextEdge = edge;
                 break;
+            }
+            edgeQueue = edgeQueue.difference(edge);
+        }
+        visitedEdges = visitedEdges.union(nextEdge);
+        nextEdge.style('line-color', 'blue');
+        
+        // Getting next node edge will take us to
+        let nextNode = null;
+        if (unvisitedNodes.contains(nextEdge.source())) {
+            nextNode = nextEdge.source();
+        }
+        else {
+            nextNode = nextEdge.target();
+        }
+        unvisitedNodes = unvisitedNodes.difference(nextNode);
+        nextNode.style('background-color', 'blue')
+        currNode = nextNode;
+    }
+    console.log("PRIMS QUICK COMPLETED!!!");
+}
+
+function kruskalsAlgorithm(graph) {
+    let edgeQueue = graph.edges().toArray();
+    edgeQueue.sort((a, b) => a.data('weight') - b.data('weight'));
+    let unvisitedNodes = graph.nodes();
+    let i = 0;
+    while (!unvisitedNodes.empty()) {
+        i++;
+
+        // Choosing edge
+        let nextEdge = null;
+        while (nextEdge == null) {
+            const edge = edgeQueue.shift();
+            if (unvisitedNodes.includes(edge.source()) || unvisitedNodes.includes(edge.target())) {
+                nextEdge = edge;
             }
         }
         setTimeout(() => {
@@ -90,11 +140,17 @@ function kruskalsAlgorithm(graph) {
         }, 2000 * (i + 1));
         
         // Getting source and target nodes of edge
-        const sourceNode = nextEdge.source();
-        const targetNode = nextEdge.target();
-        if (unvisitedNodes.contains(sourceNode)) {
-            unvisitedNodes = unvisitedNodes.difference(sourceNode);
-
+        let sourceNode = nextEdge.source();
+        let targetNode = nextEdge.target();
+        if (unvisitedNodes.includes(sourceNode)) {
+            let sourceIndex = -1;
+            for (let i = 0; i < unvisitedNodes.length; i++) {
+                if (unvisitedNodes[i].data('id') == sourceNode.data('id')) {
+                    sourceIndex = i;
+                    break;
+                }
+            }
+            unvisitedNodes.splice(sourceIndex, 1);
             setTimeout(() => {
                 sourceNode.animate({
                     style: {'background-color': 'blue'},
@@ -102,9 +158,15 @@ function kruskalsAlgorithm(graph) {
                 });
             }, 2000 * (i + 1));
         }
-        if (unvisitedNodes.contains(targetNode)) {
-            unvisitedNodes = unvisitedNodes.difference(targetNode);
-
+        if (unvisitedNodes.includes(targetNode)) {
+            let targetIndex = -1;
+            for (let i = 0; i < unvisitedNodes.length; i++) {
+                if (unvisitedNodes[i].data('id') == targetNode.data('id')) {
+                    targetIndex = i;
+                    break;
+                }
+            }
+            unvisitedNodes.splice(targetIndex, 1);
             setTimeout(() => {
                 targetNode.animate({
                     style: {'background-color': 'blue'},
@@ -113,7 +175,62 @@ function kruskalsAlgorithm(graph) {
             }, 2000 * (i + 1));
         }
     }
+    console.log("KRUSKALS COMPLETED!!!");
 }
+
+// Broken rn
+// function kruskalsAlgorithmUpdated(graph) {
+//     let edgeQueue = graph.edges()
+//     edgeQueue = edgeQueue.sort(function(a, b) {
+//         return a.data('weight') - b.data('weight')
+//     });
+//     let unvisitedNodes = graph.nodes();
+//     let i = 0;
+//     while (!unvisitedNodes.empty()) {
+//         i++;
+
+//         // Choosing edge
+//         let nextEdge = null;
+//         while (nextEdge == null) {
+//             const edge = edgeQueue[0];
+//             if (unvisitedNodes.contains(edge.source()) || unvisitedNodes.contains(edge.target())) {
+//                 nextEdge = edge;
+//                 break;
+//             }
+//         }
+//         setTimeout(() => {
+//             nextEdge.animate({
+//                 style: {'line-color': 'blue'},
+//                 duration: 1000
+//             });
+//         }, 2000 * (i + 1));
+        
+//         // Getting source and target nodes of edge
+//         const sourceNode = nextEdge.source();
+//         const targetNode = nextEdge.target();
+//         if (unvisitedNodes.contains(sourceNode)) {
+//             unvisitedNodes = unvisitedNodes.difference(sourceNode);
+
+//             setTimeout(() => {
+//                 sourceNode.animate({
+//                     style: {'background-color': 'blue'},
+//                     duration: 1000
+//                 });
+//             }, 2000 * (i + 1));
+//         }
+//         if (unvisitedNodes.contains(targetNode)) {
+//             unvisitedNodes = unvisitedNodes.difference(targetNode);
+
+//             setTimeout(() => {
+//                 targetNode.animate({
+//                     style: {'background-color': 'blue'},
+//                     duration: 1000
+//                 });
+//             }, 2000 * (i + 1));
+//         }
+//     }
+//     console.log("KRUSKALS COMPLETED!!!");
+// }
 
 // Creating initial graphs
 // let cy1 = cytoscape({
@@ -469,6 +586,7 @@ let cy1 = cytoscape({
 });
 
 storedGraphs.push(cy1.json());
+updateVals();
 
 function reset() {
     cy1.destroy();
@@ -476,12 +594,17 @@ function reset() {
         container: document.getElementById('cy')
     });
     cy1.json(storedGraphs[0]);
+    
+    updateVals();
 }
 
 function start() {
     const selectedAlgo = document.getElementById('algoDropdown').value;
     if (selectedAlgo == 'prims') {
         primsAlgorithm(cy1);
+    }
+    else if (selectedAlgo == 'primsq') {
+        primsAlgorithmQuick(cy1);
     }
     else if (selectedAlgo == 'kruskals') {
         kruskalsAlgorithm(cy1);
@@ -539,14 +662,49 @@ function addNode() {
         data: { id : crypto.randomUUID() },
         position: { x : cy1.container().clientWidth / 2, y : cy1.container().clientHeight / 2 }
     })
+    updateVals();
 }
 
 function removeElement() {
     cy1.$(':selected').remove();
+    updateVals();
 }
 
 function saveGraph() {
     storedGraphs.push(cy1.json());
+}
+
+function generateGraph() {
+    for (let i = 0; i < 100; i++) {
+        cy1.add({
+            group: 'nodes',
+            data: { id: crypto.randomUUID() },
+            position: { x : Math.random() * cy1.container().clientWidth, y : Math.random() * cy1.container().clientHeight}
+        });
+    }
+  
+    const nodes = cy1.nodes();
+    
+    for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+            cy1.add({
+                group: 'edges',
+                data: {
+                    id: crypto.randomUUID(),
+                    source: nodes[i].data('id'),
+                    target: nodes[j].data('id'),
+                    weight: Math.floor(Math.random() * 10000)
+                }
+            });
+        }
+    }
+
+    updateVals();
+}
+
+function updateVals() {
+    document.getElementById('nodeCount').innerText = cy1.nodes().length;
+    document.getElementById('edgeCount').innerText = cy1.edges().length;
 }
 
 // // To verify kruskals
