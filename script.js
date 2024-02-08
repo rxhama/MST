@@ -1,4 +1,5 @@
 let storedGraphs = [];
+const minCost = document.getElementById('minCost');
 
 function primsAlgorithm(graph) {
     if (graph.nodes(':selected').length != 1) {
@@ -36,6 +37,9 @@ function primsAlgorithm(graph) {
             }
             edgeQueue = edgeQueue.difference(edge);
         }
+
+        minCost.innerText = parseInt(minCost.innerText) + nextEdge.data('weight');
+
         visitedEdges = visitedEdges.union(nextEdge);
         setTimeout(() => {
             nextEdge.animate({
@@ -98,6 +102,9 @@ function primsAlgorithmQuick(graph) {
             }
             edgeQueue = edgeQueue.difference(edge);
         }
+        
+        minCost.innerText = parseInt(minCost.innerText) + nextEdge.data('weight');
+
         visitedEdges = visitedEdges.union(nextEdge);
         nextEdge.style('line-color', 'blue');
         
@@ -158,6 +165,9 @@ function kruskalsAlgorithm(graph) {
             }
             edgeQueue = edgeQueue.difference(edge);
         }
+
+        minCost.innerText = parseInt(minCost.innerText) + nextEdge.data('weight');
+
         setTimeout(() => {
             nextEdge.animate({
                 style: {'line-color': 'blue'},
@@ -231,6 +241,9 @@ function kruskalsAlgorithmQuick(graph) {
             }
             edgeQueue = edgeQueue.difference(edge);
         }
+
+        minCost.innerText = parseInt(minCost.innerText) + nextEdge.data('weight');
+
         nextEdge.style('line-color', 'blue');
         
         // Getting source and target nodes of edge
@@ -308,6 +321,8 @@ function boruvkasAlgorithm(graph) {
             const nextEdge = possibleEdges.min(function(edge) {
                 return edge.data('weight');
             }).ele;
+
+            minCost.innerText = parseInt(minCost.innerText) + nextEdge.data('weight');
 
             // console.log(`Next edge: ${nextEdge.data('id')}   Weight: ${nextEdge.data('weight')}`);
             // console.log(`Source: ${nextEdge.source().data('id')}   Target: ${nextEdge.target().data('id')}`);
@@ -414,6 +429,8 @@ function boruvkasAlgorithmQuick(graph) {
             const nextEdge = possibleEdges.min(function(edge) {
                 return edge.data('weight');
             }).ele;
+
+            minCost.innerText = parseInt(minCost.innerText) + nextEdge.data('weight');
 
             edgeCount++;
             const sourceId = nextEdge.source().data('id');
@@ -816,6 +833,7 @@ function firstGraph() {
 function reset() {
     cy1.nodes().style('background-color', '#666');
     cy1.edges().style('line-color', '#ccc');
+    document.getElementById('minCost').innerText = 0;
 }
 
 function start() {
@@ -949,6 +967,7 @@ function uncolour() {
 function updateVals() {
     document.getElementById('nodeCount').innerText = cy1.nodes().length;
     document.getElementById('edgeCount').innerText = cy1.edges().length;
+    document.getElementById('minCost').innerText = 0;
 }
 
 // // To verify kruskals
@@ -958,16 +977,3 @@ function updateVals() {
 //     'line-color': 'blue',
 //     'background-color': 'blue'
 // });
-
-// node1 = cy1.nodes()[0];
-// console.log(node1.style('background-color'));
-// node1.animate({
-//     style: {'background-color': 'blue'},
-//     duration: 10000
-// });
-// console.log(node1.style('background-color'));
-// setTimeout(() => {
-//     console.log(node1.style('background-color'));
-// }, 5000);
-
-// ITS A PROBLEM WITH ANIMATE!!!!!!!!!!!!!!!!!!!!!!!!!!
