@@ -14,6 +14,8 @@
                 <option value="primsq">Prim's Quick (no animations)</option>
                 <option value="kruskals">Kruskal's</option>
                 <option value="kruskalsq">Kruskal's Quick (no animations)</option>
+                <option value="boruvkas">Boruvka's</option>
+                <option value="boruvkasq">Boruvka's Quick (no animations)</option>
             </select>
             <button id="startBtn" onclick="start()">Start</button>
             <br>
@@ -33,6 +35,10 @@
             <br>
             <span>Edges: </span>
             <span id="edgeCount"></span>
+            <br>
+            <button id="colourBtn" onclick="colour()">Colour</button>
+            <br>
+            <button id="uncolourBtn" onclick="uncolour()">Uncolour</button>
             <div id="cy"></div>
         </div>
 

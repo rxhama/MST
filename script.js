@@ -124,7 +124,7 @@ function kruskalsAlgorithm(graph) {
     // For each node:
     // Key = node id and value = collection of nodes the key node is in
     let groupDict = {};
-    graph.nodes().forEach(node => {
+    unvisitedNodes.forEach(node => {
         const nodeId = node.data('id');
         groupDict[nodeId] = graph.collection();
         groupDict[nodeId] = groupDict[nodeId].union(node);
@@ -200,7 +200,7 @@ function kruskalsAlgorithmQuick(graph) {
     // For each node:
     // Key = node id and value = collection of nodes the key node is in
     let groupDict = {};
-    graph.nodes().forEach(node => {
+    unvisitedNodes.forEach(node => {
         const nodeId = node.data('id');
         groupDict[nodeId] = graph.collection();
         groupDict[nodeId] = groupDict[nodeId].union(node);
@@ -248,6 +248,203 @@ function kruskalsAlgorithmQuick(graph) {
         }
     }
     console.log("KRUSKALS COMPLETED!!!");
+}
+
+function boruvkasAlgorithm(graph) {
+    let unvisitedNodes = graph.nodes();
+    const targetEdgeCount = unvisitedNodes.length - 1;
+    let edgeCount = 0;
+
+    let groupDict = {};
+    unvisitedNodes.forEach(node => {
+        const nodeId = node.data('id');
+        groupDict[nodeId] = graph.collection();
+        groupDict[nodeId] = groupDict[nodeId].union(node);
+    });
+
+    let nodeColours = {};
+    unvisitedNodes.forEach(node => {
+        nodeColours[node.data('id')] = node.style('background-color');
+    });
+
+    let i = 0;
+    while(edgeCount < targetEdgeCount) {
+        let visited = graph.collection();
+        for (let key in groupDict) {
+            i++;
+
+            if (edgeCount >= targetEdgeCount) {
+                break;
+            }
+            if (visited.contains(graph.nodes(`#${key}`))) {
+                continue;
+            }
+
+            // console.log("-----------------------");
+
+            // console.log("Visited nodes:");
+            // visited.forEach(node => {
+            //     console.log(node.data('id'));
+            // })
+
+            // console.log("------");
+
+            // Object.keys(groupDict).forEach(nodeId => {
+            //     console.log(`Node: ${nodeId}   Group: ${groupDict[nodeId].map(node => node.data('id'))}`);
+            // })
+            
+            const collection = groupDict[key];
+
+            // console.log("------");
+            // collection.forEach(node => {
+            //     console.log(`Node: ${node.data('id')}`);
+            // });
+
+            let possibleEdges = graph.collection();
+            collection.forEach(node => {
+                const adjacentEdges = node.connectedEdges().filter(edge => groupDict[edge.source().data('id')].intersection(groupDict[edge.target().data('id')]).empty());
+                possibleEdges = possibleEdges.union(adjacentEdges);
+            });
+            const nextEdge = possibleEdges.min(function(edge) {
+                return edge.data('weight');
+            }).ele;
+
+            // console.log(`Next edge: ${nextEdge.data('id')}   Weight: ${nextEdge.data('weight')}`);
+            // console.log(`Source: ${nextEdge.source().data('id')}   Target: ${nextEdge.target().data('id')}`);
+
+            edgeCount++;
+            const sourceId = nextEdge.source().data('id');
+            const targetId = nextEdge.target().data('id');
+            let nodeWithBiggerCollection = sourceId;
+            if (groupDict[targetId].length > groupDict[sourceId].length) {
+                nodeWithBiggerCollection = targetId;
+            }
+            groupDict[sourceId] = groupDict[sourceId].union(nextEdge);
+            groupDict[sourceId] = groupDict[sourceId].union(groupDict[targetId]);
+            groupDict[sourceId].nodes().forEach(function(node) {
+                groupDict[node.data('id')] = groupDict[sourceId];
+            });
+            visited = visited.union(groupDict[sourceId]);
+
+            let colour = '';
+            let sourceColour = nodeColours[sourceId];
+            let targetColour = nodeColours[targetId];
+            if (sourceColour == 'rgb(102,102,102)' && targetColour == 'rgb(102,102,102)') {
+                colour = '#' + Math.floor(Math.random()*16777215).toString(16);
+            }
+            else if (sourceColour == 'rgb(102,102,102)') {
+                colour = targetColour;
+            }
+            else if (targetColour == 'rgb(102,102,102)') {
+                colour = sourceColour;
+            }
+            else {
+                colour = nodeColours[nodeWithBiggerCollection];
+            }
+
+            // if (edgeCount == targetEdgeCount) {
+            //     colour = 'blue';
+            // }
+
+            nodeColours[sourceId] = colour;
+            nodeColours[targetId] = colour;
+
+            groupDict[sourceId].forEach(function(elem) {
+                if (elem.isNode()) {
+                    nodeColours[elem.data('id')] = colour;
+                    setTimeout(() => {
+                        elem.animate({
+                            style: {'background-color': `${colour}`},
+                            duration: 1000
+                        });
+                    }, 2000 * (i + 1));
+                }
+                else {
+                    setTimeout(() => {
+                        elem.animate({
+                            style: {'line-color': `${colour}`},
+                            duration: 1000
+                        });
+                    }, 2000 * (i + 1));
+                }
+            });
+            
+            const sourceNode = graph.$(`#${sourceId}`);
+            const targetNode = graph.$(`#${targetId}`);
+            if (unvisitedNodes.contains(sourceNode)) {
+                unvisitedNodes = unvisitedNodes.difference(sourceNode);
+            }
+            if (unvisitedNodes.contains(targetNode)) {
+                unvisitedNodes = unvisitedNodes.difference(targetNode);
+            }
+        }
+    }
+    console.log("BORUVKAS COMPLETED!!!");
+}
+
+function boruvkasAlgorithmQuick(graph) {
+    let unvisitedNodes = graph.nodes();
+    const targetEdgeCount = unvisitedNodes.length - 1;
+    let edgeCount = 0;
+
+    let groupDict = {};
+    unvisitedNodes.forEach(node => {
+        const nodeId = node.data('id');
+        groupDict[nodeId] = graph.collection();
+        groupDict[nodeId] = groupDict[nodeId].union(node);
+    });
+
+    while(edgeCount < targetEdgeCount) {
+        let visited = graph.collection();
+        for (let key in groupDict) {
+            if (edgeCount >= targetEdgeCount) {
+                break;
+            }
+            if (visited.contains(graph.nodes(`#${key}`))) {
+                continue;
+            }
+            
+            const collection = groupDict[key];
+
+            let possibleEdges = graph.collection();
+            collection.forEach(node => {
+                const adjacentEdges = node.connectedEdges().filter(edge => groupDict[edge.source().data('id')].intersection(groupDict[edge.target().data('id')]).empty());
+                possibleEdges = possibleEdges.union(adjacentEdges);
+            });
+            const nextEdge = possibleEdges.min(function(edge) {
+                return edge.data('weight');
+            }).ele;
+
+            edgeCount++;
+            const sourceId = nextEdge.source().data('id');
+            const targetId = nextEdge.target().data('id');
+            groupDict[sourceId] = groupDict[sourceId].union(nextEdge);
+            groupDict[sourceId] = groupDict[sourceId].union(groupDict[targetId]);
+            groupDict[sourceId].nodes().forEach(function(node) {
+                groupDict[node.data('id')] = groupDict[sourceId];
+            });
+            visited = visited.union(groupDict[sourceId]);
+
+            groupDict[sourceId].forEach(function(elem) {
+                if (elem.isNode()) {
+                    elem.style('background-color', 'blue');
+                }
+                else {
+                    elem.style('line-color', 'blue');
+                }
+            });
+            
+            const sourceNode = graph.$(`#${sourceId}`);
+            const targetNode = graph.$(`#${targetId}`);
+            if (unvisitedNodes.contains(sourceNode)) {
+                unvisitedNodes = unvisitedNodes.difference(sourceNode);
+            }
+            if (unvisitedNodes.contains(targetNode)) {
+                unvisitedNodes = unvisitedNodes.difference(targetNode);
+            }
+        }
+    }
+    console.log("BORUVKAS COMPLETED!!!");
 }
 
 // Creating initial graphs
@@ -574,7 +771,7 @@ let cy1 = cytoscape({
         {
             selector: 'node',
             style: {
-                'background-color': '#666',
+                'background-color': '#666666',
                 'label': 'data(id)'
             }
         },
@@ -583,7 +780,7 @@ let cy1 = cytoscape({
             selector: 'edge',
             style: {
                 'width': 3,
-                'line-color': '#ccc',
+                'line-color': '#cccccc',
                 'curve-style': 'bezier',
                 'label': 'data(weight)'
             }
@@ -635,6 +832,12 @@ function start() {
     else if (selectedAlgo == 'kruskalsq') {
         kruskalsAlgorithmQuick(cy1);
     }
+    else if (selectedAlgo == 'boruvkas') {
+        boruvkasAlgorithm(cy1);
+    }
+    else if (selectedAlgo == 'boruvkasq') {
+        boruvkasAlgorithmQuick(cy1);
+    }
 };
 
 function createGraph() {
@@ -646,7 +849,7 @@ function createGraph() {
             {
                 selector: 'node',
                 style: {
-                    'background-color': '#666'
+                    'background-color': '#666666'
                 }
             },
 
@@ -654,7 +857,7 @@ function createGraph() {
                 selector: 'edge',
                 style: {
                     'width': 3,
-                    'line-color': '#ccc',
+                    'line-color': '#cccccc',
                     'curve-style': 'bezier',
                     'label': 'data(weight)'
                 }
@@ -733,6 +936,16 @@ function generateGraph() {
     updateVals();
 }
 
+function colour() {
+    cy1.$(':selected').style('background-color', 'blue');
+    cy1.$(':selected').style('line-color', 'blue');
+}
+
+function uncolour() {
+    cy1.$(':selected').style('background-color', '#666');
+    cy1.$(':selected').style('line-color', '#ccc');
+}
+
 function updateVals() {
     document.getElementById('nodeCount').innerText = cy1.nodes().length;
     document.getElementById('edgeCount').innerText = cy1.edges().length;
@@ -745,3 +958,16 @@ function updateVals() {
 //     'line-color': 'blue',
 //     'background-color': 'blue'
 // });
+
+// node1 = cy1.nodes()[0];
+// console.log(node1.style('background-color'));
+// node1.animate({
+//     style: {'background-color': 'blue'},
+//     duration: 10000
+// });
+// console.log(node1.style('background-color'));
+// setTimeout(() => {
+//     console.log(node1.style('background-color'));
+// }, 5000);
+
+// ITS A PROBLEM WITH ANIMATE!!!!!!!!!!!!!!!!!!!!!!!!!!
