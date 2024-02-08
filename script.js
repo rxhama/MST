@@ -260,7 +260,7 @@ function kruskalsAlgorithmQuick(graph) {
             targetNode.style('background-color', 'blue');
         }
     }
-    console.log("KRUSKALS COMPLETED!!!");
+    console.log("KRUSKALS QUICK COMPLETED!!!");
 }
 
 function boruvkasAlgorithm(graph) {
@@ -461,7 +461,7 @@ function boruvkasAlgorithmQuick(graph) {
             }
         }
     }
-    console.log("BORUVKAS COMPLETED!!!");
+    console.log("BORUVKAS QUICK COMPLETED!!!");
 }
 
 // Creating initial graphs
