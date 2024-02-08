@@ -212,10 +212,7 @@ function kruskalsAlgorithmQuick(graph) {
         return a.data('weight') - b.data('weight')
     });
     
-    let i = 0;
     while (edgeCount < targetEdgeCount) {
-        i++;
-
         // Choosing edge
         let nextEdge = null;
         while (nextEdge == null) {
