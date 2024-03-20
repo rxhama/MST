@@ -1,11 +1,179 @@
-let storedGraphs = [];
-const minCost = document.getElementById('minCost');
+const minCostDisplay = document.getElementById('minCostDisplay');
+const edgeQueueDisplay = document.getElementById('edgeQueueDisplay');
+
+async function loadInitialGraphs() {
+    if (localStorage.getItem("storedGraphs") == null) {
+        const response = await fetch("initialGraphs.json");
+        const graphs = await response.json();
+        console.log("Graphs loaded from initialGraphs.json");
+        localStorage.setItem("storedGraphs", JSON.stringify(graphs));
+    }
+    else {
+        console.log("Graphs already loaded");
+    }
+}
+
+class AlgoController {
+    constructor() {
+        this.steps = [];
+        this.currentIndex = 0;
+        this.playing = false;
+        this.timeout = null;
+    }
+
+    setSteps(steps) {
+        this.steps = steps;
+        this.currentIndex = 0;
+        this.playing = false;
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+        }
+        this.initData();
+    }
+
+    initData() {
+        this.updateDisplays(this.steps[0]);
+    }
+
+    executeStep(index) {
+        if (index < 0 || index >= this.steps.length) return;
+        const step = this.steps[index];
+        Object.keys(step.changes).forEach(id => {
+            cy1.$(`#${id}`).addClass(step.changes[id]);
+        })
+        this.updateDisplays(step);
+    }
+
+    undoStep(index) {
+        if (index < 0 || index >= this.steps.length) return;
+        const step = this.steps[index];
+        if (this.currentIndex == 2) {
+            console.log(step);
+        }
+        Object.keys(step.changes).forEach(id => {
+            console.log(`${id}: ${step.changes[id]}`);
+            cy1.$(`#${id}`).removeClass(step.changes[id]);
+        })
+        if (index < 1) {
+            this.updateDisplays(this.steps[0]);
+        }
+        else {
+            this.updateDisplays(this.steps[index - 1]);
+        }
+    }
+
+    play() {
+        if (this.currentIndex < this.steps.length && !this.playing) {
+            this.playing = true;
+            this.playSteps();
+        }
+        // Workaround for bug where last step is not completed if user spams play and pause
+        // if (this.currentIndex == this.steps.length) {
+        //     this.executeStep(this.currentIndex - 1);
+        // }
+    }
+
+    playSteps() {
+        if (this.currentIndex < this.steps.length && this.playing) {
+            this.executeStep(this.currentIndex);
+            this.currentIndex++;
+
+            this.timeout = setTimeout(() => {
+                this.playSteps()
+            }, 1000)
+        }
+        else {
+            this.pause();
+        }
+    }
+
+    pause() {
+        if (this.playing) {
+            clearTimeout(this.timeout);
+            this.playing = false;
+        }
+    }
+
+    next() {
+        if (this.currentIndex >= this.steps.length) {
+            this.pause();
+            return;
+        }
+        this.pause();
+        this.executeStep(this.currentIndex);
+        this.currentIndex++;
+    }
+
+    previous() {
+        if (this.currentIndex <= 0) {
+            this.pause();
+            cy1.elements().classes('');
+            return;
+        }
+        this.pause();
+        this.currentIndex--;
+        this.undoStep(this.currentIndex);
+    }
+
+    toStart() {
+        this.pause();
+        this.currentIndex = 0;
+        cy1.elements().classes('');
+        this.updateDisplays(this.steps[0]);
+    }
+
+    toEnd() {
+        this.pause();
+        for (let i = this.currentIndex; i < this.steps.length; i++) {
+            this.executeStep(i);
+        }
+        this.currentIndex = this.steps.length;
+    }
+
+    updateDisplays(step) {
+        minCostDisplay.innerText = step.mstCost;
+        edgeQueueDisplay.innerText = '';
+        const list = document.createElement('ul');
+        step.edgeQueue.forEach(edge => {
+            const item = document.createElement('li');
+            item.innerText = edge;
+            list.appendChild(item);
+        });
+        edgeQueueDisplay.appendChild(list);
+    }
+}
+
+const algoController = new AlgoController();
+
+document.getElementById('play').addEventListener('click', () => algoController.play());
+document.getElementById('pause').addEventListener('click', () => algoController.pause());
+document.getElementById('next').addEventListener('click', () => algoController.next());
+document.getElementById('previous').addEventListener('click', () => algoController.previous());
+document.getElementById('toStart').addEventListener('click', () => algoController.toStart());
+document.getElementById('toEnd').addEventListener('click', () => algoController.toEnd());
+
+let cy1 = cytoscape({
+    container: document.getElementById('cy'), // container to render in
+});
+loadInitialGraphs().then(() => {
+    let graphs = JSON.parse(localStorage.getItem('storedGraphs') || '[]');
+    cy1.json(graphs[0].graph);
+    cy1.fit();
+    
+    populateDropdown();
+    updateVals();
+});
 
 function primsAlgorithm(graph) {
     if (graph.nodes(':selected').length != 1) {
-        alert('Please select a starting node');
+        cy1.elements().unselect();
+        alert('Please select a single starting node');
         return;
     }
+
+    const steps = [];
+    let mstCost = 0; // Cost of minimum spanning tree at each step
 
     let edgeQueue = graph.collection();
     let visitedEdges = graph.collection();
@@ -13,19 +181,28 @@ function primsAlgorithm(graph) {
 
     let currNode = graph.nodes(':selected');
     unvisitedNodes = unvisitedNodes.difference(currNode);
-    currNode.style('background-color', 'blue');
+
+    // Sorting initial edge queue by weight
+    const initAdjacentEdges = currNode.connectedEdges().filter(edge => !visitedEdges.contains(edge) && (unvisitedNodes.contains(edge.source()) != unvisitedNodes.contains(edge.target())));
+    edgeQueue = edgeQueue.union(initAdjacentEdges);
+    edgeQueue = edgeQueue.sort(function(a, b) {
+        return a.data('weight') - b.data('weight')
+    });
+
+    // Initial step
+    const initStep = {};
+    initStep.changes = {};
+    initStep.changes[currNode.data('id')] = 'chosen';
+    edgeQueue.forEach(edge => {
+        initStep.changes[edge.data('id')] = 'search';
+    });
+    initStep.edgeQueue = initAdjacentEdges.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
+    initStep.mstCost = mstCost;
+    steps.push(initStep);
 
 
-    let i = 0;
     while (!unvisitedNodes.empty()) {
-        i++;
-
-        // Adding adjacent edges to edgeQueue and sorting edgeQueue by weight
-        const adjacentEdges = currNode.connectedEdges().filter(edge => !visitedEdges.contains(edge) && (unvisitedNodes.contains(edge.source()) != unvisitedNodes.contains(edge.target())));
-        edgeQueue = edgeQueue.union(adjacentEdges);
-        edgeQueue = edgeQueue.sort(function(a, b) {
-            return a.data('weight') - b.data('weight')
-        });
+        const step = {};
 
         // Choosing edge
         let nextEdge = null;
@@ -37,16 +214,10 @@ function primsAlgorithm(graph) {
             }
             edgeQueue = edgeQueue.difference(edge);
         }
-
-        minCost.innerText = parseInt(minCost.innerText) + nextEdge.data('weight');
-
+        edgeQueue = edgeQueue.difference(nextEdge);
         visitedEdges = visitedEdges.union(nextEdge);
-        setTimeout(() => {
-            nextEdge.animate({
-                style: {'line-color': 'blue'},
-                duration: 1000
-            });
-        }, 2000 * (i + 1));
+        
+        mstCost += nextEdge.data('weight');
         
         // Getting next node edge will take us to
         let nextNode = null;
@@ -57,73 +228,36 @@ function primsAlgorithm(graph) {
             nextNode = nextEdge.target();
         }
         unvisitedNodes = unvisitedNodes.difference(nextNode);
-        setTimeout(() => {
-            nextNode.animate({
-                style: {'background-color': 'blue'},
-                duration: 1000
-            });
-        }, 2000 * (i + 1));
+
         currNode = nextNode;
+
+        // Adding adjacent edges to edgeQueue and sorting edgeQueue by weight
+        const adjacentEdges = currNode.connectedEdges().filter(edge => !visitedEdges.contains(edge) && (unvisitedNodes.contains(edge.source()) != unvisitedNodes.contains(edge.target())));
+        edgeQueue = edgeQueue.union(adjacentEdges);
+        edgeQueue = edgeQueue.sort(function(a, b) {
+            return a.data('weight') - b.data('weight')
+        });
+
+        step.mstCost = mstCost;
+        step.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
+        step.changes = {};
+        step.changes[nextEdge.data('id')] = 'chosen';
+        step.changes[nextNode.data('id')] = 'chosen';
+        adjacentEdges.forEach(edge => {
+            step.changes[edge.data('id')] = 'search';
+        });
+
+        steps.push(step);
     }
     console.log("PRIMS COMPLETED!!!");
-}
-
-function primsAlgorithmQuick(graph) {
-    if (graph.nodes(':selected').length != 1) {
-        alert('Please select a starting node');
-        return;
-    }
-
-    let edgeQueue = graph.collection();
-    let visitedEdges = graph.collection();
-    let unvisitedNodes = graph.nodes();
-
-    let currNode = graph.nodes(':selected');
-    unvisitedNodes = unvisitedNodes.difference(currNode);
-    currNode.style('background-color', 'blue');
-
-
-    while (!unvisitedNodes.empty()) {
-
-        // Adding adjacent edges to edgeQueue and sorting edgeQueue by weight
-        const adjacentEdges = currNode.connectedEdges().filter(edge => !visitedEdges.contains(edge) && (unvisitedNodes.contains(edge.source()) != unvisitedNodes.contains(edge.target())));
-        edgeQueue = edgeQueue.union(adjacentEdges);
-        edgeQueue = edgeQueue.sort(function(a, b) {
-            return a.data('weight') - b.data('weight')
-        });
-
-        // Choosing edge
-        let nextEdge = null;
-        while (nextEdge == null) {
-            const edge = edgeQueue[0];
-            if (unvisitedNodes.contains(edge.source()) || unvisitedNodes.contains(edge.target())) {
-                nextEdge = edge;
-                break;
-            }
-            edgeQueue = edgeQueue.difference(edge);
-        }
-        
-        minCost.innerText = parseInt(minCost.innerText) + nextEdge.data('weight');
-
-        visitedEdges = visitedEdges.union(nextEdge);
-        nextEdge.style('line-color', 'blue');
-        
-        // Getting next node edge will take us to
-        let nextNode = null;
-        if (unvisitedNodes.contains(nextEdge.source())) {
-            nextNode = nextEdge.source();
-        }
-        else {
-            nextNode = nextEdge.target();
-        }
-        unvisitedNodes = unvisitedNodes.difference(nextNode);
-        nextNode.style('background-color', 'blue')
-        currNode = nextNode;
-    }
-    console.log("PRIMS QUICK COMPLETED!!!");
+    algoController.setSteps(steps);
+    return steps;
 }
 
 function kruskalsAlgorithm(graph) {
+    const steps = [];
+    let mstCost = 0; // Cost of minimum spanning tree at each step
+    
     let unvisitedNodes = graph.nodes();
     const targetEdgeCount = unvisitedNodes.length - 1;
     let edgeCount = 0;
@@ -142,10 +276,16 @@ function kruskalsAlgorithm(graph) {
     edgeQueue = edgeQueue.sort(function(a, b) {
         return a.data('weight') - b.data('weight')
     });
+
+    // Init step with 0 changes, 0 cost, just displaying the initial edgeQueue
+    const initStep = {};
+    initStep.changes = {};
+    initStep.mstCost = mstCost;
+    initStep.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
+    steps.push(initStep);
     
-    let i = 0;
     while (edgeCount < targetEdgeCount) {
-        i++;
+        const step = {};
 
         // Choosing edge
         let nextEdge = null;
@@ -165,15 +305,13 @@ function kruskalsAlgorithm(graph) {
             }
             edgeQueue = edgeQueue.difference(edge);
         }
+        edgeQueue = edgeQueue.difference(nextEdge);
 
-        minCost.innerText = parseInt(minCost.innerText) + nextEdge.data('weight');
-
-        setTimeout(() => {
-            nextEdge.animate({
-                style: {'line-color': 'blue'},
-                duration: 1000
-            });
-        }, 2000 * (i + 1));
+        mstCost += nextEdge.data('weight');
+        step.mstCost = mstCost;
+        step.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
+        step.changes = {};
+        step.changes[nextEdge.data('id')] = 'chosen';
         
         // Getting source and target nodes of edge
         const sourceNode = nextEdge.source();
@@ -181,86 +319,18 @@ function kruskalsAlgorithm(graph) {
         if (unvisitedNodes.contains(sourceNode)) {
             unvisitedNodes = unvisitedNodes.difference(sourceNode);
 
-            setTimeout(() => {
-                sourceNode.animate({
-                    style: {'background-color': 'blue'},
-                    duration: 1000
-                });
-            }, 2000 * (i + 1));
+            step.changes[sourceNode.data('id')] = 'chosen';
         }
         if (unvisitedNodes.contains(targetNode)) {
             unvisitedNodes = unvisitedNodes.difference(targetNode);
 
-            setTimeout(() => {
-                targetNode.animate({
-                    style: {'background-color': 'blue'},
-                    duration: 1000
-                });
-            }, 2000 * (i + 1));
+            step.changes[targetNode.data('id')] = 'chosen';
         }
+
+        steps.push(step);
     }
     console.log("KRUSKALS COMPLETED!!!");
-}
-
-function kruskalsAlgorithmQuick(graph) {
-    let unvisitedNodes = graph.nodes();
-    const targetEdgeCount = unvisitedNodes.length - 1;
-    let edgeCount = 0;
-
-    // For each node:
-    // Key = node id and value = collection of nodes the key node is in
-    let groupDict = {};
-    unvisitedNodes.forEach(node => {
-        const nodeId = node.data('id');
-        groupDict[nodeId] = graph.collection();
-        groupDict[nodeId] = groupDict[nodeId].union(node);
-    });
-
-    // Sorting edge queue by weight
-    let edgeQueue = graph.edges();
-    edgeQueue = edgeQueue.sort(function(a, b) {
-        return a.data('weight') - b.data('weight')
-    });
-    
-    while (edgeCount < targetEdgeCount) {
-        // Choosing edge
-        let nextEdge = null;
-        while (nextEdge == null) {
-            const edge = edgeQueue[0];
-            const sourceId = edge.source().data('id');
-            const targetId = edge.target().data('id');
-            if (groupDict[sourceId].intersection(groupDict[targetId]).empty()) {
-                nextEdge = edge;
-                edgeCount++;
-                groupDict[sourceId] = groupDict[sourceId].union(groupDict[targetId]);
-                groupDict[sourceId].forEach(function(node) {
-                    groupDict[node.data('id')] = groupDict[sourceId];
-                });
-
-                break;
-            }
-            edgeQueue = edgeQueue.difference(edge);
-        }
-
-        minCost.innerText = parseInt(minCost.innerText) + nextEdge.data('weight');
-
-        nextEdge.style('line-color', 'blue');
-        
-        // Getting source and target nodes of edge
-        const sourceNode = nextEdge.source();
-        const targetNode = nextEdge.target();
-        if (unvisitedNodes.contains(sourceNode)) {
-            unvisitedNodes = unvisitedNodes.difference(sourceNode);
-
-            sourceNode.style('background-color', 'blue');
-        }
-        if (unvisitedNodes.contains(targetNode)) {
-            unvisitedNodes = unvisitedNodes.difference(targetNode);
-
-            targetNode.style('background-color', 'blue');
-        }
-    }
-    console.log("KRUSKALS QUICK COMPLETED!!!");
+    algoController.setSteps(steps);
 }
 
 function boruvkasAlgorithm(graph) {
@@ -322,7 +392,7 @@ function boruvkasAlgorithm(graph) {
                 return edge.data('weight');
             }).ele;
 
-            minCost.innerText = parseInt(minCost.innerText) + nextEdge.data('weight');
+            minCostDisplay.innerText = parseInt(minCostDisplay.innerText) + nextEdge.data('weight');
 
             // console.log(`Next edge: ${nextEdge.data('id')}   Weight: ${nextEdge.data('weight')}`);
             // console.log(`Source: ${nextEdge.source().data('id')}   Target: ${nextEdge.target().data('id')}`);
@@ -345,7 +415,8 @@ function boruvkasAlgorithm(graph) {
             let sourceColour = nodeColours[sourceId];
             let targetColour = nodeColours[targetId];
             if (sourceColour == 'rgb(102,102,102)' && targetColour == 'rgb(102,102,102)') {
-                colour = '#' + Math.floor(Math.random()*16777215).toString(16);
+                // colour = '#' + Math.floor(Math.random()*16777215).toString(16);
+                colour = `rgb(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`;
             }
             else if (sourceColour == 'rgb(102,102,102)') {
                 colour = targetColour;
@@ -430,7 +501,7 @@ function boruvkasAlgorithmQuick(graph) {
                 return edge.data('weight');
             }).ele;
 
-            minCost.innerText = parseInt(minCost.innerText) + nextEdge.data('weight');
+            minCostDisplay.innerText = parseInt(minCostDisplay.innerText) + nextEdge.data('weight');
 
             edgeCount++;
             const sourceId = nextEdge.source().data('id');
@@ -444,10 +515,10 @@ function boruvkasAlgorithmQuick(graph) {
 
             groupDict[sourceId].forEach(function(elem) {
                 if (elem.isNode()) {
-                    elem.style('background-color', 'blue');
+                    elem.addClass('chosen');
                 }
                 else {
-                    elem.style('line-color', 'blue');
+                    elem.addClass('chosen');
                 }
             });
             
@@ -464,391 +535,49 @@ function boruvkasAlgorithmQuick(graph) {
     console.log("BORUVKAS QUICK COMPLETED!!!");
 }
 
-// Creating initial graphs
-// let cy1 = cytoscape({
-//     container: document.getElementById('cy'), // container to render in
-
-//     elements: [
-//         // Nodes
-//         {
-//             data: { id : 'a' }
-//         },
-//         {
-//             data: { id : 'b' }
-//         },
-//         {
-//             data: { id : 'c' }
-//         },
-//         {
-//             data: { id : 'd' }
-//         },
-//         {
-//             data: { id : 'e' }
-//         },
-//         {
-//             data: { id : 'f' }
-//         },
-//         // Edges
-//         {
-//             data: {
-//                 id: 'ab',
-//                 source: 'a',
-//                 target: 'b',
-//                 weight: 78
-//             }
-//         },
-//         {
-//             data: {
-//                 id: 'ac',
-//                 source: 'a',
-//                 target: 'c',
-//                 weight: 44
-//             }
-//         },
-//         {
-//             data: {
-//                 id: 'ad',
-//                 source: 'a',
-//                 target: 'd',
-//                 weight: 11
-//             }
-//         },
-//         {
-//             data: {
-//                 id: 'ae',
-//                 source: 'a',
-//                 target: 'e',
-//                 weight: 40
-//             }
-//         },
-//         {
-//             data: {
-//                 id: 'af',
-//                 source: 'a',
-//                 target: 'f',
-//                 weight: 61
-//             }
-//         },
-//         {
-//             data: {
-//                 id: 'bc',
-//                 source: 'b',
-//                 target: 'c',
-//                 weight: 71
-//             }
-//         },
-//         {
-//             data: {
-//                 id: 'bd',
-//                 source: 'b',
-//                 target: 'd',
-//                 weight: 93
-//             }
-//         },
-//         {
-//             data: {
-//                 id: 'be',
-//                 source: 'b',
-//                 target: 'e',
-//                 weight: 63
-//             }
-//         },
-//         {
-//             data: {
-//                 id: 'bf',
-//                 source: 'b',
-//                 target: 'f',
-//                 weight: 29
-//             }
-//         },
-//         {
-//             data: {
-//                 id: 'cd',
-//                 source: 'c',
-//                 target: 'd',
-//                 weight: 81
-//             }
-//         },
-//         {
-//             data: {
-//                 id: 'ce',
-//                 source: 'c',
-//                 target: 'e',
-//                 weight: 1
-//             }
-//         },
-//         {
-//             data: {
-//                 id: 'cf',
-//                 source: 'c',
-//                 target: 'f',
-//                 weight: 11
-//             }
-//         },
-//         {
-//             data: {
-//                 id: 'de',
-//                 source: 'd',
-//                 target: 'e',
-//                 weight: 33
-//             }
-//         },
-//         {
-//             data: {
-//                 id: 'df',
-//                 source: 'd',
-//                 target: 'f',
-//                 weight: 20
-//             }
-//         },
-//         {
-//             data: {
-//                 id: 'ef',
-//                 source: 'e',
-//                 target: 'f',
-//                 weight: 87
-//             }
-//         },
-        
-//     ],
-
-//     style: [ // the stylesheet for the graph
-//         {
-//             selector: 'node',
-//             style: {
-//                 'background-color': '#666',
-//                 'label': 'data(id)'
-//             }
-//         },
-
-//         {
-//             selector: 'edge',
-//             style: {
-//                 'width': 3,
-//                 'line-color': '#ccc',
-//                 'curve-style': 'bezier',
-//                 'label': 'data(weight)'
-//             }
-//         }
-//     ],
-
-//     layout: {
-//         name: 'circle'
-//     }
-// });
-
-let cy1 = cytoscape({
-    container: document.getElementById('cy'), // container to render in
-
-    elements: [
-        // Nodes
-        {
-            data: { id : 'a' }
-        },
-        {
-            data: { id : 'b' }
-        },
-        {
-            data: { id : 'c' }
-        },
-        {
-            data: { id : 'd' }
-        },
-        {
-            data: { id : 'e' }
-        },
-        {
-            data: { id : 'f' }
-        },
-        {
-            data: { id : 'g' }
-        },
-        {
-            data: { id : 'h' }
-        },
-        {
-            data: { id : 'i' }
-        },
-        // Edges
-        {
-            data: {
-                id: 'ab',
-                source: 'a',
-                target: 'b',
-                weight: 4
-            }
-        },
-        {
-            data: {
-                id: 'ah',
-                source: 'a',
-                target: 'h',
-                weight: 8
-            }
-        },
-        {
-            data: {
-                id: 'bh',
-                source: 'b',
-                target: 'h',
-                weight: 11
-            }
-        },
-        {
-            data: {
-                id: 'bc',
-                source: 'b',
-                target: 'c',
-                weight: 8
-            }
-        },
-        {
-            data: {
-                id: 'hi',
-                source: 'h',
-                target: 'i',
-                weight: 7
-            }
-        },
-        {
-            data: {
-                id: 'hg',
-                source: 'h',
-                target: 'g',
-                weight: 1
-            }
-        },
-        {
-            data: {
-                id: 'ic',
-                source: 'i',
-                target: 'c',
-                weight: 2
-            }
-        },
-        {
-            data: {
-                id: 'ig',
-                source: 'i',
-                target: 'g',
-                weight: 6
-            }
-        },
-        {
-            data: {
-                id: 'gf',
-                source: 'g',
-                target: 'f',
-                weight: 2
-            }
-        },
-        {
-            data: {
-                id: 'cd',
-                source: 'c',
-                target: 'd',
-                weight: 7
-            }
-        },
-        {
-            data: {
-                id: 'cf',
-                source: 'c',
-                target: 'f',
-                weight: 4
-            }
-        },
-        {
-            data: {
-                id: 'df',
-                source: 'd',
-                target: 'f',
-                weight: 14
-            }
-        },
-        {
-            data: {
-                id: 'de',
-                source: 'd',
-                target: 'e',
-                weight: 9
-            }
-        },
-        {
-            data: {
-                id: 'fe',
-                source: 'f',
-                target: 'e',
-                weight: 10
-            }
-        }
-    ],
-
-    style: [ // the stylesheet for the graph
-        {
-            selector: 'node',
-            style: {
-                'background-color': '#666666',
-                'label': 'data(id)'
-            }
-        },
-
-        {
-            selector: 'edge',
-            style: {
-                'width': 3,
-                'line-color': '#cccccc',
-                'curve-style': 'bezier',
-                'label': 'data(weight)'
-            }
-        },
-
-        {
-            selector: ':selected',
-            style: {
-                'background-color': 'black',
-                'line-color': 'black',
-            }
-        }
-    ],
-
-    layout: {
-        name: 'circle'
-    }
-});
-
-storedGraphs.push(cy1.json());
-updateVals();
-
-function firstGraph() {
+function loadGraph(dropdown) {
+    const graphs = JSON.parse(localStorage.getItem('storedGraphs') || '[]');
+    const selectedGraph = graphs[dropdown.value].graph;
     cy1.destroy();
     cy1 = cytoscape({
         container: document.getElementById('cy')
     });
-    cy1.json(storedGraphs[0]);
+    cy1.json(selectedGraph);
+    cy1.fit();
     
     updateVals();
 }
 
-function reset() {
-    cy1.nodes().style('background-color', '#666');
-    cy1.edges().style('line-color', '#ccc');
-    document.getElementById('minCost').innerText = 0;
+function populateDropdown() {
+    const dropdown = document.getElementById('graphDropdown');
+    dropdown.innerHTML = '';
+
+    const graphs = JSON.parse(localStorage.getItem('storedGraphs') || '[]');
+    for (let i = 0; i < graphs.length; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.innerText = graphs[i].name;
+        dropdown.appendChild(option);
+    };
 }
 
+// This and start doing same thing at beginning
+function reset() {
+    cy1.elements().classes('');
+    document.getElementById('minCostDisplay').innerText = 0;
+    cy1.fit();
+}
+
+// This and reset doing same thing at beginning
 function start() {
+    reset();
+    
     const selectedAlgo = document.getElementById('algoDropdown').value;
     if (selectedAlgo == 'prims') {
         primsAlgorithm(cy1);
     }
-    else if (selectedAlgo == 'primsq') {
-        primsAlgorithmQuick(cy1);
-    }
     else if (selectedAlgo == 'kruskals') {
         kruskalsAlgorithm(cy1);
-    }
-    else if (selectedAlgo == 'kruskalsq') {
-        kruskalsAlgorithmQuick(cy1);
     }
     else if (selectedAlgo == 'boruvkas') {
         boruvkasAlgorithm(cy1);
@@ -865,27 +594,50 @@ function createGraph() {
 
         style: [
             {
-                selector: 'node',
-                style: {
-                    'background-color': '#666666'
+                "selector": "node",
+                "style": {
+                    "background-color": "rgb(102,102,102)",
+                    "label": "data(id)",
+                    "transition-property": "background-color",
+                    "transition-duration": "0.2s"
                 }
             },
-
             {
-                selector: 'edge',
-                style: {
-                    'width': 3,
-                    'line-color': '#cccccc',
-                    'curve-style': 'bezier',
-                    'label': 'data(weight)'
+                "selector": "edge",
+                "style": {
+                    "width": "3px",
+                    "line-color": "rgb(204,204,204)",
+                    "curve-style": "bezier",
+                    "label": "data(weight)",
+                    "transition-property": "line-color",
+                    "transition-duration": "0.2s"
                 }
             },
-
             {
-                selector: ':selected',
-                style: {
-                    'background-color': 'black',
-                    'line-color': 'black',
+                "selector": ":selected",
+                "style": {
+                    "background-color": "rgb(0,0,0)",
+                    "line-color": "rgb(0,0,0)"
+                }
+            },
+            {
+                "selector": ".search",
+                "style": {
+                    
+                }
+            },
+            {
+                "selector": ".rejected",
+                "style": {
+                    "background-color": "rgb(255,0,0)",
+                    "line-color": "rgb(255,0,0)"
+                }
+            },
+            {
+                "selector": ".chosen",
+                "style": {
+                    "background-color": "rgb(0,0,255)",
+                    "line-color": "rgb(0,0,255)"
                 }
             }
         ],
@@ -914,7 +666,125 @@ function removeElement() {
 }
 
 function saveGraph() {
-    storedGraphs.push(cy1.json());
+    if (cy1.elements().length == 0) {
+        alert('Graph is empty');
+        return;
+    }
+
+    if (cy1.nodes().length == 1) {
+        alert('Graph must have at least 2 nodes');
+        return;
+    }
+
+    for (const node of cy1.nodes()) {
+        if (node.connectedEdges().empty()) {
+            alert('Graph must be connected');
+            return;
+        }
+    }
+
+    const graphs = JSON.parse(localStorage.getItem('storedGraphs') || '[]');
+    for (let i = 0; i < graphs.length; i++) {
+        if (checkIdenticalElements(cy1.json().elements, graphs[i].graph.elements)) {
+            alert('Graph already saved');
+            return;
+        }
+    }
+
+    const graphName = prompt('Enter graph name');
+    if (graphName == '' || graphName == null) {
+        alert('Please enter a graph name');
+        return;
+    }
+
+    graphs.forEach(graph => {
+        if (graph.name == graphName) {
+            alert('Graph name already exists');
+            return;
+        }
+    })
+
+    const newGraph = {};
+    newGraph.name = graphName;
+    newGraph.graph = cy1.json();
+    graphs.push(newGraph);
+    localStorage.setItem('storedGraphs', JSON.stringify(graphs));
+
+    populateDropdown();
+}
+
+function checkIdenticalElements(elesA, elesB) {
+    if (elesA.length != elesB.length) {
+        return false;
+    }
+
+    // Using maps for easy lookup
+    const nodesA = new Map(elesA.nodes.map(node => [node.data.id, node]));
+    const edgesA = new Map(elesA.edges.map(edge => [edge.data.id, edge]));
+
+    // Check each node in elesB to see if in elesA
+    for (let nodeB of elesB.nodes) {
+        const nodeA = nodesA.get(nodeB.data.id);
+        if (!nodeA) {
+            return false;
+        }
+    }
+
+    // Check each node in elesB to see if in elesA
+    for (let edgeB of elesB.edges) {
+        const edgeA = edgesA.get(edgeB.data.id);
+        if (!edgeA) {
+            return false;
+        }
+        if (edgeA.data.source != edgeB.data.source || edgeA.data.target != edgeB.data.target || edgeA.data.weight != edgeB.data.weight) {
+            return false;
+        }
+    }
+
+    // All checks passed and elements are identical
+    return true;
+}
+
+function addEdge() {
+    const weightInput = document.getElementById('edgeWeightInput');
+
+    if (cy1.nodes(':selected').length != 2) {
+        alert('Please select 2 nodes only');
+        return;
+    }
+    
+    if (weightInput.value == '') {
+        alert('Please enter a weight');
+        return;
+    }
+
+    if (weightInput.value < 1 || weightInput.value > 100) {
+        alert('Please enter a number between 1 and 100');
+        return;
+    }
+
+    const node1 = cy1.nodes(':selected')[0];
+    const node2 = cy1.nodes(':selected')[1];
+
+    if (node1.edgesWith(node2).length > 0) {
+        alert('Edge already exists');
+        return;
+    }
+
+    cy1.add({
+        group: 'edges',
+        data: {
+            id: crypto.randomUUID(),
+            source: cy1.nodes(':selected')[0].data('id'),
+            target: cy1.nodes(':selected')[1].data('id'),
+            weight: weightInput.value
+        }
+    });
+
+    cy1.elements().unselect();
+    weightInput.value = '';
+
+    updateVals();
 }
 
 function generateGraph() {
@@ -954,20 +824,11 @@ function generateGraph() {
     updateVals();
 }
 
-function colour() {
-    cy1.$(':selected').style('background-color', 'blue');
-    cy1.$(':selected').style('line-color', 'blue');
-}
-
-function uncolour() {
-    cy1.$(':selected').style('background-color', '#666');
-    cy1.$(':selected').style('line-color', '#ccc');
-}
-
 function updateVals() {
     document.getElementById('nodeCount').innerText = cy1.nodes().length;
     document.getElementById('edgeCount').innerText = cy1.edges().length;
-    document.getElementById('minCost').innerText = 0;
+    minCostDisplay.innerText = 0;
+    edgeQueueDisplay.innerText = '';
 }
 
 // // To verify kruskals
