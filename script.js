@@ -38,19 +38,27 @@ class AlgoController {
 
     executeStep(index) {
         if (index < 0 || index >= this.steps.length) return;
+
         const step = this.steps[index];
-        Object.keys(step.changes).forEach(id => {
-            cy1.$(`#${id}`).addClass(step.changes[id]);
-        })
+        Object.entries(step.changes).forEach(([id, classNames]) => {
+            classNames.forEach(className => {
+                if (className == 'outlined') {
+                    cy1.$(`#${id}`).flashClass(className);
+                }
+                else {
+                    cy1.$(`#${id}`).addClass(className);
+                }
+            })
+        });
+        // Object.keys(step.changes).forEach(id => {
+        //     cy1.$(`#${id}`).addClass(step.changes[id]);
+        // })
         this.updateDisplays(step);
     }
 
     undoStep(index) {
         if (index < 0 || index >= this.steps.length) return;
         const step = this.steps[index];
-        if (this.currentIndex == 2) {
-            console.log(step);
-        }
         Object.keys(step.changes).forEach(id => {
             console.log(`${id}: ${step.changes[id]}`);
             cy1.$(`#${id}`).removeClass(step.changes[id]);
@@ -116,11 +124,19 @@ class AlgoController {
         this.undoStep(this.currentIndex);
     }
 
+    // toStart() {
+    //     this.pause();
+    //     this.currentIndex = 0;
+    //     cy1.elements().classes('');
+    //     this.updateDisplays(this.steps[0]);
+    // }
+
     toStart() {
         this.pause();
+        for (let i = this.currentIndex; i >= 0; i--) {
+            this.undoStep(i);
+        }
         this.currentIndex = 0;
-        cy1.elements().classes('');
-        this.updateDisplays(this.steps[0]);
     }
 
     toEnd() {
@@ -134,13 +150,15 @@ class AlgoController {
     updateDisplays(step) {
         minCostDisplay.innerText = step.mstCost;
         edgeQueueDisplay.innerText = '';
-        const list = document.createElement('ul');
-        step.edgeQueue.forEach(edge => {
-            const item = document.createElement('li');
-            item.innerText = edge;
-            list.appendChild(item);
-        });
-        edgeQueueDisplay.appendChild(list);
+        if (step.edgeQueue.length > 0) {
+            const list = document.createElement('ul');
+            step.edgeQueue.forEach(edge => {
+                const item = document.createElement('li');
+                item.innerText = edge;
+                list.appendChild(item);
+            });
+            edgeQueueDisplay.appendChild(list);
+        }
     }
 }
 
@@ -192,9 +210,9 @@ function primsAlgorithm(graph) {
     // Initial step
     const initStep = {};
     initStep.changes = {};
-    initStep.changes[currNode.data('id')] = 'chosen';
+    initStep.changes[currNode.data('id')] = ['chosen'];
     edgeQueue.forEach(edge => {
-        initStep.changes[edge.data('id')] = 'search';
+        initStep.changes[edge.data('id')] = ['search'];
     });
     initStep.edgeQueue = initAdjacentEdges.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
     initStep.mstCost = mstCost;
@@ -241,10 +259,10 @@ function primsAlgorithm(graph) {
         step.mstCost = mstCost;
         step.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
         step.changes = {};
-        step.changes[nextEdge.data('id')] = 'chosen';
-        step.changes[nextNode.data('id')] = 'chosen';
+        step.changes[nextEdge.data('id')] = ['chosen'];
+        step.changes[nextNode.data('id')] = ['chosen'];
         adjacentEdges.forEach(edge => {
-            step.changes[edge.data('id')] = 'search';
+            step.changes[edge.data('id')] = ['search'];
         });
 
         steps.push(step);
@@ -311,7 +329,7 @@ function kruskalsAlgorithm(graph) {
         step.mstCost = mstCost;
         step.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
         step.changes = {};
-        step.changes[nextEdge.data('id')] = 'chosen';
+        step.changes[nextEdge.data('id')] = ['chosen'];
         
         // Getting source and target nodes of edge
         const sourceNode = nextEdge.source();
@@ -319,12 +337,12 @@ function kruskalsAlgorithm(graph) {
         if (unvisitedNodes.contains(sourceNode)) {
             unvisitedNodes = unvisitedNodes.difference(sourceNode);
 
-            step.changes[sourceNode.data('id')] = 'chosen';
+            step.changes[sourceNode.data('id')] = ['chosen'];
         }
         if (unvisitedNodes.contains(targetNode)) {
             unvisitedNodes = unvisitedNodes.difference(targetNode);
 
-            step.changes[targetNode.data('id')] = 'chosen';
+            step.changes[targetNode.data('id')] = ['chosen'];
         }
 
         steps.push(step);
@@ -334,6 +352,9 @@ function kruskalsAlgorithm(graph) {
 }
 
 function boruvkasAlgorithm(graph) {
+    const steps = [];
+    let mstCost = 0; // Cost of minimum spanning tree at each step
+
     let unvisitedNodes = graph.nodes();
     const targetEdgeCount = unvisitedNodes.length - 1;
     let edgeCount = 0;
@@ -345,43 +366,35 @@ function boruvkasAlgorithm(graph) {
         groupDict[nodeId] = groupDict[nodeId].union(node);
     });
 
-    let nodeColours = {};
-    unvisitedNodes.forEach(node => {
-        nodeColours[node.data('id')] = node.style('background-color');
-    });
+    // Init step with 0 changes, 0 cost, just displaying the initial node groups
+    const initStep = {};
+    initStep.changes = {};
+    initStep.mstCost = mstCost;
+    initStep.edgeQueue = Object.values(groupDict).map(group => group.filter(ele => ele.isNode()).map(node => node.data('id')));
+    steps.push(initStep);
 
-    let i = 0;
     while(edgeCount < targetEdgeCount) {
         let visited = graph.collection();
         for (let key in groupDict) {
-            i++;
+            const step = {};
+            step.changes = {};
+            
+            // Flashes the entire group of nodes
+            const nodesInGroup = groupDict[key].filter(ele => ele.isNode()).map(node => node.data('id'));
+            nodesInGroup.forEach(nodeId => {
+                step.changes[nodeId] = ['outlined'];
+            });
 
+            
+            
             if (edgeCount >= targetEdgeCount) {
                 break;
             }
             if (visited.contains(graph.nodes(`#${key}`))) {
                 continue;
             }
-
-            // console.log("-----------------------");
-
-            // console.log("Visited nodes:");
-            // visited.forEach(node => {
-            //     console.log(node.data('id'));
-            // })
-
-            // console.log("------");
-
-            // Object.keys(groupDict).forEach(nodeId => {
-            //     console.log(`Node: ${nodeId}   Group: ${groupDict[nodeId].map(node => node.data('id'))}`);
-            // })
             
             const collection = groupDict[key];
-
-            // console.log("------");
-            // collection.forEach(node => {
-            //     console.log(`Node: ${node.data('id')}`);
-            // });
 
             let possibleEdges = graph.collection();
             collection.forEach(node => {
@@ -392,18 +405,40 @@ function boruvkasAlgorithm(graph) {
                 return edge.data('weight');
             }).ele;
 
-            minCostDisplay.innerText = parseInt(minCostDisplay.innerText) + nextEdge.data('weight');
-
-            // console.log(`Next edge: ${nextEdge.data('id')}   Weight: ${nextEdge.data('weight')}`);
-            // console.log(`Source: ${nextEdge.source().data('id')}   Target: ${nextEdge.target().data('id')}`);
-
             edgeCount++;
+            mstCost += nextEdge.data('weight');
+            step.mstCost = mstCost;
+
             const sourceId = nextEdge.source().data('id');
             const targetId = nextEdge.target().data('id');
-            let nodeWithBiggerCollection = sourceId;
-            if (groupDict[targetId].length > groupDict[sourceId].length) {
-                nodeWithBiggerCollection = targetId;
+            
+            
+            if (!step.changes[nextEdge.data('id')]) {
+                step.changes[nextEdge.data('id')] = ['chosen'];
             }
+            else {
+                step.changes[nextEdge.data('id')].push('chosen');
+            }
+
+            if (groupDict[sourceId].length == 1) {
+                if (!step.changes[sourceId]) {
+                    step.changes[sourceId] = ['chosen'];
+                }
+                else {
+                    step.changes[sourceId].push('chosen');
+                }
+            }
+
+            if (groupDict[targetId].length == 1) {
+                if (!step.changes[targetId]) {
+                    step.changes[targetId] = ['chosen'];
+                }
+                else {
+                    step.changes[targetId].push('chosen');
+                }
+            }
+            
+
             groupDict[sourceId] = groupDict[sourceId].union(nextEdge);
             groupDict[sourceId] = groupDict[sourceId].union(groupDict[targetId]);
             groupDict[sourceId].nodes().forEach(function(node) {
@@ -411,50 +446,21 @@ function boruvkasAlgorithm(graph) {
             });
             visited = visited.union(groupDict[sourceId]);
 
-            let colour = '';
-            let sourceColour = nodeColours[sourceId];
-            let targetColour = nodeColours[targetId];
-            if (sourceColour == 'rgb(102,102,102)' && targetColour == 'rgb(102,102,102)') {
-                // colour = '#' + Math.floor(Math.random()*16777215).toString(16);
-                colour = `rgb(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`;
-            }
-            else if (sourceColour == 'rgb(102,102,102)') {
-                colour = targetColour;
-            }
-            else if (targetColour == 'rgb(102,102,102)') {
-                colour = sourceColour;
-            }
-            else {
-                colour = nodeColours[nodeWithBiggerCollection];
-            }
-
-            // if (edgeCount == targetEdgeCount) {
-            //     colour = 'blue';
-            // }
-
-            nodeColours[sourceId] = colour;
-            nodeColours[targetId] = colour;
-
-            groupDict[sourceId].forEach(function(elem) {
-                if (elem.isNode()) {
-                    nodeColours[elem.data('id')] = colour;
-                    setTimeout(() => {
-                        elem.animate({
-                            style: {'background-color': `${colour}`},
-                            duration: 1000
-                        });
-                    }, 2000 * (i + 1));
-                }
-                else {
-                    setTimeout(() => {
-                        elem.animate({
-                            style: {'line-color': `${colour}`},
-                            duration: 1000
-                        });
-                    }, 2000 * (i + 1));
+            // Converting groupDict vals to list and removing duplicates,
+            // then converting those vals (cytoscape collections) to list of node ids
+            // to display at each step
+            const elementCollections = Object.values(groupDict);
+            let uniqueGroups = [];
+            elementCollections.forEach(collection => {
+                if (!uniqueGroups.some(group => group.same(collection))) {
+                    uniqueGroups.push(collection);
                 }
             });
-            
+            uniqueGroups = uniqueGroups.map(group => group.filter(ele => ele.isNode()).map(node => node.data('id')));
+            step.edgeQueue = uniqueGroups;
+        
+
+            // Removing nodes of the edge from univistedNodes if they are in it
             const sourceNode = graph.$(`#${sourceId}`);
             const targetNode = graph.$(`#${targetId}`);
             if (unvisitedNodes.contains(sourceNode)) {
@@ -463,76 +469,12 @@ function boruvkasAlgorithm(graph) {
             if (unvisitedNodes.contains(targetNode)) {
                 unvisitedNodes = unvisitedNodes.difference(targetNode);
             }
+
+            steps.push(step);
         }
     }
     console.log("BORUVKAS COMPLETED!!!");
-}
-
-function boruvkasAlgorithmQuick(graph) {
-    let unvisitedNodes = graph.nodes();
-    const targetEdgeCount = unvisitedNodes.length - 1;
-    let edgeCount = 0;
-
-    let groupDict = {};
-    unvisitedNodes.forEach(node => {
-        const nodeId = node.data('id');
-        groupDict[nodeId] = graph.collection();
-        groupDict[nodeId] = groupDict[nodeId].union(node);
-    });
-
-    while(edgeCount < targetEdgeCount) {
-        let visited = graph.collection();
-        for (let key in groupDict) {
-            if (edgeCount >= targetEdgeCount) {
-                break;
-            }
-            if (visited.contains(graph.nodes(`#${key}`))) {
-                continue;
-            }
-            
-            const collection = groupDict[key];
-
-            let possibleEdges = graph.collection();
-            collection.forEach(node => {
-                const adjacentEdges = node.connectedEdges().filter(edge => groupDict[edge.source().data('id')].intersection(groupDict[edge.target().data('id')]).empty());
-                possibleEdges = possibleEdges.union(adjacentEdges);
-            });
-            const nextEdge = possibleEdges.min(function(edge) {
-                return edge.data('weight');
-            }).ele;
-
-            minCostDisplay.innerText = parseInt(minCostDisplay.innerText) + nextEdge.data('weight');
-
-            edgeCount++;
-            const sourceId = nextEdge.source().data('id');
-            const targetId = nextEdge.target().data('id');
-            groupDict[sourceId] = groupDict[sourceId].union(nextEdge);
-            groupDict[sourceId] = groupDict[sourceId].union(groupDict[targetId]);
-            groupDict[sourceId].nodes().forEach(function(node) {
-                groupDict[node.data('id')] = groupDict[sourceId];
-            });
-            visited = visited.union(groupDict[sourceId]);
-
-            groupDict[sourceId].forEach(function(elem) {
-                if (elem.isNode()) {
-                    elem.addClass('chosen');
-                }
-                else {
-                    elem.addClass('chosen');
-                }
-            });
-            
-            const sourceNode = graph.$(`#${sourceId}`);
-            const targetNode = graph.$(`#${targetId}`);
-            if (unvisitedNodes.contains(sourceNode)) {
-                unvisitedNodes = unvisitedNodes.difference(sourceNode);
-            }
-            if (unvisitedNodes.contains(targetNode)) {
-                unvisitedNodes = unvisitedNodes.difference(targetNode);
-            }
-        }
-    }
-    console.log("BORUVKAS QUICK COMPLETED!!!");
+    algoController.setSteps(steps);
 }
 
 function loadGraph(dropdown) {
@@ -581,9 +523,6 @@ function start() {
     }
     else if (selectedAlgo == 'boruvkas') {
         boruvkasAlgorithm(cy1);
-    }
-    else if (selectedAlgo == 'boruvkasq') {
-        boruvkasAlgorithmQuick(cy1);
     }
 };
 
@@ -638,6 +577,13 @@ function createGraph() {
                 "style": {
                     "background-color": "rgb(0,0,255)",
                     "line-color": "rgb(0,0,255)"
+                }
+            },
+            {
+                "selector": ".outlined",
+                "style": {
+                  "border-width": "3px",
+                  "border-color": "rgb(255,255,0)"
                 }
             }
         ],
@@ -831,10 +777,7 @@ function updateVals() {
     edgeQueueDisplay.innerText = '';
 }
 
-// // To verify kruskals
+// To verify kruskals
 // cy1.elements().kruskal(function(edge) {
 //     return edge.data('weight');
-// }).style({
-//     'line-color': 'blue',
-//     'background-color': 'blue'
-// });
+// }).addClass('chosen');
