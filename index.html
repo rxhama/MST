@@ -1,27 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <link href="./style.css" rel="stylesheet">
+        <title>MST Algo Visualiser</title>
+        <link href="/style.css" rel="stylesheet">
         <!-- Cytoscape.js Script -->
         <script src="cytoscape.min.js"></script>
     </head>
     <body>
         <div class="container">
-            <button id="firstGraphBtn" onclick="firstGraph()">Graph 1</button>
+            <select id="graphDropdown" onchange="loadGraph(this)">
+            </select>
             <button id="resetBtn" onclick="reset()">Reset</button>
             <select id="algoDropdown">
                 <option value="prims">Prim's</option>
-                <option value="primsq">Prim's Quick (no animations)</option>
                 <option value="kruskals">Kruskal's</option>
-                <option value="kruskalsq">Kruskal's Quick (no animations)</option>
                 <option value="boruvkas">Boruvka's</option>
-                <option value="boruvkasq">Boruvka's Quick (no animations)</option>
             </select>
             <button id="startBtn" onclick="start()">Start</button>
+            <button id="play">Play</button>
+            <button id="pause">Pause</button>
+            <button id="toStart"><<</button>
+            <button id="previous"><</button>
+            <button id="next">></button>
+            <button id="toEnd">>></button>
+            <a href="pages/createGraph/index.html">
+                <button>Create Graph</button>
+            </a>
             <br>
             <br>
             <button id="createGraphBtn" onclick="createGraph()">Create Graph</button>
             <button id="saveGraphBtn" onclick="saveGraph()">Save</button>
+            <input type="number" id="edgeWeightInput" placeholder="Enter weight..." min="1" max="100"></input>
+            <button id="addEdgeBtn" onclick="addEdge()">Add Edge</button>
             <br>
             <button id="addNodeBtn" onclick="addNode()">+</button>
             <button id="removeElementBtn" onclick="removeElement()">-</button>
@@ -41,11 +51,13 @@
             <button id="uncolourBtn" onclick="uncolour()">Uncolour</button>
             <br><br><br><br>
             <span>Minimum cost: </span>
-            <span id="minCost"></span>
+            <span id="minCostDisplay"></span>
+            <div id="edgeQueueDisplay"></div>
+
             <div id="cy"></div>
         </div>
 
         <!-- Initialize Cytoscape.js -->
-        <script src="./script.js"></script>
+        <script src="/script.js"></script>
     </body>
 </html>

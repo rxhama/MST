@@ -1,7 +1,7 @@
 /* Basic styling for the graph container */
 #cy {
-    width: 60vw; /* 800px */
-    height: 60vh; /* 600px */
+    width: 60vw;
+    height: 60vh;
     position: absolute;
     left: 0;
     right: 0;
