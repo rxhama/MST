@@ -1,21 +1,4 @@
-// import { testNumber, AlgoController, primsAlgorithm, kruskalsAlgorithm, boruvkasAlgorithm } from './utils.js';
-
-const minCostDisplay = document.getElementById('minCostDisplay');
-const edgeQueueDisplay = document.getElementById('edgeQueueDisplay');
-
-async function loadInitialGraphs() {
-    if (localStorage.getItem("storedGraphs") == null) {
-        const response = await fetch("initialGraphs.json");
-        const graphs = await response.json();
-        console.log("Graphs loaded from initialGraphs.json");
-        localStorage.setItem("storedGraphs", JSON.stringify(graphs));
-    }
-    else {
-        console.log("Graphs already loaded");
-    }
-}
-
-class AlgoController {
+export class AlgoController {
     constructor() {
         this.steps = [];
         this.currentIndex = 0;
@@ -52,7 +35,7 @@ class AlgoController {
                 }
             })
         });
-
+        
         this.updateDisplays(step);
     }
 
@@ -151,28 +134,7 @@ class AlgoController {
     }
 }
 
-const algoController = new AlgoController();
-
-document.getElementById('play').addEventListener('click', () => algoController.play());
-document.getElementById('pause').addEventListener('click', () => algoController.pause());
-document.getElementById('next').addEventListener('click', () => algoController.next());
-document.getElementById('previous').addEventListener('click', () => algoController.previous());
-document.getElementById('toStart').addEventListener('click', () => algoController.toStart());
-document.getElementById('toEnd').addEventListener('click', () => algoController.toEnd());
-
-let cy1 = cytoscape({
-    container: document.getElementById('cy'), // container to render in
-});
-loadInitialGraphs().then(() => {
-    let graphs = JSON.parse(localStorage.getItem('storedGraphs') || '[]');
-    cy1.json(graphs[0].graph);
-    cy1.fit();
-    
-    populateDropdown();
-    updateVals();
-});
-
-function primsAlgorithm(graph) {
+export function primsAlgorithm(graph) {
     if (graph.nodes(':selected').length != 1) {
         cy1.elements().unselect();
         alert('Please select a single starting node');
@@ -261,7 +223,7 @@ function primsAlgorithm(graph) {
     return steps;
 }
 
-function kruskalsAlgorithm(graph) {
+export function kruskalsAlgorithm(graph) {
     const steps = [];
     let mstCost = 0; // Cost of minimum spanning tree at each step
     
@@ -340,7 +302,7 @@ function kruskalsAlgorithm(graph) {
     algoController.setSteps(steps);
 }
 
-function boruvkasAlgorithm(graph) {
+export function boruvkasAlgorithm(graph) {
     const steps = [];
     let mstCost = 0; // Cost of minimum spanning tree at each step
 
@@ -466,12 +428,7 @@ function boruvkasAlgorithm(graph) {
     algoController.setSteps(steps);
 }
 
-function loadGraph(dropdown) {
-    if (!localStorage.getItem('storedGraphs')) {
-        alert('Graphs have been deleted.\nPlease refresh the page to load them again.');
-        return;
-    }
-    
+export function loadGraph(dropdown) {
     const graphs = JSON.parse(localStorage.getItem('storedGraphs') || '[]');
     const selectedGraph = graphs[dropdown.value].graph;
     cy1.destroy();
@@ -484,46 +441,4 @@ function loadGraph(dropdown) {
     updateVals();
 }
 
-function populateDropdown() {
-    const dropdown = document.getElementById('graphDropdown');
-    dropdown.innerHTML = '';
-
-    const graphs = JSON.parse(localStorage.getItem('storedGraphs') || '[]');
-    for (let i = 0; i < graphs.length; i++) {
-        const option = document.createElement('option');
-        option.value = i;
-        option.innerText = graphs[i].name;
-        dropdown.appendChild(option);
-    };
-}
-
-// This and start doing same thing at beginning
-function reset() {
-    loadGraph(document.getElementById('graphDropdown'));
-}
-
-// This and reset doing same thing at beginning
-function start() {
-    const selectedAlgo = document.getElementById('algoDropdown').value;
-    if (selectedAlgo == 'prims') {
-        primsAlgorithm(cy1);
-    }
-    else if (selectedAlgo == 'kruskals') {
-        kruskalsAlgorithm(cy1);
-    }
-    else if (selectedAlgo == 'boruvkas') {
-        boruvkasAlgorithm(cy1);
-    }
-};
-
-function updateVals() {
-    document.getElementById('nodeCount').innerText = cy1.nodes().length;
-    document.getElementById('edgeCount').innerText = cy1.edges().length;
-    minCostDisplay.innerText = 0;
-    edgeQueueDisplay.innerText = '';
-}
-
-// To verify kruskals
-// cy1.elements().kruskal(function(edge) {
-//     return edge.data('weight');
-// }).addClass('chosen');
+export const testNumber = 12345;

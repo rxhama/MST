@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="./style.css" rel="stylesheet">
+        <script>
+            const isMainPage = false;
+        </script>
+        <script src="../navbar/loadNavbar.js"></script>
+        <!-- Cytoscape.js library -->
+        <script src="../../cytoscape.min.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <div id="navbar-container"></div>
+            <button id="clearBtn" onclick="deleteGraph()">Clear Graph</button>
+            <button id="saveGraphBtn" onclick="saveGraph()">Save</button>
+            <input type="number" id="edgeWeightInput" placeholder="Enter weight..." min="1" max="100"></input>
+            <button id="addEdgeBtn" onclick="addEdge()">Add Edge</button>
+            <br>
+            <button id="addNodeBtn" onclick="addNode()">+</button>
+            <button id="removeElementBtn" onclick="removeElement()">-</button>
+            <button id="generateGraphBtn" onclick="generateGraph()">Gen</button>
+            <label for="nodeCountInput">Node Count:</label>
+            <input type="number" id="nodeCountInput" name="nodeCountInput" value="100" min="1" max="100">
+            <br>
+            <div class="options">
+                <span>Weights:</span>
+                <label for="random">Random</label>
+                <input type="radio" id="random" value="random" name="edgeOptionGroup" checked>
+                <label for="euclidean">Euclidean</label>
+                <input type="radio" id="euclidean" value="euclidean" name="edgeOptionGroup">
+            </div>
+            <br>
+            <button id="drawBtn" onclick="toggleDraw()">Draw Edge Mode: OFF</button>
+            <br>
+            <span>Nodes: </span>
+            <span id="nodeCount"></span>
+            <br>
+            <span>Edges: </span>
+            <span id="edgeCount"></span>
+            <div id="cy"></div>
+        </div>
+
+        <script src="./script.js"></script>
+    </body>
+</html>
