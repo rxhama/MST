@@ -2,12 +2,14 @@
 <html lang="en">
     <head>
         <title>MST Algo Visualiser</title>
-        <link href="/style.css" rel="stylesheet">
+        <link href="style.css" rel="stylesheet">
+        <script src="pages/navbar/loadNavbar.js"></script>
         <!-- Cytoscape.js Script -->
         <script src="cytoscape.min.js"></script>
     </head>
     <body>
         <div class="container">
+            <div id="navbar"></div>
             <select id="graphDropdown" onchange="loadGraph(this)">
             </select>
             <button id="resetBtn" onclick="reset()">Reset</button>
@@ -58,6 +60,6 @@
         </div>
 
         <!-- Initialize Cytoscape.js -->
-        <script src="/script.js"></script>
+        <script src="script.js"></script>
     </body>
 </html>
