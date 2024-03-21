@@ -207,6 +207,7 @@ function saveGraph() {
         }
     }
 
+    cy1.elements().unselect();
     const newGraph = {};
     newGraph.name = graphName;
     newGraph.graph = cy1.json();
@@ -280,6 +281,8 @@ function addEdge() {
                 }
             });
 
+            cy1.elements().unselect();
+            weightInput.value = '';
             return;
         }
         else if (choice == 'euclidean') {
@@ -293,6 +296,8 @@ function addEdge() {
                 }
             });
 
+            cy1.elements().unselect();
+            weightInput.value = '';
             return;
         }
     }
