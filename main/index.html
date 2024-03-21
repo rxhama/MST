@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>MST Algo Visualiser</title>
+        <link href="style.css" rel="stylesheet">
+        <script src="pages/navbar/loadNavbar.js"></script>
+        <!-- Cytoscape.js Script -->
+        <script src="cytoscape.min.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <div id="navbar"></div>
+            <select id="graphDropdown" onchange="loadGraph(this)">
+            </select>
+            <button id="resetBtn" onclick="reset()">Reset</button>
+            <select id="algoDropdown">
+                <option value="prims">Prim's</option>
+                <option value="kruskals">Kruskal's</option>
+                <option value="boruvkas">Boruvka's</option>
+            </select>
+            <button id="startBtn" onclick="start()">Start</button>
+            <button id="play">Play</button>
+            <button id="pause">Pause</button>
+            <button id="toStart"><<</button>
+            <button id="previous"><</button>
+            <button id="next">></button>
+            <button id="toEnd">>></button>
+            <a href="pages/createGraph/index.html">
+                <button>Create Graph</button>
+            </a>
+            <br>
+            <br>
+            <button id="createGraphBtn" onclick="createGraph()">Create Graph</button>
+            <button id="saveGraphBtn" onclick="saveGraph()">Save</button>
+            <input type="number" id="edgeWeightInput" placeholder="Enter weight..." min="1" max="100"></input>
+            <button id="addEdgeBtn" onclick="addEdge()">Add Edge</button>
+            <br>
+            <button id="addNodeBtn" onclick="addNode()">+</button>
+            <button id="removeElementBtn" onclick="removeElement()">-</button>
+            <button id="generateGraphBtn" onclick="generateGraph()">Gen</button>
+            <br>
+            <label for="nodeCountInput">Node Count:</label>
+            <input type="number" id="nodeCountInput" name="nodeCountInput" value="100" min="1" max="100">
+            <br>
+            <span>Nodes: </span>
+            <span id="nodeCount"></span>
+            <br>
+            <span>Edges: </span>
+            <span id="edgeCount"></span>
+            <br>
+            <button id="colourBtn" onclick="colour()">Colour</button>
+            <br>
+            <button id="uncolourBtn" onclick="uncolour()">Uncolour</button>
+            <br><br><br><br>
+            <span>Minimum cost: </span>
+            <span id="minCostDisplay"></span>
+            <div id="edgeQueueDisplay"></div>
+
+            <div id="cy"></div>
+        </div>
+
+        <!-- Initialize Cytoscape.js -->
+        <script src="script.js"></script>
+    </body>
+</html>
