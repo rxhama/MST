@@ -6,8 +6,21 @@
 export class AlgoController {
     constructor() {
         this.graph = null;
-        this.displays = {};
         this.steps = [];
+        this.accepted = null;
+        this.displays = {};
+        this.currentIndex = 0;
+        this.playing = false;
+        this.timeout = null;
+    }
+
+    // Resets all fields to initial state
+    reset() {
+        this.unmark();
+        this.graph = null;
+        this.steps = [];
+        this.accepted = null;
+        this.displays = {};
         this.currentIndex = 0;
         this.playing = false;
         this.timeout = null;
@@ -16,13 +29,14 @@ export class AlgoController {
     /*
     * Updates AlgoController's fields with new data
     * @param {object} graph - The graph to be used
-    * @param {array} steps - The steps to be executed
+    * @param {array} result - result[0] is the steps array, result[1] is a boolean saying if the algo could find the MST or not
     * @param {object} displays - The displays to be updated
     */
-    setSteps(graph, steps, displays) {
+    setSteps(graph, result, displays) {
         this.graph = graph;
+        this.steps = result[0];
+        this.accepted = result[1];
         this.displays = displays;
-        this.steps = steps;
         this.currentIndex = 0;
         this.playing = false;
         if (this.timeout) {
@@ -37,9 +51,30 @@ export class AlgoController {
         this.updateDisplays(this.steps[0]);
     }
 
+    // Marks the graph container with a green border if the algorithm was successful, and red if not
+    mark() {
+        if (this.accepted) {
+            this.displays.cyContainer.style.transition = 'border 0.2s ease-in-out';
+            this.displays.cyContainer.style.border = '5px solid rgb(5, 232, 5)';
+        }
+        else {
+            this.displays.cyContainer.style.transition = 'border 0.2s ease-in-out';
+            this.displays.cyContainer.style.border = '5px solid rgb(249, 61, 61)';
+        }
+    }
+
+    // Unmarks the graph container
+    unmark() {
+        this.displays.cyContainer.style.border = '1px solid black';
+    }
+
     // Executes the step at the given index
     executeStep(index) {
         if (index < 0 || index >= this.steps.length) return;
+
+        if (this.currentIndex == this.steps.length - 1) {
+            this.mark();
+        }
 
         const step = this.steps[index];
         Object.entries(step.change.changes).forEach(([id, classNames]) => {
@@ -66,6 +101,11 @@ export class AlgoController {
     // Undoes the step at the given index
     undoStep(index) {
         if (index < 0 || index >= this.steps.length) return;
+
+        if (this.currentIndex == this.steps.length - 1) {
+            this.unmark();
+        }
+
         const step = this.steps[index];
         Object.keys(step.change.changes).forEach(id => {
             if (step.change.add) {
@@ -140,6 +180,7 @@ export class AlgoController {
     // Called when toStart button is pressed
     // Instantly undoes all steps until back at initial step
     toStart() {
+        this.unmark();
         this.pause();
         for (let i = this.currentIndex; i >= 0; i--) {
             this.undoStep(i);
@@ -150,6 +191,7 @@ export class AlgoController {
     // Called when toEnd button is pressed
     // Instantly executes all steps up to final step
     toEnd() {
+        this.mark();
         this.pause();
         for (let i = this.currentIndex; i < this.steps.length; i++) {
             this.executeStep(i);
@@ -176,7 +218,8 @@ export class AlgoController {
 /*
 * Prims Algorithm
 * @param {object} graph - The cytoscape graph passed through
-* @returns {array} steps - An array of steps to be used by the AlgoController
+* @returns {array} [steps, accepted] - steps = the array of steps to be used by the AlgoController
+* accepted = if the algo was able to find the MST or not
 */
 export function primsAlgorithm(graph) {
     if (graph.nodes(':selected').length != 1) {
@@ -268,13 +311,14 @@ export function primsAlgorithm(graph) {
     }
     console.log('PRIMS COMPLETED!!!');
     
-    return steps;
+    return [steps, true];
 }
 
 /*
 * Kruskals Algorithm
 * @param {object} graph - The cytoscape graph passed through
-* @returns {array} steps - An array of steps to be used by the AlgoController
+* @returns {array} [steps, accepted] - steps = the array of steps to be used by the AlgoController
+* accepted = if the algo was able to find the MST or not
 */
 export function kruskalsAlgorithm(graph) {
     const steps = [];
@@ -357,13 +401,14 @@ export function kruskalsAlgorithm(graph) {
     }
     console.log('KRUSKALS COMPLETED!!!');
     
-    return steps;
+    return [steps, true];
 }
 
 /*
 * Reverse-Delete Algorithm
 * @param {object} graph - The cytoscape graph passed through
-* @returns {array} steps - An array of steps to be used by the AlgoController
+* @returns {array} [steps, accepted] - steps = the array of steps to be used by the AlgoController
+* accepted = if the algo was able to find the MST or not
 */
 export function reverseDeleteAlgorithm(graph) {
     const steps = [];
@@ -448,13 +493,14 @@ export function reverseDeleteAlgorithm(graph) {
     }
     console.log('REVERSE DELETE COMPLETED!!!');
     
-    return steps;
+    return [steps, true];
 }
 
 /*
 * Boruvkas Algorithm
 * @param {object} graph - The cytoscape graph passed through
-* @returns {array} steps - An array of steps to be used by the AlgoController
+* @returns {array} [steps, accepted] - steps = the array of steps to be used by the AlgoController
+* accepted = if the algo was able to find the MST or not
 */
 export function boruvkasAlgorithm(graph) {
     const steps = [];
@@ -584,14 +630,15 @@ export function boruvkasAlgorithm(graph) {
     }
     console.log('BORUVKAS COMPLETED!!!');
     
-    return steps;
+    return [steps, true];
 }
 
 /*
 * Degree-Constrained Kruskals Algorithm (Simple)
 * @param {object} graph - The cytoscape graph passed through
 * @param {number} maxDegree - The maximum degree a node can have
-* @returns {array} steps - An array of steps to be used by the AlgoController
+* @returns {array} [steps, accepted] - steps = the array of steps to be used by the AlgoController
+* accepted = if the algo was able to find the MST or not
 */
 export function degreeConstrainedKruskals(graph, maxDegree) {
     if (maxDegree <= 1) {
@@ -638,7 +685,7 @@ export function degreeConstrainedKruskals(graph, maxDegree) {
         while (nextEdge == null) {
             if (edgeQueue.empty()) {
                 console.log('No more edges to choose from');
-                return steps;
+                return [steps, false];
             }
 
             const edge = edgeQueue[0];
@@ -687,5 +734,5 @@ export function degreeConstrainedKruskals(graph, maxDegree) {
     }
     console.log('DEGREE CONSTRAINED KRUSKALS COMPLETED!!!');
     
-    return steps;
+    return [steps, true];
 }

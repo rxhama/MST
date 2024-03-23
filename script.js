@@ -15,6 +15,7 @@ const nodeDegreeInput = document.getElementById('nodeDegreeInput');
 const algoDisplays = {};
 algoDisplays.minCostDisplay = minCostDisplay;
 algoDisplays.edgeQueueDisplay = edgeQueueDisplay;
+algoDisplays.cyContainer = cyContainer;
 
 // Loads the initial graphs from initialGraphs.json, if not already loaded
 // and saves them to localStorage
@@ -89,6 +90,7 @@ function populateDropdown() {
 
 // Calls loadGraph to reset the currently selected graph
 function reset() {
+    algoController.reset();
     loadGraph(document.getElementById('graphDropdown'));
 }
 resetBtn.addEventListener('click', reset);
