@@ -1,4 +1,5 @@
 let drawMode = false;
+const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
 let cy1 = cytoscape({
     container: document.getElementById('cy'),
@@ -66,8 +67,6 @@ let cy1 = cytoscape({
 
     // NEED TO IMPORT EDGEHANDLES EXTENSION TO ADD TOGGLE BETWEEN NODE MOVEMENT/DRAW EDGE MODE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 });
-
-const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
 function deleteGraph() {
     cy1.destroy();

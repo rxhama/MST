@@ -9,13 +9,15 @@
         <script src="pages/navbar/loadNavbar.js"></script>
         <!-- Cytoscape.js library -->
         <script src="cytoscape.min.js"></script>
+        <!-- Import util.js algorithms and AlgoController class -->
+        <script type="module" src="./utils.js"></script>
     </head>
     <body>
         <div class="container">
             <div id="navbar-container"></div>
-            <select id="graphDropdown" onchange="loadGraph(this)">
+            <select id="graphDropdown">
             </select>
-            <button id="resetBtn" onclick="reset()">Reset</button>
+            <button id="resetBtn">Reset</button>
             <select id="algoDropdown">
                 <option value="prims">Prim's</option>
                 <option value="kruskals">Kruskal's</option>
@@ -23,7 +25,7 @@
                 <option value="reverse-delete">Reverse Delete</option>
                 <option value="dckruskals">Degree-constrained kruskals</option>
             </select>
-            <button id="startBtn" onclick="start()">Start</button>
+            <button id="startBtn">Start</button>
             <button id="play">Play</button>
             <button id="pause">Pause</button>
             <button id="toStart"><<</button>
@@ -31,6 +33,9 @@
             <button id="next">></button>
             <button id="toEnd">>></button>
             <br>
+            <br>
+            <label for="nodeDegreeInput">Max Node Degree:</label>
+            <input type="number" id="nodeDegreeInput" min="2">
             <br>
             <span>Nodes: </span>
             <span id="nodeCount"></span>
@@ -45,7 +50,7 @@
             <div id="cy"></div>
         </div>
 
-        <!-- Initialize Cytoscape.js -->
-        <script src="./script.js"></script>
+        <!-- Initialize cytoscape instance -->
+        <script type="module" src="./script.js"></script>
     </body>
 </html>
