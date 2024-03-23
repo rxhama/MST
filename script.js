@@ -14,6 +14,7 @@ const nodeDegreeInput = document.getElementById('nodeDegreeInput');
 const showRejectedEdgesCheckbox = document.getElementById('showRejectedEdgesCheckbox');
 
 showRejectedEdgesCheckbox.addEventListener('change', reset);
+nodeDegreeInput.addEventListener('change', reset);
 
 // These are the displays that are passed to the algoController
 const algoDisplays = {};

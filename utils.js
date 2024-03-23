@@ -25,7 +25,10 @@ export class AlgoController {
         this.displays = null;
         this.currentIndex = null;
         this.playing = null;
-        this.timeout = null;
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+        }
     }
 
     /*
@@ -219,6 +222,7 @@ export class AlgoController {
         this.displays.edgeQueueDisplay.innerText = '';
         if (step.edgeQueue.length > 0) {
             const list = document.createElement('ul');
+            list.style.listStyleType = 'none';
             step.edgeQueue.forEach(edge => {
                 const item = document.createElement('li');
                 item.innerText = edge;
@@ -446,7 +450,7 @@ export function primsAlgorithm(graph, showRejectedEdges) {
 * @returns {array} [steps, accepted] - steps = the array of steps to be used by the AlgoController
 * accepted = if the algo was able to find the MST or not
 */
-export function kruskalsAlgorithm(graph) {
+export function kruskalsAlgorithm(graph, showRejectedEdges) {
     const steps = [];
     let mstCost = 0; // Cost of minimum spanning tree at each step
     
@@ -536,7 +540,7 @@ export function kruskalsAlgorithm(graph) {
 * @returns {array} [steps, accepted] - steps = the array of steps to be used by the AlgoController
 * accepted = if the algo was able to find the MST or not
 */
-export function reverseDeleteAlgorithm(graph) {
+export function reverseDeleteAlgorithm(graph, showRejectedEdges) {
     const steps = [];
     let mstCost = graph.edges().reduce((sum, edge) => {
         return sum + edge.data('weight');
@@ -628,7 +632,7 @@ export function reverseDeleteAlgorithm(graph) {
 * @returns {array} [steps, accepted] - steps = the array of steps to be used by the AlgoController
 * accepted = if the algo was able to find the MST or not
 */
-export function boruvkasAlgorithm(graph) {
+export function boruvkasAlgorithm(graph, showRejectedEdges) {
     const steps = [];
     let mstCost = 0; // Cost of minimum spanning tree at each step
 
@@ -766,7 +770,7 @@ export function boruvkasAlgorithm(graph) {
 * @returns {array} [steps, accepted] - steps = the array of steps to be used by the AlgoController
 * accepted = if the algo was able to find the MST or not
 */
-export function degreeConstrainedKruskals(graph, maxDegree) {
+export function degreeConstrainedKruskals(graph, showRejectedEdges, maxDegree) {
     if (maxDegree <= 1) {
         alert('Max degree must be greater than 1');
         return null;
