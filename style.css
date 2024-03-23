@@ -10,3 +10,9 @@
     margin: auto;
     border: 1px solid black;
 }
+.algo-accepted {
+    border: 10px solid green;
+}
+.algo-rejected {
+    border: 10px solid red;
+}

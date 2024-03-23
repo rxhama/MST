@@ -97,10 +97,10 @@ resetBtn.addEventListener('click', reset);
 // Passes the graph, the steps the algo returns, and the algoDisplays to the algoController
 function start() {
     const selectedAlgo = document.getElementById('algoDropdown').value;
-    console.log(selectedAlgo);
     if (selectedAlgo == 'prims') {
-        if (!primsAlgorithm(cy)) return;
-        algoController.setSteps(cy, primsAlgorithm(cy), algoDisplays);
+        const steps = primsAlgorithm(cy);
+        if (!steps) return;
+        algoController.setSteps(cy, steps, algoDisplays);
     }
     else if (selectedAlgo == 'kruskals') {
         algoController.setSteps(cy, kruskalsAlgorithm(cy), algoDisplays);
@@ -112,8 +112,9 @@ function start() {
         algoController.setSteps(cy, reverseDeleteAlgorithm(cy), algoDisplays);
     }
     else if (selectedAlgo == 'dckruskals') {
-        if (!degreeConstrainedKruskals(cy, nodeDegreeInput.value)) return;
-        algoController.setSteps(cy, degreeConstrainedKruskals(cy, nodeDegreeInput.value), algoDisplays);
+        const steps = degreeConstrainedKruskals(cy, nodeDegreeInput.value);
+        if (!steps) return;
+        algoController.setSteps(cy, steps, algoDisplays);
     }
 };
 startBtn.addEventListener("click", start);
