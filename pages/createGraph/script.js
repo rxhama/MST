@@ -39,19 +39,19 @@ let cy1 = cytoscape({
             }
         },
         {
-            "selector": ".rejected",
-            "style": {
-                "background-color": "rgb(255,0,0)",
-                "line-color": "rgb(255,0,0)"
-            }
-        },
-        {
             "selector": ".chosen",
             "style": {
                 "background-color": "rgb(0,0,255)",
                 "line-color": "rgb(0,0,255)"
             }
         },
+        {
+            "selector": ".rejected",
+            "style": {
+                "background-color": "rgb(255,0,0)",
+                "line-color": "rgb(255,0,0)"
+            }
+          },
         {
             "selector": ".outlined",
             "style": {

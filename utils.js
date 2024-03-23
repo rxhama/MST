@@ -380,6 +380,7 @@ export function primsAlgorithm(graph, showRejectedEdges) {
     while (!unvisitedNodes.empty()) {
         const step = {};
 
+        // Choosing next edge
         let nextEdge = null;
         let rejected = false;
 
@@ -450,6 +451,97 @@ export function primsAlgorithm(graph, showRejectedEdges) {
 * @returns {array} [steps, accepted] - steps = the array of steps to be used by the AlgoController
 * accepted = if the algo was able to find the MST or not
 */
+// export function kruskalsAlgorithm(graph, showRejectedEdges) {
+//     const steps = [];
+//     let mstCost = 0; // Cost of minimum spanning tree at each step
+    
+//     let unvisitedNodes = graph.nodes();
+//     const targetEdgeCount = unvisitedNodes.length - 1;
+//     let edgeCount = 0;
+
+//     // For each node:
+//     // Key = node id and value = collection of nodes the key node is in
+//     let groupDict = {};
+//     unvisitedNodes.forEach(node => {
+//         const nodeId = node.data('id');
+//         groupDict[nodeId] = graph.collection();
+//         groupDict[nodeId] = groupDict[nodeId].union(node);
+//     });
+
+//     // Sorting edge queue by weight - ascending order
+//     let edgeQueue = graph.edges();
+//     edgeQueue = edgeQueue.sort(function(a, b) {
+//         return a.data('weight') - b.data('weight')
+//     });
+
+//     // Init step with 0 changes, 0 cost, just displaying the initial edgeQueue
+//     const initStep = {};
+//     initStep.change = {};
+//     initStep.change.add = true;
+//     initStep.change.changes = {};
+//     initStep.mstCost = mstCost;
+//     initStep.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
+//     steps.push(initStep);
+    
+//     while (edgeCount < targetEdgeCount) {
+//         const step = {};
+
+//         // Choosing edge
+//         let nextEdge = null;
+//         while (nextEdge == null) {
+//             const edge = edgeQueue[0];
+//             const sourceId = edge.source().data('id');
+//             const targetId = edge.target().data('id');
+//             if (groupDict[sourceId].intersection(groupDict[targetId]).empty()) {
+//                 nextEdge = edge;
+//                 edgeCount++;
+//                 groupDict[sourceId] = groupDict[sourceId].union(groupDict[targetId]);
+//                 groupDict[sourceId].forEach(function(node) {
+//                     groupDict[node.data('id')] = groupDict[sourceId];
+//                 });
+
+//                 break;
+//             }
+//             edgeQueue = edgeQueue.difference(edge);
+//         }
+//         edgeQueue = edgeQueue.difference(nextEdge);
+
+//         mstCost += nextEdge.data('weight');
+//         step.mstCost = mstCost;
+//         step.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
+//         step.change = {};
+//         step.change.add = true;
+//         step.change.changes = {};
+//         step.change.changes[nextEdge.data('id')] = ['chosen'];
+        
+//         // Getting source and target nodes of edge
+//         const sourceNode = nextEdge.source();
+//         const targetNode = nextEdge.target();
+//         if (unvisitedNodes.contains(sourceNode)) {
+//             unvisitedNodes = unvisitedNodes.difference(sourceNode);
+
+//             step.change.changes[sourceNode.data('id')] = ['chosen'];
+//         }
+//         if (unvisitedNodes.contains(targetNode)) {
+//             unvisitedNodes = unvisitedNodes.difference(targetNode);
+
+//             step.change.changes[targetNode.data('id')] = ['chosen'];
+//         }
+
+//         steps.push(step);
+//     }
+//     console.log('KRUSKALS COMPLETED!!!');
+    
+//     return [steps, true];
+// }
+
+/*
+* Kruskals Algorithm
+* @param {object} graph - The cytoscape graph passed through
+* @param {boolean} showRejectedEdges - If the rejected edges should be shown in the animation or not
+* @returns {array} [steps, accepted] - steps = the array of steps to be used by the AlgoController
+* accepted = if the algo was able to find the MST or not
+*/
 export function kruskalsAlgorithm(graph, showRejectedEdges) {
     const steps = [];
     let mstCost = 0; // Cost of minimum spanning tree at each step
@@ -487,45 +579,58 @@ export function kruskalsAlgorithm(graph, showRejectedEdges) {
 
         // Choosing edge
         let nextEdge = null;
-        while (nextEdge == null) {
-            const edge = edgeQueue[0];
-            const sourceId = edge.source().data('id');
-            const targetId = edge.target().data('id');
-            if (groupDict[sourceId].intersection(groupDict[targetId]).empty()) {
-                nextEdge = edge;
-                edgeCount++;
-                groupDict[sourceId] = groupDict[sourceId].union(groupDict[targetId]);
-                groupDict[sourceId].forEach(function(node) {
-                    groupDict[node.data('id')] = groupDict[sourceId];
-                });
-
-                break;
+        let rejected = false;
+        if (showRejectedEdges) {
+            nextEdge = edgeQueue[0];
+            if (groupDict[nextEdge.source().data('id')].same(groupDict[nextEdge.target().data('id')])) {
+                rejected = true;
             }
-            edgeQueue = edgeQueue.difference(edge);
+        }
+        else {
+            while (nextEdge == null) {
+                const edge = edgeQueue[0];
+                if (groupDict[edge.source().data('id')].intersection(groupDict[edge.target().data('id')]).empty()) {
+                    nextEdge = edge;
+
+                    break;
+                }
+                edgeQueue = edgeQueue.difference(edge);
+            }
         }
         edgeQueue = edgeQueue.difference(nextEdge);
 
-        mstCost += nextEdge.data('weight');
-        step.mstCost = mstCost;
-        step.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
         step.change = {};
         step.change.add = true;
         step.change.changes = {};
-        step.change.changes[nextEdge.data('id')] = ['chosen'];
-        
-        // Getting source and target nodes of edge
-        const sourceNode = nextEdge.source();
-        const targetNode = nextEdge.target();
-        if (unvisitedNodes.contains(sourceNode)) {
-            unvisitedNodes = unvisitedNodes.difference(sourceNode);
 
-            step.change.changes[sourceNode.data('id')] = ['chosen'];
-        }
-        if (unvisitedNodes.contains(targetNode)) {
-            unvisitedNodes = unvisitedNodes.difference(targetNode);
+        if (!rejected) {
+            edgeCount++;
+            mstCost += nextEdge.data('weight');
 
-            step.change.changes[targetNode.data('id')] = ['chosen'];
+            // Adding source and target nodes to same group and all their connected nodes as well
+            const sourceId = nextEdge.source().data('id');
+            const targetId = nextEdge.target().data('id');
+            groupDict[sourceId] = groupDict[sourceId].union(groupDict[targetId]);
+            groupDict[sourceId].forEach(function(node) {
+                groupDict[node.data('id')] = groupDict[sourceId];
+            });
+
+            // Getting source and target nodes of new edge
+            const sourceNode = nextEdge.source();
+            const targetNode = nextEdge.target();
+            if (unvisitedNodes.contains(sourceNode)) {
+                unvisitedNodes = unvisitedNodes.difference(sourceNode);
+                step.change.changes[sourceNode.data('id')] = ['chosen'];
+            }
+            if (unvisitedNodes.contains(targetNode)) {
+                unvisitedNodes = unvisitedNodes.difference(targetNode);
+                step.change.changes[targetNode.data('id')] = ['chosen'];
+            }
         }
+
+        step.mstCost = mstCost;
+        step.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
+        step.change.changes[nextEdge.data('id')] = rejected ? ['rejected'] : ['chosen'];
 
         steps.push(step);
     }
@@ -580,11 +685,12 @@ export function reverseDeleteAlgorithm(graph, showRejectedEdges) {
 
         // Choosing edge
         let nextEdge = null;
-        while (nextEdge == null) {
-            const edge = edgeQueue[0];
-            const sourceId = edge.source().data('id');
-            const targetId = edge.target().data('id');
-            edgeInGraph[edge.data('id')] = false;
+        let rejected = false;
+        if (showRejectedEdges) {
+            nextEdge = edgeQueue[0];
+            const sourceId = nextEdge.source().data('id');
+            const targetId = nextEdge.target().data('id');
+            edgeInGraph[nextEdge.data('id')] = false;
 
             let chosenEdges = graph.edges().filter(edge => edgeInGraph[edge.data('id')]);
             let connectedNodes = chosenEdges.connectedNodes();
@@ -600,14 +706,41 @@ export function reverseDeleteAlgorithm(graph, showRejectedEdges) {
                 directed: false
             }).path.nodes();
 
-            if (!sourceNodeCollection.intersection(targetNodeCollection).empty()) {
-                nextEdge = edge;
-                edgeCount--;
-                
-                break;
+            if (sourceNodeCollection.intersection(targetNodeCollection).empty()) {
+                rejected = true;
             }
+
             edgeInGraph[edge.data('id')] = true;
-            edgeQueue = edgeQueue.difference(edge);
+        }
+        else {
+            while (nextEdge == null) {
+                const edge = edgeQueue[0];
+                const sourceId = edge.source().data('id');
+                const targetId = edge.target().data('id');
+                edgeInGraph[edge.data('id')] = false;
+
+                let chosenEdges = graph.edges().filter(edge => edgeInGraph[edge.data('id')]);
+                let connectedNodes = chosenEdges.connectedNodes();
+                let subgraph = chosenEdges.union(connectedNodes);
+
+                let sourceNodeCollection = subgraph.bfs({
+                    roots: `#${sourceId}`,
+                    directed: false
+                }).path.nodes();
+
+                let targetNodeCollection = subgraph.bfs({
+                    roots: `#${targetId}`,
+                    directed: false
+                }).path.nodes();
+
+                if (!sourceNodeCollection.intersection(targetNodeCollection).empty()) {
+                    nextEdge = edge;
+                    edgeCount--;
+                    
+                    break;
+                }
+                edgeInGraph[edge.data('id')] = true;
+            }
         }
         edgeQueue = edgeQueue.difference(nextEdge);
         
