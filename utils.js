@@ -6,23 +6,25 @@
 export class AlgoController {
     constructor() {
         this.graph = null;
-        this.steps = [];
+        this.steps = null;
         this.accepted = null;
-        this.displays = {};
-        this.currentIndex = 0;
-        this.playing = false;
+        this.displays = null;
+        this.currentIndex = null;
+        this.playing = null;
         this.timeout = null;
     }
 
     // Resets all fields to initial state
     reset() {
+        if (!this.graph) return;
+
         this.unmark();
         this.graph = null;
-        this.steps = [];
+        this.steps = null;
         this.accepted = null;
-        this.displays = {};
-        this.currentIndex = 0;
-        this.playing = false;
+        this.displays = null;
+        this.currentIndex = null;
+        this.playing = null;
         this.timeout = null;
     }
 
@@ -79,7 +81,7 @@ export class AlgoController {
         const step = this.steps[index];
         Object.entries(step.change.changes).forEach(([id, classNames]) => {
             classNames.forEach(className => {
-                if (className == 'outlined') {
+                if (className == 'outlined' || className == 'rejected') {
                     if (step.change.add) {
                         this.graph.$(`#${id}`).flashClass(className);
                     }
@@ -125,6 +127,8 @@ export class AlgoController {
 
     // Called when play button is pressed
     play() {
+        if (!this.steps) return;
+
         if (this.currentIndex < this.steps.length && !this.playing) {
             this.playing = true;
             this.playSteps();
@@ -148,6 +152,8 @@ export class AlgoController {
 
     // Called when pause button is pressed
     pause() {
+        if (!this.steps) return;
+
         if (this.playing) {
             clearTimeout(this.timeout);
             this.playing = false;
@@ -156,6 +162,8 @@ export class AlgoController {
 
     // Called when next button is pressed
     next() {
+        if (!this.steps) return;
+        
         if (this.currentIndex >= this.steps.length) {
             this.pause();
             return;
@@ -167,6 +175,8 @@ export class AlgoController {
 
     // Called when previous button is pressed
     previous() {
+        if (!this.steps) return;
+
         if (this.currentIndex <= 0) {
             this.pause();
             this.graph.elements().classes('');
@@ -180,6 +190,8 @@ export class AlgoController {
     // Called when toStart button is pressed
     // Instantly undoes all steps until back at initial step
     toStart() {
+        if (!this.steps) return;
+
         this.unmark();
         this.pause();
         for (let i = this.currentIndex; i >= 0; i--) {
@@ -191,6 +203,8 @@ export class AlgoController {
     // Called when toEnd button is pressed
     // Instantly executes all steps up to final step
     toEnd() {
+        if (!this.steps) return;
+
         this.mark();
         this.pause();
         for (let i = this.currentIndex; i < this.steps.length; i++) {
@@ -215,13 +229,113 @@ export class AlgoController {
     }
 }
 
+// /*
+// * Prims Algorithm
+// * @param {object} graph - The cytoscape graph passed through
+// * @returns {array} [steps, accepted] - steps = the array of steps to be used by the AlgoController
+// * accepted = if the algo was able to find the MST or not
+// */
+// export function primsAlgorithm(graph) {
+//     if (graph.nodes(':selected').length != 1) {
+//         graph.elements().unselect();
+//         alert('Please select a single starting node');
+//         return null;
+//     }
+
+//     const steps = [];
+//     let mstCost = 0; // Cost of minimum spanning tree at each step
+
+//     let edgeQueue = graph.collection();
+//     let visitedEdges = graph.collection();
+//     let unvisitedNodes = graph.nodes();
+
+//     let currNode = graph.nodes(':selected');
+//     unvisitedNodes = unvisitedNodes.difference(currNode);
+
+//     // Sorting initial edge queue by weight - ascending order
+//     const initAdjacentEdges = currNode.connectedEdges().filter(edge => !visitedEdges.contains(edge) && (unvisitedNodes.contains(edge.source()) != unvisitedNodes.contains(edge.target())));
+//     edgeQueue = edgeQueue.union(initAdjacentEdges);
+//     edgeQueue = edgeQueue.sort(function(a, b) {
+//         return a.data('weight') - b.data('weight')
+//     });
+
+//     // Initial step
+//     const initStep = {};
+//     initStep.change = {};
+//     initStep.change.add = true;
+//     initStep.change.changes = {};
+//     initStep.change.changes[currNode.data('id')] = ['chosen'];
+//     edgeQueue.forEach(edge => {
+//         initStep.change.changes[edge.data('id')] = ['search'];
+//     });
+//     initStep.edgeQueue = initAdjacentEdges.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
+//     initStep.mstCost = mstCost;
+//     steps.push(initStep);
+
+
+//     while (!unvisitedNodes.empty()) {
+//         const step = {};
+
+//         // Choosing edge
+//         let nextEdge = null;
+//         while (nextEdge == null) {
+//             const edge = edgeQueue[0];
+//             if (unvisitedNodes.contains(edge.source()) || unvisitedNodes.contains(edge.target())) {
+//                 nextEdge = edge;
+//                 break;
+//             }
+//             edgeQueue = edgeQueue.difference(edge);
+//         }
+//         edgeQueue = edgeQueue.difference(nextEdge);
+//         visitedEdges = visitedEdges.union(nextEdge);
+        
+//         mstCost += nextEdge.data('weight');
+        
+//         // Getting next node edge will take us to
+//         let nextNode = null;
+//         if (unvisitedNodes.contains(nextEdge.source())) {
+//             nextNode = nextEdge.source();
+//         }
+//         else {
+//             nextNode = nextEdge.target();
+//         }
+//         unvisitedNodes = unvisitedNodes.difference(nextNode);
+
+//         currNode = nextNode;
+
+//         // Adding adjacent edges to edgeQueue and sorting edgeQueue by weight
+//         const adjacentEdges = currNode.connectedEdges().filter(edge => !visitedEdges.contains(edge) && (unvisitedNodes.contains(edge.source()) != unvisitedNodes.contains(edge.target())));
+//         edgeQueue = edgeQueue.union(adjacentEdges);
+//         edgeQueue = edgeQueue.sort(function(a, b) {
+//             return a.data('weight') - b.data('weight')
+//         });
+
+//         step.mstCost = mstCost;
+//         step.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
+//         step.change = {};
+//         step.change.add = true;
+//         step.change.changes = {};
+//         step.change.changes[nextEdge.data('id')] = ['chosen'];
+//         step.change.changes[nextNode.data('id')] = ['chosen'];
+//         adjacentEdges.forEach(edge => {
+//             step.change.changes[edge.data('id')] = ['search'];
+//         });
+
+//         steps.push(step);
+//     }
+//     console.log('PRIMS COMPLETED!!!');
+    
+//     return [steps, true];
+// }
+
 /*
 * Prims Algorithm
 * @param {object} graph - The cytoscape graph passed through
+* @param {boolean} showRejectedEdges - If the rejected edges should be shown in the animation or not
 * @returns {array} [steps, accepted] - steps = the array of steps to be used by the AlgoController
 * accepted = if the algo was able to find the MST or not
 */
-export function primsAlgorithm(graph) {
+export function primsAlgorithm(graph, showRejectedEdges) {
     if (graph.nodes(':selected').length != 1) {
         graph.elements().unselect();
         alert('Please select a single starting node');
@@ -262,50 +376,62 @@ export function primsAlgorithm(graph) {
     while (!unvisitedNodes.empty()) {
         const step = {};
 
-        // Choosing edge
         let nextEdge = null;
-        while (nextEdge == null) {
-            const edge = edgeQueue[0];
-            if (unvisitedNodes.contains(edge.source()) || unvisitedNodes.contains(edge.target())) {
-                nextEdge = edge;
-                break;
+        let rejected = false;
+
+        if (showRejectedEdges) {
+            nextEdge = edgeQueue[0];
+            if (!unvisitedNodes.contains(nextEdge.source()) && !unvisitedNodes.contains(nextEdge.target())) {
+                rejected = true;
             }
-            edgeQueue = edgeQueue.difference(edge);
-        }
-        edgeQueue = edgeQueue.difference(nextEdge);
-        visitedEdges = visitedEdges.union(nextEdge);
-        
-        mstCost += nextEdge.data('weight');
-        
-        // Getting next node edge will take us to
-        let nextNode = null;
-        if (unvisitedNodes.contains(nextEdge.source())) {
-            nextNode = nextEdge.source();
         }
         else {
-            nextNode = nextEdge.target();
+            while (nextEdge == null) {
+                const edge = edgeQueue[0];
+                if (unvisitedNodes.contains(edge.source()) != unvisitedNodes.contains(edge.target())) {
+                    nextEdge = edge;
+                    break;
+                }
+                edgeQueue = edgeQueue.difference(edge);
+            }
         }
-        unvisitedNodes = unvisitedNodes.difference(nextNode);
+        edgeQueue = edgeQueue.difference(nextEdge);
 
-        currNode = nextNode;
-
-        // Adding adjacent edges to edgeQueue and sorting edgeQueue by weight
-        const adjacentEdges = currNode.connectedEdges().filter(edge => !visitedEdges.contains(edge) && (unvisitedNodes.contains(edge.source()) != unvisitedNodes.contains(edge.target())));
-        edgeQueue = edgeQueue.union(adjacentEdges);
-        edgeQueue = edgeQueue.sort(function(a, b) {
-            return a.data('weight') - b.data('weight')
-        });
-
-        step.mstCost = mstCost;
-        step.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
         step.change = {};
         step.change.add = true;
         step.change.changes = {};
-        step.change.changes[nextEdge.data('id')] = ['chosen'];
-        step.change.changes[nextNode.data('id')] = ['chosen'];
-        adjacentEdges.forEach(edge => {
-            step.change.changes[edge.data('id')] = ['search'];
-        });
+
+        if (!rejected) {
+            visitedEdges = visitedEdges.union(nextEdge);
+            mstCost += nextEdge.data('weight');
+            
+            let nextNode = null;
+            if (unvisitedNodes.contains(nextEdge.source())) {
+                nextNode = nextEdge.source();
+            }
+            else {
+                nextNode = nextEdge.target();
+            }
+            unvisitedNodes = unvisitedNodes.difference(nextNode);
+            step.change.changes[nextNode.data('id')] = ['chosen'];
+            
+            currNode = nextNode;
+
+            //Adding adjacent edges to edgeQueue and sorting edgeQueue by weight
+            const adjacentEdges = currNode.connectedEdges().filter(edge => !visitedEdges.contains(edge));
+            adjacentEdges.forEach(edge => {
+                step.change.changes[edge.data('id')] = ['search'];
+            });
+
+            edgeQueue = edgeQueue.union(adjacentEdges);
+            edgeQueue = edgeQueue.sort(function(a, b) {
+                return a.data('weight') - b.data('weight')
+            });
+        }
+
+        step.mstCost = mstCost;
+        step.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
+        step.change.changes[nextEdge.data('id')] = rejected ? ['rejected'] : ['chosen'];
 
         steps.push(step);
     }

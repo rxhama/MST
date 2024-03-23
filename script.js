@@ -5,11 +5,15 @@ const cyContainer = document.getElementById('cy');
 const minCostDisplay = document.getElementById('minCostDisplay');
 const edgeQueueDisplay = document.getElementById('edgeQueueDisplay');
 const graphDropdown = document.getElementById('graphDropdown');
+const algoDropdown = document.getElementById('algoDropdown');
 const resetBtn = document.getElementById('resetBtn');
 const startBtn = document.getElementById('startBtn');
 const nodeCount = document.getElementById('nodeCount');
 const edgeCount = document.getElementById('edgeCount');
 const nodeDegreeInput = document.getElementById('nodeDegreeInput');
+const showRejectedEdgesCheckbox = document.getElementById('showRejectedEdgesCheckbox');
+
+showRejectedEdgesCheckbox.addEventListener('change', reset);
 
 // These are the displays that are passed to the algoController
 const algoDisplays = {};
@@ -72,7 +76,10 @@ function loadGraph(dropdown) {
     
     updateVals();
 }
-graphDropdown.addEventListener('change', (e) => loadGraph(e.target));
+graphDropdown.addEventListener('change', e => {
+    algoController.reset();
+    loadGraph(e.target)
+});
 
 // Populates the graph dropdown with the graphs stored in localStorage
 function populateDropdown() {
@@ -94,27 +101,29 @@ function reset() {
     loadGraph(document.getElementById('graphDropdown'));
 }
 resetBtn.addEventListener('click', reset);
+algoDropdown.addEventListener('change', reset);
 
 // Calls the selected algo from the dropdown on the current loaded graph
 // Passes the graph, the steps the algo returns, and the algoDisplays to the algoController
 function start() {
-    const selectedAlgo = document.getElementById('algoDropdown').value;
+    const selectedAlgo = algoDropdown.value;
+    const showRejectedEdges = showRejectedEdgesCheckbox.checked;
     if (selectedAlgo == 'prims') {
-        const steps = primsAlgorithm(cy);
+        const steps = primsAlgorithm(cy, showRejectedEdges);
         if (!steps) return;
         algoController.setSteps(cy, steps, algoDisplays);
     }
     else if (selectedAlgo == 'kruskals') {
-        algoController.setSteps(cy, kruskalsAlgorithm(cy), algoDisplays);
+        algoController.setSteps(cy, kruskalsAlgorithm(cy, showRejectedEdges), algoDisplays);
     }
     else if (selectedAlgo == 'boruvkas') {
-        algoController.setSteps(cy, boruvkasAlgorithm(cy), algoDisplays);
+        algoController.setSteps(cy, boruvkasAlgorithm(cy, showRejectedEdges), algoDisplays);
     }
     else if (selectedAlgo == 'reverse-delete') {
-        algoController.setSteps(cy, reverseDeleteAlgorithm(cy), algoDisplays);
+        algoController.setSteps(cy, reverseDeleteAlgorithm(cy, showRejectedEdges), algoDisplays);
     }
     else if (selectedAlgo == 'dckruskals') {
-        const steps = degreeConstrainedKruskals(cy, nodeDegreeInput.value);
+        const steps = degreeConstrainedKruskals(cy, showRejectedEdges,  nodeDegreeInput.value);
         if (!steps) return;
         algoController.setSteps(cy, steps, algoDisplays);
     }
