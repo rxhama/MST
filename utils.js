@@ -589,7 +589,7 @@ export function kruskalsAlgorithm(graph, showRejectedEdges) {
         else {
             while (nextEdge == null) {
                 const edge = edgeQueue[0];
-                if (groupDict[edge.source().data('id')].intersection(groupDict[edge.target().data('id')]).empty()) {
+                if (!groupDict[edge.source().data('id')].same(groupDict[edge.target().data('id')])) {
                     nextEdge = edge;
 
                     break;
@@ -748,7 +748,7 @@ export function reverseDeleteAlgorithm(graph, showRejectedEdges) {
         step.mstCost = mstCost;
         step.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
         step.change = {};
-        step.change.add = false;
+        step.change.add = false; // THE PROBLEM IS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE (NEED TO ADD REJECTED)
         step.change.changes = {};
         step.change.changes[nextEdge.data('id')] = ['chosen'];
 
