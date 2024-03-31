@@ -1,4 +1,4 @@
-import { AlgoController, primsAlgorithm, kruskalsAlgorithm, boruvkasAlgorithm, reverseDeleteAlgorithm, degreeConstrainedKruskals } from './utils.js';
+import { AlgoController, primsAlgorithm, kruskalsAlgorithm, boruvkasAlgorithm, reverseDeleteAlgorithm, degreeConstrainedPrims, degreeConstrainedKruskals } from './utils.js';
 
 // Getting the DOM elements for ease of use later on
 const cyContainer = document.getElementById('cy');
@@ -122,6 +122,11 @@ function start() {
     }
     else if (selectedAlgo == 'reverse-delete') {
         algoController.setSteps(cy, reverseDeleteAlgorithm(cy, showRejectedEdges), algoDisplays);
+    }
+    else if (selectedAlgo == 'dcprims') {
+        const steps = degreeConstrainedPrims(cy, showRejectedEdges,  nodeDegreeInput.value);
+        if (!steps) return;
+        algoController.setSteps(cy, steps, algoDisplays);
     }
     else if (selectedAlgo == 'dckruskals') {
         const steps = degreeConstrainedKruskals(cy, showRejectedEdges,  nodeDegreeInput.value);

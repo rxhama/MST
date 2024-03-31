@@ -334,6 +334,8 @@ function addEdge() {
 }
 
 function generateGraph() {
+    deleteGraph();
+
     const nodeCount = document.getElementById('nodeCountInput').value;
 
     if (nodeCount < 1 || nodeCount > 100) {

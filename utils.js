@@ -12,6 +12,7 @@ export class AlgoController {
         this.currentIndex = null;
         this.playing = null;
         this.timeout = null;
+        this.speed = 1000; // in ms
     }
 
     // Resets all fields to initial state
@@ -82,20 +83,18 @@ export class AlgoController {
         }
 
         const step = this.steps[index];
-        Object.entries(step.change.changes).forEach(([id, classNames]) => {
+        Object.entries(step.changes).forEach(([id, classNames]) => {
             classNames.forEach(className => {
-                if (className == 'outlined' || className == 'rejected') {
-                    if (step.change.add) {
-                        this.graph.$(`#${id}`).flashClass(className);
+                if (className.add) {
+                    if (className.class == 'outlined' || className.class == 'rejected') {
+                        this.graph.$(`#${id}`).flashClass(className.class, 0.5 * this.speed);
+                    }
+                    else {
+                        this.graph.$(`#${id}`).addClass(className.class);
                     }
                 }
                 else {
-                    if (step.change.add) {
-                        this.graph.$(`#${id}`).addClass(className);
-                    }
-                    else {
-                        this.graph.$(`#${id}`).removeClass(className);
-                    }
+                    this.graph.$(`#${id}`).removeClass(className.class);
                 }
             })
         });
@@ -112,13 +111,15 @@ export class AlgoController {
         }
 
         const step = this.steps[index];
-        Object.keys(step.change.changes).forEach(id => {
-            if (step.change.add) {
-                this.graph.$(`#${id}`).removeClass(step.change.changes[id]);
-            }
-            else {
-                this.graph.$(`#${id}`).addClass(step.change.changes[id]);
-            }
+        Object.entries(step.changes).forEach(([id, classNames]) => {
+            classNames.forEach(className => {
+                if (className.add) {
+                    this.graph.$(`#${id}`).removeClass(className.class);
+                }
+                else {
+                    this.graph.$(`#${id}`).addClass(className.class);
+                }
+            })
         })
         if (index < 1) {
             this.updateDisplays(this.steps[0]);
@@ -146,7 +147,7 @@ export class AlgoController {
 
             this.timeout = setTimeout(() => {
                 this.playSteps()
-            }, 1000)
+            }, this.speed)
         }
         else {
             this.pause();
@@ -233,105 +234,6 @@ export class AlgoController {
     }
 }
 
-// /*
-// * Prims Algorithm
-// * @param {object} graph - The cytoscape graph passed through
-// * @returns {array} [steps, accepted] - steps = the array of steps to be used by the AlgoController
-// * accepted = if the algo was able to find the MST or not
-// */
-// export function primsAlgorithm(graph) {
-//     if (graph.nodes(':selected').length != 1) {
-//         graph.elements().unselect();
-//         alert('Please select a single starting node');
-//         return null;
-//     }
-
-//     const steps = [];
-//     let mstCost = 0; // Cost of minimum spanning tree at each step
-
-//     let edgeQueue = graph.collection();
-//     let visitedEdges = graph.collection();
-//     let unvisitedNodes = graph.nodes();
-
-//     let currNode = graph.nodes(':selected');
-//     unvisitedNodes = unvisitedNodes.difference(currNode);
-
-//     // Sorting initial edge queue by weight - ascending order
-//     const initAdjacentEdges = currNode.connectedEdges().filter(edge => !visitedEdges.contains(edge) && (unvisitedNodes.contains(edge.source()) != unvisitedNodes.contains(edge.target())));
-//     edgeQueue = edgeQueue.union(initAdjacentEdges);
-//     edgeQueue = edgeQueue.sort(function(a, b) {
-//         return a.data('weight') - b.data('weight')
-//     });
-
-//     // Initial step
-//     const initStep = {};
-//     initStep.change = {};
-//     initStep.change.add = true;
-//     initStep.change.changes = {};
-//     initStep.change.changes[currNode.data('id')] = ['chosen'];
-//     edgeQueue.forEach(edge => {
-//         initStep.change.changes[edge.data('id')] = ['search'];
-//     });
-//     initStep.edgeQueue = initAdjacentEdges.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
-//     initStep.mstCost = mstCost;
-//     steps.push(initStep);
-
-
-//     while (!unvisitedNodes.empty()) {
-//         const step = {};
-
-//         // Choosing edge
-//         let nextEdge = null;
-//         while (nextEdge == null) {
-//             const edge = edgeQueue[0];
-//             if (unvisitedNodes.contains(edge.source()) || unvisitedNodes.contains(edge.target())) {
-//                 nextEdge = edge;
-//                 break;
-//             }
-//             edgeQueue = edgeQueue.difference(edge);
-//         }
-//         edgeQueue = edgeQueue.difference(nextEdge);
-//         visitedEdges = visitedEdges.union(nextEdge);
-        
-//         mstCost += nextEdge.data('weight');
-        
-//         // Getting next node edge will take us to
-//         let nextNode = null;
-//         if (unvisitedNodes.contains(nextEdge.source())) {
-//             nextNode = nextEdge.source();
-//         }
-//         else {
-//             nextNode = nextEdge.target();
-//         }
-//         unvisitedNodes = unvisitedNodes.difference(nextNode);
-
-//         currNode = nextNode;
-
-//         // Adding adjacent edges to edgeQueue and sorting edgeQueue by weight
-//         const adjacentEdges = currNode.connectedEdges().filter(edge => !visitedEdges.contains(edge) && (unvisitedNodes.contains(edge.source()) != unvisitedNodes.contains(edge.target())));
-//         edgeQueue = edgeQueue.union(adjacentEdges);
-//         edgeQueue = edgeQueue.sort(function(a, b) {
-//             return a.data('weight') - b.data('weight')
-//         });
-
-//         step.mstCost = mstCost;
-//         step.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
-//         step.change = {};
-//         step.change.add = true;
-//         step.change.changes = {};
-//         step.change.changes[nextEdge.data('id')] = ['chosen'];
-//         step.change.changes[nextNode.data('id')] = ['chosen'];
-//         adjacentEdges.forEach(edge => {
-//             step.change.changes[edge.data('id')] = ['search'];
-//         });
-
-//         steps.push(step);
-//     }
-//     console.log('PRIMS COMPLETED!!!');
-    
-//     return [steps, true];
-// }
-
 /*
 * Prims Algorithm
 * @param {object} graph - The cytoscape graph passed through
@@ -353,6 +255,9 @@ export function primsAlgorithm(graph, showRejectedEdges) {
     let visitedEdges = graph.collection();
     let unvisitedNodes = graph.nodes();
 
+    let edgeCount = 0;
+    let targetEdgeCount = unvisitedNodes.length - 1;
+
     let currNode = graph.nodes(':selected');
     unvisitedNodes = unvisitedNodes.difference(currNode);
 
@@ -363,21 +268,26 @@ export function primsAlgorithm(graph, showRejectedEdges) {
         return a.data('weight') - b.data('weight')
     });
 
+    // Dict that checks if ane edge already has the search class
+    // so doesn't have to be added if it already has the class.
+    // Otherwise, re-adding search will cause problems when going backwards
+    // in algo controller because we will remove it earlier than needed (than when it was initially added)
+    const hasSearchClass = {};
+
     // Initial step
     const initStep = {};
-    initStep.change = {};
-    initStep.change.add = true;
-    initStep.change.changes = {};
-    initStep.change.changes[currNode.data('id')] = ['chosen'];
+    initStep.changes = {};
+    initStep.changes[currNode.data('id')] = [{add:true, class:'chosen'}];
     edgeQueue.forEach(edge => {
-        initStep.change.changes[edge.data('id')] = ['search'];
+        initStep.changes[edge.data('id')] = [{add:true, class:'search'}];
+        hasSearchClass[edge.data('id')] = true;
     });
     initStep.edgeQueue = initAdjacentEdges.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
     initStep.mstCost = mstCost;
     steps.push(initStep);
 
 
-    while (!unvisitedNodes.empty()) {
+    while (edgeCount < targetEdgeCount) {
         const step = {};
 
         // Choosing next edge
@@ -402,11 +312,11 @@ export function primsAlgorithm(graph, showRejectedEdges) {
         }
         edgeQueue = edgeQueue.difference(nextEdge);
 
-        step.change = {};
-        step.change.add = true;
-        step.change.changes = {};
+        step.changes = {};
 
         if (!rejected) {
+            edgeCount++;
+
             visitedEdges = visitedEdges.union(nextEdge);
             mstCost += nextEdge.data('weight');
             
@@ -418,14 +328,15 @@ export function primsAlgorithm(graph, showRejectedEdges) {
                 nextNode = nextEdge.target();
             }
             unvisitedNodes = unvisitedNodes.difference(nextNode);
-            step.change.changes[nextNode.data('id')] = ['chosen'];
+            step.changes[nextNode.data('id')] = [{add:true, class:'chosen'}];
             
             currNode = nextNode;
 
             //Adding adjacent edges to edgeQueue and sorting edgeQueue by weight
             const adjacentEdges = currNode.connectedEdges().filter(edge => !visitedEdges.contains(edge));
-            adjacentEdges.forEach(edge => {
-                step.change.changes[edge.data('id')] = ['search'];
+            adjacentEdges.filter(edge => !hasSearchClass[edge.data('id')]).forEach(edge => {
+                step.changes[edge.data('id')] = [{add:true, class:'search'}];
+                hasSearchClass[edge.data('id')] = true;
             });
 
             edgeQueue = edgeQueue.union(adjacentEdges);
@@ -436,104 +347,14 @@ export function primsAlgorithm(graph, showRejectedEdges) {
 
         step.mstCost = mstCost;
         step.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
-        step.change.changes[nextEdge.data('id')] = rejected ? ['rejected'] : ['chosen'];
+        step.changes[nextEdge.data('id')] = rejected ? [{add:true, class:'rejected'}, {add:false, class:'search'}] : [{add:true, class:'chosen'}];
 
         steps.push(step);
     }
     console.log('PRIMS COMPLETED!!!');
-    
+
     return [steps, true];
 }
-
-/*
-* Kruskals Algorithm
-* @param {object} graph - The cytoscape graph passed through
-* @returns {array} [steps, accepted] - steps = the array of steps to be used by the AlgoController
-* accepted = if the algo was able to find the MST or not
-*/
-// export function kruskalsAlgorithm(graph, showRejectedEdges) {
-//     const steps = [];
-//     let mstCost = 0; // Cost of minimum spanning tree at each step
-    
-//     let unvisitedNodes = graph.nodes();
-//     const targetEdgeCount = unvisitedNodes.length - 1;
-//     let edgeCount = 0;
-
-//     // For each node:
-//     // Key = node id and value = collection of nodes the key node is in
-//     let groupDict = {};
-//     unvisitedNodes.forEach(node => {
-//         const nodeId = node.data('id');
-//         groupDict[nodeId] = graph.collection();
-//         groupDict[nodeId] = groupDict[nodeId].union(node);
-//     });
-
-//     // Sorting edge queue by weight - ascending order
-//     let edgeQueue = graph.edges();
-//     edgeQueue = edgeQueue.sort(function(a, b) {
-//         return a.data('weight') - b.data('weight')
-//     });
-
-//     // Init step with 0 changes, 0 cost, just displaying the initial edgeQueue
-//     const initStep = {};
-//     initStep.change = {};
-//     initStep.change.add = true;
-//     initStep.change.changes = {};
-//     initStep.mstCost = mstCost;
-//     initStep.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
-//     steps.push(initStep);
-    
-//     while (edgeCount < targetEdgeCount) {
-//         const step = {};
-
-//         // Choosing edge
-//         let nextEdge = null;
-//         while (nextEdge == null) {
-//             const edge = edgeQueue[0];
-//             const sourceId = edge.source().data('id');
-//             const targetId = edge.target().data('id');
-//             if (groupDict[sourceId].intersection(groupDict[targetId]).empty()) {
-//                 nextEdge = edge;
-//                 edgeCount++;
-//                 groupDict[sourceId] = groupDict[sourceId].union(groupDict[targetId]);
-//                 groupDict[sourceId].forEach(function(node) {
-//                     groupDict[node.data('id')] = groupDict[sourceId];
-//                 });
-
-//                 break;
-//             }
-//             edgeQueue = edgeQueue.difference(edge);
-//         }
-//         edgeQueue = edgeQueue.difference(nextEdge);
-
-//         mstCost += nextEdge.data('weight');
-//         step.mstCost = mstCost;
-//         step.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
-//         step.change = {};
-//         step.change.add = true;
-//         step.change.changes = {};
-//         step.change.changes[nextEdge.data('id')] = ['chosen'];
-        
-//         // Getting source and target nodes of edge
-//         const sourceNode = nextEdge.source();
-//         const targetNode = nextEdge.target();
-//         if (unvisitedNodes.contains(sourceNode)) {
-//             unvisitedNodes = unvisitedNodes.difference(sourceNode);
-
-//             step.change.changes[sourceNode.data('id')] = ['chosen'];
-//         }
-//         if (unvisitedNodes.contains(targetNode)) {
-//             unvisitedNodes = unvisitedNodes.difference(targetNode);
-
-//             step.change.changes[targetNode.data('id')] = ['chosen'];
-//         }
-
-//         steps.push(step);
-//     }
-//     console.log('KRUSKALS COMPLETED!!!');
-    
-//     return [steps, true];
-// }
 
 /*
 * Kruskals Algorithm
@@ -567,9 +388,12 @@ export function kruskalsAlgorithm(graph, showRejectedEdges) {
 
     // Init step with 0 changes, 0 cost, just displaying the initial edgeQueue
     const initStep = {};
-    initStep.change = {};
-    initStep.change.add = true;
-    initStep.change.changes = {};
+    initStep.changes = {};
+    if (showRejectedEdges) {
+        graph.edges().forEach(edge => {
+            initStep.changes[edge.data('id')] = [{add:true, class:'search'}];
+        });
+    }
     initStep.mstCost = mstCost;
     initStep.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
     steps.push(initStep);
@@ -599,38 +423,36 @@ export function kruskalsAlgorithm(graph, showRejectedEdges) {
         }
         edgeQueue = edgeQueue.difference(nextEdge);
 
-        step.change = {};
-        step.change.add = true;
-        step.change.changes = {};
+        step.changes = {};
 
         if (!rejected) {
             edgeCount++;
             mstCost += nextEdge.data('weight');
 
+            const sourceNode = nextEdge.source();
+            const targetNode = nextEdge.target();
+
             // Adding source and target nodes to same group and all their connected nodes as well
-            const sourceId = nextEdge.source().data('id');
-            const targetId = nextEdge.target().data('id');
+            const sourceId = sourceNode.data('id');
+            const targetId = targetNode.data('id');
             groupDict[sourceId] = groupDict[sourceId].union(groupDict[targetId]);
             groupDict[sourceId].forEach(function(node) {
                 groupDict[node.data('id')] = groupDict[sourceId];
             });
 
-            // Getting source and target nodes of new edge
-            const sourceNode = nextEdge.source();
-            const targetNode = nextEdge.target();
             if (unvisitedNodes.contains(sourceNode)) {
                 unvisitedNodes = unvisitedNodes.difference(sourceNode);
-                step.change.changes[sourceNode.data('id')] = ['chosen'];
+                step.changes[sourceNode.data('id')] = [{add:true, class:'chosen'}];
             }
             if (unvisitedNodes.contains(targetNode)) {
                 unvisitedNodes = unvisitedNodes.difference(targetNode);
-                step.change.changes[targetNode.data('id')] = ['chosen'];
+                step.changes[targetNode.data('id')] = [{add:true, class:'chosen'}];
             }
         }
 
         step.mstCost = mstCost;
         step.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
-        step.change.changes[nextEdge.data('id')] = rejected ? ['rejected'] : ['chosen'];
+        step.changes[nextEdge.data('id')] = rejected ? [{add:true, class:'rejected'}, {add:false, class:'search'}] : [{add:true, class:'chosen'}];
 
         steps.push(step);
     }
@@ -652,6 +474,7 @@ export function reverseDeleteAlgorithm(graph, showRejectedEdges) {
     }, 0); // Cost of minimum spanning tree at each step
     
     let edgeCount = graph.edges().length;
+    const targetEdgeCount = graph.nodes().length - 1;
 
     // Since all edges are chosen initially, we can track of if they're
     // chosen here, by id. This is to avoid actually removing edges
@@ -670,17 +493,15 @@ export function reverseDeleteAlgorithm(graph, showRejectedEdges) {
     });
 
     const initStep = {};
-    initStep.change = {};
-    initStep.change.add = true;
-    initStep.change.changes = {};
+    initStep.changes = {};
     initStep.mstCost = mstCost;
     initStep.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
     graph.elements().forEach(ele => {
-        initStep.change.changes[ele.data('id')] = ['chosen'];
+        initStep.changes[ele.data('id')] = [{add:true, class:'chosen'}];
     });
     steps.push(initStep);
 
-    while (edgeCount > graph.nodes().length - 1) {
+    while (edgeCount > targetEdgeCount) {
         const step = {};
 
         // Choosing edge
@@ -706,11 +527,10 @@ export function reverseDeleteAlgorithm(graph, showRejectedEdges) {
                 directed: false
             }).path.nodes();
 
-            if (sourceNodeCollection.intersection(targetNodeCollection).empty()) {
+            if (!sourceNodeCollection.same(targetNodeCollection)) {
                 rejected = true;
+                edgeInGraph[nextEdge.data('id')] = true;
             }
-
-            edgeInGraph[edge.data('id')] = true;
         }
         else {
             while (nextEdge == null) {
@@ -733,24 +553,30 @@ export function reverseDeleteAlgorithm(graph, showRejectedEdges) {
                     directed: false
                 }).path.nodes();
 
-                if (!sourceNodeCollection.intersection(targetNodeCollection).empty()) {
+                if (sourceNodeCollection.same(targetNodeCollection)) {
                     nextEdge = edge;
-                    edgeCount--;
                     
                     break;
                 }
                 edgeInGraph[edge.data('id')] = true;
+                edgeQueue = edgeQueue.difference(edge);
             }
         }
         edgeQueue = edgeQueue.difference(nextEdge);
-        
-        mstCost -= nextEdge.data('weight');
+
+        if (!rejected) {
+            edgeCount--;
+            mstCost -= nextEdge.data('weight');
+        }
+
         step.mstCost = mstCost;
         step.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
-        step.change = {};
-        step.change.add = false; // THE PROBLEM IS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE (NEED TO ADD REJECTED)
-        step.change.changes = {};
-        step.change.changes[nextEdge.data('id')] = ['chosen'];
+        step.changes = {};
+        step.changes[nextEdge.data('id')] = rejected ? [{add:true, class:'rejected'}] : [{add:false, class:'chosen'}];
+        if (rejected) {
+            step.changes[nextEdge.source().data('id')] = [{add:true, class:'rejected'}];
+            step.changes[nextEdge.target().data('id')] = [{add:true, class:'rejected'}];
+        }
 
         steps.push(step);
     }
@@ -782,9 +608,7 @@ export function boruvkasAlgorithm(graph, showRejectedEdges) {
 
     // Init step with 0 changes, 0 cost, just displaying the initial node groups
     const initStep = {};
-    initStep.change = {};
-    initStep.change.add = true;
-    initStep.change.changes = {};
+    initStep.changes = {};
     initStep.mstCost = mstCost;
     initStep.edgeQueue = Object.values(groupDict).map(group => group.filter(ele => ele.isNode()).map(node => node.data('id')));
     steps.push(initStep);
@@ -793,14 +617,12 @@ export function boruvkasAlgorithm(graph, showRejectedEdges) {
         let visited = graph.collection();
         for (let key in groupDict) {
             const step = {};
-            step.change = {};
-            step.change.add = true;
-            step.change.changes = {};
+            step.changes = {};
             
             // Flashes the entire group of nodes
             const nodesInGroup = groupDict[key].filter(ele => ele.isNode()).map(node => node.data('id'));
             nodesInGroup.forEach(nodeId => {
-                step.change.changes[nodeId] = ['outlined'];
+                step.changes[nodeId] = [{add:true, class:'outlined'}];
             });
 
             
@@ -831,28 +653,28 @@ export function boruvkasAlgorithm(graph, showRejectedEdges) {
             const targetId = nextEdge.target().data('id');
             
             
-            if (!step.change.changes[nextEdge.data('id')]) {
-                step.change.changes[nextEdge.data('id')] = ['chosen'];
+            if (!step.changes[nextEdge.data('id')]) {
+                step.changes[nextEdge.data('id')] = [{add:true, class:'chosen'}];
             }
             else {
-                step.change.changes[nextEdge.data('id')].push('chosen');
+                step.changes[nextEdge.data('id')].push({add:true, class:'chosen'});
             }
 
             if (groupDict[sourceId].length == 1) {
-                if (!step.change.changes[sourceId]) {
-                    step.change.changes[sourceId] = ['chosen'];
+                if (!step.changes[sourceId]) {
+                    step.changes[sourceId] = [{add:true, class:'chosen'}];
                 }
                 else {
-                    step.change.changes[sourceId].push('chosen');
+                    step.changes[sourceId].push({add:true, class:'chosen'});
                 }
             }
 
             if (groupDict[targetId].length == 1) {
-                if (!step.change.changes[targetId]) {
-                    step.change.changes[targetId] = ['chosen'];
+                if (!step.changes[targetId]) {
+                    step.changes[targetId] = [{add:true, class:'chosen'}];
                 }
                 else {
-                    step.change.changes[targetId].push('chosen');
+                    step.changes[targetId].push({add:true, class:'chosen'});
                 }
             }
             
@@ -897,6 +719,166 @@ export function boruvkasAlgorithm(graph, showRejectedEdges) {
 }
 
 /*
+* Degree-Constrained Prim's Algorithm (Simple)
+* @param {object} graph - The cytoscape graph passed through
+* @param {number} maxDegree - The maximum degree a node can have
+* @returns {array} [steps, accepted] - steps = the array of steps to be used by the AlgoController
+* accepted = if the algo was able to find the MST or not
+*/
+export function degreeConstrainedPrims(graph, showRejectedEdges, maxDegree) {
+    if (maxDegree <= 1) {
+        alert('Max degree must be greater than 1');
+        return null;
+    }
+
+    if (graph.nodes(':selected').length != 1) {
+        graph.elements().unselect();
+        alert('Please select a single starting node');
+        return null;
+    }
+
+    const steps = [];
+    let mstCost = 0; // Cost of minimum spanning tree at each step
+
+    let edgeQueue = graph.collection();
+    let visitedEdges = graph.collection();
+    let unvisitedNodes = graph.nodes();
+
+    let edgeCount = 0;
+    let targetEdgeCount = unvisitedNodes.length - 1;
+
+    let currNode = graph.nodes(':selected');
+    unvisitedNodes = unvisitedNodes.difference(currNode);
+
+    // Sorting initial edge queue by weight - ascending order
+    const initAdjacentEdges = currNode.connectedEdges().filter(edge => !visitedEdges.contains(edge) && (unvisitedNodes.contains(edge.source()) != unvisitedNodes.contains(edge.target())));
+    edgeQueue = edgeQueue.union(initAdjacentEdges);
+    edgeQueue = edgeQueue.sort(function(a, b) {
+        return a.data('weight') - b.data('weight')
+    });
+
+    // Dict that checks if ane edge already has the search class
+    // so doesn't have to be added if it already has the class.
+    // Otherwise, re-adding search will cause problems when going backwards
+    // in algo controller because we will remove it earlier than needed (than when it was initially added)
+    const hasSearchClass = {};
+
+    // Initial step
+    const initStep = {};
+    initStep.changes = {};
+    initStep.changes[currNode.data('id')] = [{add:true, class:'chosen'}];
+    edgeQueue.forEach(edge => {
+        initStep.changes[edge.data('id')] = [{add:true, class:'search'}];
+        hasSearchClass[edge.data('id')] = true;
+    });
+    initStep.edgeQueue = initAdjacentEdges.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
+    initStep.mstCost = mstCost;
+    steps.push(initStep);
+
+
+    while (edgeCount < targetEdgeCount) {
+        const step = {};
+
+        // Choosing next edge
+        let nextEdge = null;
+        let rejected = false;
+        let violatedNodes = [];
+
+        if (showRejectedEdges) {
+            if (edgeQueue.empty()) {
+                console.log('No more edges to choose from');
+                return [steps, false];
+            }
+
+            nextEdge = edgeQueue[0];
+            const sourceNode = nextEdge.source();
+            const targetNode = nextEdge.target();
+
+            if (!unvisitedNodes.contains(sourceNode) && !unvisitedNodes.contains(targetNode)) {
+                rejected = true;
+            }
+            if (sourceNode.connectedEdges().filter(edge => visitedEdges.contains(edge)).length >= maxDegree) {
+                violatedNodes.push(sourceNode);
+                rejected = true;
+            }
+            if (targetNode.connectedEdges().filter(edge => visitedEdges.contains(edge)).length >= maxDegree) {
+                violatedNodes.push(targetNode);
+                rejected = true;
+            }
+        }
+        else {
+            while (nextEdge == null) {
+                if (edgeQueue.empty()) {
+                    console.log('No more edges to choose from');
+                    return [steps, false];
+                }
+
+                const edge = edgeQueue[0];
+                const sourceNode = edge.source();
+                const targetNode = edge.target();
+
+                if (unvisitedNodes.contains(edge.source()) != unvisitedNodes.contains(edge.target()) && 
+                    sourceNode.connectedEdges().filter(edge => visitedEdges.contains(edge)).length + 1 <= maxDegree && 
+                    targetNode.connectedEdges().filter(edge => visitedEdges.contains(edge)).length + 1 <= maxDegree) {
+
+                        nextEdge = edge;
+                        break;
+                }
+                edgeQueue = edgeQueue.difference(edge);
+            }
+        }
+        edgeQueue = edgeQueue.difference(nextEdge);
+
+        step.changes = {};
+
+        if (!rejected) {
+            edgeCount++;
+
+            visitedEdges = visitedEdges.union(nextEdge);
+            mstCost += nextEdge.data('weight');
+            
+            let nextNode = null;
+            if (unvisitedNodes.contains(nextEdge.source())) {
+                nextNode = nextEdge.source();
+            }
+            else {
+                nextNode = nextEdge.target();
+            }
+            unvisitedNodes = unvisitedNodes.difference(nextNode);
+            step.changes[nextNode.data('id')] = [{add:true, class:'chosen'}];
+            
+            currNode = nextNode;
+
+            //Adding adjacent edges to edgeQueue and sorting edgeQueue by weight
+            const adjacentEdges = currNode.connectedEdges().filter(edge => !visitedEdges.contains(edge));
+            adjacentEdges.filter(edge => !hasSearchClass[edge.data('id')]).forEach(edge => {
+                step.changes[edge.data('id')] = [{add:true, class:'search'}];
+                hasSearchClass[edge.data('id')] = true;
+            });
+
+            edgeQueue = edgeQueue.union(adjacentEdges);
+            edgeQueue = edgeQueue.sort(function(a, b) {
+                return a.data('weight') - b.data('weight')
+            });
+        }
+
+        step.mstCost = mstCost;
+        step.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
+        step.changes[nextEdge.data('id')] = rejected ? [{add:true, class:'rejected'}, {add:false, class:'search'}] : [{add:true, class:'chosen'}];
+        if (rejected) {
+            violatedNodes.forEach(node => {
+                step.changes[node.data('id')] = [{add:true, class:'rejected'}];
+            });
+        }
+
+        steps.push(step);
+    }
+    console.log('PRIMS COMPLETED!!!');
+
+    return [steps, true];
+}
+
+/*
 * Degree-Constrained Kruskals Algorithm (Simple)
 * @param {object} graph - The cytoscape graph passed through
 * @param {number} maxDegree - The maximum degree a node can have
@@ -929,9 +911,12 @@ export function degreeConstrainedKruskals(graph, showRejectedEdges, maxDegree) {
     });
 
     const initStep = {};
-    initStep.change = {};
-    initStep.change.add = true;
-    initStep.change.changes = {};
+    initStep.changes = {};
+    if (showRejectedEdges) {
+        graph.edges().forEach(edge => {
+            initStep.changes[edge.data('id')] = [{add:true, class:'search'}];
+        });
+    }
     initStep.mstCost = mstCost;
     initStep.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
     steps.push(initStep);
@@ -945,52 +930,88 @@ export function degreeConstrainedKruskals(graph, showRejectedEdges, maxDegree) {
         const step = {};
 
         let nextEdge = null;
-        while (nextEdge == null) {
+        let rejected = false;
+        let violatedNodes = [];
+
+        if (showRejectedEdges) {
             if (edgeQueue.empty()) {
                 console.log('No more edges to choose from');
                 return [steps, false];
             }
 
-            const edge = edgeQueue[0];
-            const sourceId = edge.source().data('id');
-            const targetId = edge.target().data('id');
-            if (edge.source().connectedEdges().filter(edge => edgeInGraph[edge.data('id')]).length + 1 <= maxDegree && edge.target().connectedEdges().filter(edge => edgeInGraph[edge.data('id')]).length + 1 <= maxDegree) {
-                if (groupDict[sourceId].intersection(groupDict[targetId]).empty()) {
-                    nextEdge = edge;
-                    edgeCount++;
-                    edgeInGraph[edge.data('id')] = true;
-                    groupDict[sourceId] = groupDict[sourceId].union(groupDict[targetId]);
-                    groupDict[sourceId].forEach(function(node) {
-                        groupDict[node.data('id')] = groupDict[sourceId];
-                    });
-
-                    break;
-                }
+            nextEdge = edgeQueue[0];
+            const sourceNode = nextEdge.source();
+            const targetNode = nextEdge.target();
+            if (groupDict[sourceNode.data('id')].same(groupDict[targetNode.data('id')])) {
+                rejected = true;
             }
-            edgeQueue = edgeQueue.difference(edge);
+            if (sourceNode.connectedEdges().filter(edge => edgeInGraph[edge.data('id')]).length >= maxDegree) {
+                violatedNodes.push(sourceNode);
+                rejected = true;
+            }
+            if (targetNode.connectedEdges().filter(edge => edgeInGraph[edge.data('id')]).length >= maxDegree) {
+                violatedNodes.push(targetNode);
+                rejected = true;
+            }
+        }
+        else {
+            while (nextEdge == null) {
+                if (edgeQueue.empty()) {
+                    console.log('No more edges to choose from');
+                    return [steps, false];
+                }
+
+                const edge = edgeQueue[0];
+                const sourceId = edge.source().data('id');
+                const targetId = edge.target().data('id');
+
+                if (!groupDict[sourceId].same(groupDict[targetId]) && 
+                    edge.source().connectedEdges().filter(edge => edgeInGraph[edge.data('id')]).length + 1 <= maxDegree && 
+                    edge.target().connectedEdges().filter(edge => edgeInGraph[edge.data('id')]).length + 1 <= maxDegree) {
+
+                        nextEdge = edge;
+                        break;
+                }
+                edgeQueue = edgeQueue.difference(edge);
+            }
         }
         edgeQueue = edgeQueue.difference(nextEdge);
 
-        mstCost += nextEdge.data('weight');
+        step.changes = {};
+
+        if (!rejected) {
+            edgeCount++;
+            edgeInGraph[nextEdge.data('id')] = true;
+            mstCost += nextEdge.data('weight');
+
+            const sourceNode = nextEdge.source();
+            const targetNode = nextEdge.target();
+            const sourceId = sourceNode.data('id');
+            const targetId = targetNode.data('id');
+
+            // Adding source and target nodes to same group and all their connected nodes as well
+            groupDict[sourceId] = groupDict[sourceId].union(groupDict[targetId]);
+            groupDict[sourceId].forEach(function(node) {
+                groupDict[node.data('id')] = groupDict[sourceId];
+            });
+
+            if (unvisitedNodes.contains(sourceNode)) {
+                unvisitedNodes = unvisitedNodes.difference(sourceNode);
+                step.changes[sourceNode.data('id')] = [{add:true, class:'chosen'}];
+            }
+            if (unvisitedNodes.contains(targetNode)) {
+                unvisitedNodes = unvisitedNodes.difference(targetNode);
+                step.changes[targetNode.data('id')] = [{add:true, class:'chosen'}];
+            }
+        }
+
         step.mstCost = mstCost;
         step.edgeQueue = edgeQueue.map(edge => `${edge.data('id')} (${edge.data('weight')})`);
-        step.change = {};
-        step.change.add = true;
-        step.change.changes = {};
-        step.change.changes[nextEdge.data('id')] = ['chosen'];
-        
-        // Getting source and target nodes of edge
-        const sourceNode = nextEdge.source();
-        const targetNode = nextEdge.target();
-        if (unvisitedNodes.contains(sourceNode)) {
-            unvisitedNodes = unvisitedNodes.difference(sourceNode);
-
-            step.change.changes[sourceNode.data('id')] = ['chosen'];
-        }
-        if (unvisitedNodes.contains(targetNode)) {
-            unvisitedNodes = unvisitedNodes.difference(targetNode);
-
-            step.change.changes[targetNode.data('id')] = ['chosen'];
+        step.changes[nextEdge.data('id')] = rejected ? [{add:true, class:'rejected'}, {add:false, class:'search'}] : [{add:true, class:'chosen'}];
+        if (violatedNodes.length > 0) {
+            violatedNodes.forEach(node => {
+                step.changes[node.data('id')] = [{add:true, class:'rejected'}];
+            });
         }
 
         steps.push(step);
