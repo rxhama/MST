@@ -54,6 +54,8 @@ loadInitialGraphs().then(() => {
     let graphs = JSON.parse(localStorage.getItem('storedGraphs') || '[]');
     cy.json(graphs[0].graph);
     cy.fit();
+
+    window.cy = cy;
     
     populateDropdown();
     updateVals();
@@ -149,3 +151,9 @@ function updateVals() {
 // cy.elements().kruskal(function(edge) {
 //     return edge.data('weight');
 // }).addClass('chosen');
+
+// window.addEventListener('resize', resize);
+
+// function resize() {
+//     cy.fit();
+// }
