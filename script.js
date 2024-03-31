@@ -1,4 +1,4 @@
-import { AlgoController, primsAlgorithm, kruskalsAlgorithm, boruvkasAlgorithm, reverseDeleteAlgorithm, degreeConstrainedPrims, degreeConstrainedKruskals } from './utils.js';
+import { AlgoController, primsAlgorithm, kruskalsAlgorithm, boruvkasAlgorithm, reverseDeleteAlgorithm, degreeConstrainedPrims, degreeConstrainedKruskals, newBoruvkasAlgorithm } from './utils.js';
 
 // Getting the DOM elements for ease of use later on
 const cyContainer = document.getElementById('cy');
@@ -54,8 +54,6 @@ loadInitialGraphs().then(() => {
     let graphs = JSON.parse(localStorage.getItem('storedGraphs') || '[]');
     cy.json(graphs[0].graph);
     cy.fit();
-
-    window.cy = cy;
     
     populateDropdown();
     updateVals();
@@ -120,7 +118,12 @@ function start() {
         algoController.setSteps(cy, kruskalsAlgorithm(cy, showRejectedEdges), algoDisplays);
     }
     else if (selectedAlgo == 'boruvkas') {
-        algoController.setSteps(cy, boruvkasAlgorithm(cy, showRejectedEdges), algoDisplays);
+        if (cy.nodes().length > 26) {
+            algoController.setSteps(cy, boruvkasAlgorithm(cy, showRejectedEdges), algoDisplays);
+        }
+        else {
+            algoController.setSteps(cy, newBoruvkasAlgorithm(cy, showRejectedEdges), algoDisplays);
+        }
     }
     else if (selectedAlgo == 'reverse-delete') {
         algoController.setSteps(cy, reverseDeleteAlgorithm(cy, showRejectedEdges), algoDisplays);

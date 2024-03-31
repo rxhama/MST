@@ -610,7 +610,7 @@ export function boruvkasAlgorithm(graph, showRejectedEdges) {
     const initStep = {};
     initStep.changes = {};
     initStep.mstCost = mstCost;
-    initStep.edgeQueue = Object.values(groupDict).map(group => group.filter(ele => ele.isNode()).map(node => node.data('id')));
+    initStep.edgeQueue = Object.values(groupDict).map(group => group.nodes().map(node => node.data('id')));
     steps.push(initStep);
 
     while(edgeCount < targetEdgeCount) {
@@ -620,7 +620,7 @@ export function boruvkasAlgorithm(graph, showRejectedEdges) {
             step.changes = {};
             
             // Flashes the entire group of nodes
-            const nodesInGroup = groupDict[key].filter(ele => ele.isNode()).map(node => node.data('id'));
+            const nodesInGroup = groupDict[key].nodes().map(node => node.data('id'));
             nodesInGroup.forEach(nodeId => {
                 step.changes[nodeId] = [{add:true, class:'outlined'}];
             });
@@ -638,7 +638,7 @@ export function boruvkasAlgorithm(graph, showRejectedEdges) {
 
             let possibleEdges = graph.collection();
             collection.forEach(node => {
-                const adjacentEdges = node.connectedEdges().filter(edge => groupDict[edge.source().data('id')].intersection(groupDict[edge.target().data('id')]).empty());
+                const adjacentEdges = node.connectedEdges().filter(edge => !groupDict[edge.source().data('id')].same(groupDict[edge.target().data('id')]));
                 possibleEdges = possibleEdges.union(adjacentEdges);
             });
             const nextEdge = possibleEdges.min(function(edge) {
@@ -696,7 +696,7 @@ export function boruvkasAlgorithm(graph, showRejectedEdges) {
                     uniqueGroups.push(collection);
                 }
             });
-            uniqueGroups = uniqueGroups.map(group => group.filter(ele => ele.isNode()).map(node => node.data('id')));
+            uniqueGroups = uniqueGroups.map(group => group.nodes().map(node => node.data('id')));
             step.edgeQueue = uniqueGroups;
         
 
@@ -1017,6 +1017,159 @@ export function degreeConstrainedKruskals(graph, showRejectedEdges, maxDegree) {
         steps.push(step);
     }
     console.log('DEGREE CONSTRAINED KRUSKALS COMPLETED!!!');
+    
+    return [steps, true];
+}
+
+export function newBoruvkasAlgorithm(graph, showRejectedEdges) {
+    const steps = [];
+    let mstCost = 0; // Cost of minimum spanning tree at each step
+
+    let unvisitedNodes = graph.nodes();
+    const targetEdgeCount = unvisitedNodes.length - 1;
+    let edgeCount = 0;
+
+    // Keep track of which colour on (in colour classes 0-9),
+    // so we can assign a different colour every time new edge is added
+    let colourCounter = 0;
+    // Returns the class string then increments the colour counter for next time
+    const getColourClass = function() {
+        const temp = colourCounter;
+        colourCounter = (colourCounter + 1) % 13;
+        return temp.toString();
+    }
+
+    // Holds the groups/components
+    // For each node's value:
+    // [0] = group collection
+    // [1] = colour class
+    let groupDict = {};
+    unvisitedNodes.forEach(node => {
+        const nodeId = node.data('id');
+        let group = graph.collection();
+        group = group.union(node);
+        groupDict[nodeId] = [group, null];
+    });
+
+    // Check if ele is in graph or not
+    let eleColourClass = {};
+
+    // Init step with 0 changes, 0 cost, just displaying the initial node groups
+    const initStep = {};
+    initStep.changes = {};
+    initStep.mstCost = mstCost;
+    initStep.edgeQueue = Object.values(groupDict).map(result => result[0]).map(group => group.nodes().map(node => node.data('id')));
+    steps.push(initStep);
+
+    while(edgeCount < targetEdgeCount) {
+        let visited = graph.collection();
+        for (let key in groupDict) {
+
+            if (edgeCount >= targetEdgeCount) {
+                break;
+            }
+            if (visited.contains(graph.nodes(`#${key}`))) {
+                continue;
+            }
+            
+            const step = {};
+            step.changes = {};
+
+            const collection = groupDict[key][0];
+            
+            // Flashes the entire current group of nodes
+            const nodesInGroup = collection.nodes().map(node => node.data('id'));
+            nodesInGroup.forEach(nodeId => {
+                step.changes[nodeId] = [{add:true, class:'outlined'}];
+            });
+
+            let possibleEdges = graph.collection();
+            collection.nodes().forEach(node => {
+                const adjacentEdges = node.connectedEdges().filter(edge => !groupDict[edge.source().data('id')][0].same(groupDict[edge.target().data('id')][0]));
+                possibleEdges = possibleEdges.union(adjacentEdges);
+            });
+            const nextEdge = possibleEdges.min(function(edge) {
+                return edge.data('weight');
+            }).ele;
+
+            edgeCount++;
+            mstCost += nextEdge.data('weight');
+            step.mstCost = mstCost;
+
+            const sourceNode = nextEdge.source();
+            const targetNode = nextEdge.target();
+            const sourceId = sourceNode.data('id');
+            const targetId = targetNode.data('id');
+
+            // Check which colour to assign the new combined group
+            let colourClassToAssign = null;
+            if (groupDict[sourceId][1] && groupDict[targetId][1]) {
+                if (parseInt(groupDict[sourceId][1]) > parseInt(groupDict[targetId][1])) {
+                    colourClassToAssign = groupDict[sourceId][1];
+                }
+                else {
+                    colourClassToAssign = groupDict[targetId][1];
+                }
+            }
+            else if (groupDict[sourceId][1]) {
+                colourClassToAssign = groupDict[sourceId][1];
+            }
+            else if (groupDict[targetId][1]) {
+                colourClassToAssign = groupDict[targetId][1];
+            }
+            else {
+                colourClassToAssign = getColourClass();
+            }
+
+            groupDict[sourceId][0] = groupDict[sourceId][0].union(nextEdge);
+            groupDict[sourceId][0] = groupDict[sourceId][0].union(groupDict[targetId][0]);
+            groupDict[sourceId][1] = colourClassToAssign;
+            groupDict[sourceId][0].nodes().forEach(function(node) {
+                groupDict[node.data('id')] = groupDict[sourceId];
+            });
+            visited = visited.union(groupDict[sourceId][0]);
+
+            groupDict[sourceId][0].forEach(ele => {
+                if (eleColourClass[ele.data('id')] != groupDict[sourceId][1]) {
+                    if (!step.changes[ele.data('id')]) {
+                        step.changes[ele.data('id')] = [{add:true, class:groupDict[sourceId][1]}];
+                    }
+                    else {
+                        step.changes[ele.data('id')].push({add:true, class:groupDict[sourceId][1]});
+                    }
+                }
+            });
+
+            groupDict[sourceId][0].forEach(ele => {
+                eleColourClass[ele.data('id')] = groupDict[sourceId][1];
+            });
+
+            // Converting groupDict vals to list and removing duplicates,
+            // then converting those vals (cytoscape collections) to list of node ids
+            // to display at each step
+            const elementCollections = Object.values(groupDict).map(result => result[0]);
+            let uniqueGroups = [];
+            elementCollections.forEach(collection => {
+                if (!uniqueGroups.some(group => group.same(collection))) {
+                    uniqueGroups.push(collection);
+                }
+            });
+            uniqueGroups = uniqueGroups.map(group => group.nodes().map(node => node.data('id')));
+            step.edgeQueue = uniqueGroups;
+        
+
+            // Removing nodes of the edge from univistedNodes if they are in it
+            if (unvisitedNodes.contains(sourceNode)) {
+                unvisitedNodes = unvisitedNodes.difference(sourceNode);
+            }
+            if (unvisitedNodes.contains(targetNode)) {
+                unvisitedNodes = unvisitedNodes.difference(targetNode);
+            }
+
+            steps.push(step);
+        }
+    }
+    console.log('BORUVKAS COMPLETED!!!');
     
     return [steps, true];
 }

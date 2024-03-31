@@ -1,7 +1,7 @@
 let drawMode = false;
 const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
-let cy1 = cytoscape({
+const cyOptions = {
     container: document.getElementById('cy'),
 
     style: [
@@ -58,89 +58,117 @@ let cy1 = cytoscape({
                 "border-width": "3px",
                 "border-color": "rgb(255,255,0)"
             }
+        },
+        {
+            "selector": ".0",
+            "style": {
+              "background-color": "rgb(0,153,0)",
+              "line-color": "rgb(0,153,0)"
+            }
+        },
+        {
+            "selector": ".1",
+            "style": {
+            "background-color": "rgb(0,153,204)",
+            "line-color": "rgb(0,153,204)"
+            }
+        },
+        {
+            "selector": ".2",
+            "style": {
+            "background-color": "rgb(255,153,51)",
+            "line-color": "rgb(255,153,51)"
+            }
+        },
+        {
+            "selector": ".3",
+            "style": {
+            "background-color": "rgb(255,0,102)",
+            "line-color": "rgb(255,0,102)"
+            }
+        },
+        {
+            "selector": ".4",
+            "style": {
+            "background-color": "rgb(51,204,255)",
+            "line-color": "rgb(51,204,255)"
+            }
+        },
+        {
+            "selector": ".5",
+            "style": {
+            "background-color": "rgb(51,51,153)",
+            "line-color": "rgb(51,51,153)"
+            }
+        },
+        {
+            "selector": ".6",
+            "style": {
+            "background-color": "rgb(255,153,255)",
+            "line-color": "rgb(255,153,255)"
+            }
+        },
+        {
+            "selector": ".7",
+            "style": {
+            "background-color": "rgb(0,255,0)",
+            "line-color": "rgb(0,255,0)"
+            }
+        },
+        {
+            "selector": ".8",
+            "style": {
+            "background-color": "rgb(153,0,255)",
+            "line-color": "rgb(153,0,255)"
+            }
+        },
+        {
+            "selector": ".9",
+            "style": {
+            "background-color": "rgb(153,51,51)",
+            "line-color": "rgb(153,51,51)"
+            }
+        },
+        {
+            "selector": ".10",
+            "style": {
+            "background-color": "rgb(102,0,102)",
+            "line-color": "rgb(102,0,102)"
+            }
+        },
+        {
+            "selector": ".11",
+            "style": {
+            "background-color": "rgb(0,102,0)",
+            "line-color": "rgb(0,102,0)"
+            }
+        },
+        {
+            "selector": ".12",
+            "style": {
+            "background-color": "rgb(204,0,204)",
+            "line-color": "rgb(204,0,204)"
+            }
         }
     ],
 
     layout: {
         name: 'circle'
     }
+};
 
-    // NEED TO IMPORT EDGEHANDLES EXTENSION TO ADD TOGGLE BETWEEN NODE MOVEMENT/DRAW EDGE MODE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-});
+let cy = cytoscape(cyOptions);
 
 function deleteGraph() {
-    cy1.destroy();
+    cy.destroy();
     
-    cy1 = cytoscape({
-        container: document.getElementById('cy'),
-
-        style: [
-            {
-                "selector": "node",
-                "style": {
-                    "background-color": "rgb(102,102,102)",
-                    "label": "data(id)",
-                    "transition-property": "background-color",
-                    "transition-duration": "0.2s"
-                }
-            },
-            {
-                "selector": "edge",
-                "style": {
-                    "width": "3px",
-                    "line-color": "rgb(204,204,204)",
-                    "curve-style": "bezier",
-                    "label": "data(weight)",
-                    "transition-property": "line-color",
-                    "transition-duration": "0.2s"
-                }
-            },
-            {
-                "selector": ":selected",
-                "style": {
-                    "background-color": "rgb(0,0,0)",
-                    "line-color": "rgb(0,0,0)"
-                }
-            },
-            {
-                "selector": ".search",
-                "style": {
-                    
-                }
-            },
-            {
-                "selector": ".rejected",
-                "style": {
-                    "background-color": "rgb(255,0,0)",
-                    "line-color": "rgb(255,0,0)"
-                }
-            },
-            {
-                "selector": ".chosen",
-                "style": {
-                    "background-color": "rgb(0,0,255)",
-                    "line-color": "rgb(0,0,255)"
-                }
-            },
-            {
-                "selector": ".outlined",
-                "style": {
-                  "border-width": "3px",
-                  "border-color": "rgb(255,255,0)"
-                }
-            }
-        ],
-
-        layout: {
-            name: 'circle'
-        }
-    });
+    cy = cytoscape(cyOptions);
 
     updateVals();
 };
 
 function addNode() {
-    if (cy1.nodes().length >= 26) {
+    if (cy.nodes().length >= 26) {
         alert("no more");
         return;
     }
@@ -150,30 +178,30 @@ function addNode() {
         alert('MAX NODES');
         return;
     }
-    cy1.add({
+    cy.add({
         data: { id : nextId },
-        position: { x : cy1.container().clientWidth / 2, y : cy1.container().clientHeight / 2 }
+        position: { x : cy.container().clientWidth / 2, y : cy.container().clientHeight / 2 }
     })
     updateVals();
 };
 
 function removeElement() {
-    cy1.$(':selected').remove();
+    cy.$(':selected').remove();
     updateVals();
 }
 
 function saveGraph() {
-    if (cy1.elements().length == 0) {
+    if (cy.elements().length == 0) {
         alert('Graph is empty');
         return;
     }
 
-    if (cy1.nodes().length == 1) {
+    if (cy.nodes().length == 1) {
         alert('Graph must have at least 2 nodes');
         return;
     }
 
-    for (const node of cy1.nodes()) {
+    for (const node of cy.nodes()) {
         if (node.connectedEdges().empty()) {
             alert('Graph must be connected');
             return;
@@ -182,7 +210,7 @@ function saveGraph() {
 
     const graphs = JSON.parse(localStorage.getItem('storedGraphs') || '[]');
     for (let i = 0; i < graphs.length; i++) {
-        if (checkIdenticalElements(cy1.json().elements, graphs[i].graph.elements)) {
+        if (checkIdenticalElements(cy.json().elements, graphs[i].graph.elements)) {
             alert('Identical graph already saved');
             return;
         }
@@ -206,10 +234,10 @@ function saveGraph() {
         }
     }
 
-    cy1.elements().unselect();
+    cy.elements().unselect();
     const newGraph = {};
     newGraph.name = graphName;
-    newGraph.graph = cy1.json();
+    newGraph.graph = cy.json();
     graphs.push(newGraph);
     localStorage.setItem('storedGraphs', JSON.stringify(graphs));
 }
@@ -250,13 +278,13 @@ function addEdge() {
     const weightInput = document.getElementById('edgeWeightInput');
     const edgeChoice = document.getElementById('random');
 
-    if (cy1.nodes(':selected').length != 2) {
+    if (cy.nodes(':selected').length != 2) {
         alert('Please select 2 nodes only');
         return;
     }
 
-    const node1 = cy1.nodes(':selected')[0];
-    const node2 = cy1.nodes(':selected')[1];
+    const node1 = cy.nodes(':selected')[0];
+    const node2 = cy.nodes(':selected')[1];
 
     const sourceTargetList = [node1.data('id'), node2.data('id')].sort();
     const newEdgeId = sourceTargetList.join('');
@@ -270,32 +298,32 @@ function addEdge() {
     if (drawMode) {
         const choice = document.querySelector('input[name="edgeOptionGroup"]:checked').value;
         if (choice == 'random') {
-            cy1.add({
+            cy.add({
                 group: 'edges',
                 data: {
                     id: newEdgeId,
-                    source: cy1.nodes(':selected')[0].data('id'),
-                    target: cy1.nodes(':selected')[1].data('id'),
+                    source: cy.nodes(':selected')[0].data('id'),
+                    target: cy.nodes(':selected')[1].data('id'),
                     weight: Math.floor(Math.random() * 100)
                 }
             });
 
-            cy1.elements().unselect();
+            cy.elements().unselect();
             weightInput.value = '';
             return;
         }
         else if (choice == 'euclidean') {
-            cy1.add({
+            cy.add({
                 group: 'edges',
                 data: {
                     id: newEdgeId,
-                    source: cy1.nodes(':selected')[0].data('id'),
-                    target: cy1.nodes(':selected')[1].data('id'),
-                    weight: Math.floor(0.1 * getEuclideanDistance(cy1.nodes(':selected')[0], cy1.nodes(':selected')[1]))
+                    source: cy.nodes(':selected')[0].data('id'),
+                    target: cy.nodes(':selected')[1].data('id'),
+                    weight: Math.floor(0.1 * getEuclideanDistance(cy.nodes(':selected')[0], cy.nodes(':selected')[1]))
                 }
             });
 
-            cy1.elements().unselect();
+            cy.elements().unselect();
             weightInput.value = '';
             return;
         }
@@ -317,17 +345,17 @@ function addEdge() {
         return;
     }
 
-    cy1.add({
+    cy.add({
         group: 'edges',
         data: {
             id: newEdgeId,
-            source: cy1.nodes(':selected')[0].data('id'),
-            target: cy1.nodes(':selected')[1].data('id'),
+            source: cy.nodes(':selected')[0].data('id'),
+            target: cy.nodes(':selected')[1].data('id'),
             weight: weight
         }
     });
 
-    cy1.elements().unselect();
+    cy.elements().unselect();
     weightInput.value = '';
 
     updateVals();
@@ -345,19 +373,19 @@ function generateGraph() {
 
     // Generate nodes with random position in cy container
     for (let i = 0; i < nodeCount; i++) {
-        cy1.add({
+        cy.add({
             group: 'nodes',
             data: { id: crypto.randomUUID() },
-            position: { x : Math.random() * cy1.container().clientWidth, y : Math.random() * cy1.container().clientHeight}
+            position: { x : Math.random() * cy.container().clientWidth, y : Math.random() * cy.container().clientHeight}
         });
     }
   
-    const nodes = cy1.nodes();
+    const nodes = cy.nodes();
     
     // Generate edges between all nodes
     for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
-            cy1.add({
+            cy.add({
                 group: 'edges',
                 data: {
                     id: crypto.randomUUID(),
@@ -373,12 +401,12 @@ function generateGraph() {
 }
 
 function updateVals() {
-    document.getElementById('nodeCount').innerText = cy1.nodes().length;
-    document.getElementById('edgeCount').innerText = cy1.edges().length;
+    document.getElementById('nodeCount').innerText = cy.nodes().length;
+    document.getElementById('edgeCount').innerText = cy.edges().length;
 }
 
 function nextAvailableId() {
-    const existingIds = cy1.nodes().map(node => node.data('id')).sort();
+    const existingIds = cy.nodes().map(node => node.data('id')).sort();
 
     for (let i = 0; i < alphabet.length; i++) {
         if (!existingIds.includes(alphabet[i])) {
