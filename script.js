@@ -62,7 +62,8 @@ loadInitialGraphs().then(() => {
 // Loads the selected graph from the graph dropdown
 function loadGraph(dropdown) {
     if (!localStorage.getItem('storedGraphs')) {
-        alert('Graphs have been deleted.\nPlease refresh the page to load them again.');
+        alert('Graphs have been deleted.\nPage will be refreshed to reload initial graphs.');
+        window.location.reload();
         return;
     }
     

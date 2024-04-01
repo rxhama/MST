@@ -1,6 +1,7 @@
 [
   {
       "name": "Graph1",
+      "default": true,
       "graph": {
           "elements": {
             "nodes": [
@@ -607,6 +608,7 @@
       }
   },
   {   "name": "Graph2",
+      "default": true,
       "graph": {
           "elements": {
             "nodes": [
@@ -1183,6 +1185,7 @@
   },
   {   
     "name": "Graph3",
+    "default": true,
     "graph": {
       "elements": {
         "nodes": [

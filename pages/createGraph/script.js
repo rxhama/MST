@@ -1,3 +1,8 @@
+if (!localStorage.getItem('storedGraphs')) {
+    alert('Initial graphs have been deleted.\nYou will be redirected to the home page to reload initial graphs.');
+    window.location.href = '../../index.html';
+}
+
 let drawMode = false;
 const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
@@ -237,11 +242,13 @@ function saveGraph() {
     cy.elements().unselect();
     const newGraph = {};
     newGraph.name = graphName;
+    newGraph.default = false;
     newGraph.graph = cy.json();
     graphs.push(newGraph);
     localStorage.setItem('storedGraphs', JSON.stringify(graphs));
 }
 
+// Checks the if the JSON elements of 2 graphs are identical
 function checkIdenticalElements(elesA, elesB) {
     if (elesA.length != elesB.length) {
         return false;

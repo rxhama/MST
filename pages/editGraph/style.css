@@ -1,0 +1,11 @@
+#cy {
+    width: 60vw;
+    height: 60vh;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    border: 1px solid black;
+}

@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('navbar-container').innerHTML = data;
             document.getElementById('homeLink').setAttribute('href', isMainPage ? 'index.html' : '../../index.html');
             document.getElementById('sandboxLink').setAttribute('href', isMainPage ? 'pages/sandbox/sandbox.html' : '../sandbox/sandbox.html');
-            document.getElementById('createLink').setAttribute('href', isMainPage ? 'pages/createGraph/createGraph.html' : '../createGraph/createGraph.html');
+            document.getElementById('compareLink').setAttribute('href', isMainPage ? 'pages/compare/compare.html' : '../compare/compare.html');
+            document.getElementById('myGraphsLink').setAttribute('href', isMainPage ? 'pages/myGraphs/myGraphs.html' : '../myGraphs/myGraphs.html');
 
     });
 });
