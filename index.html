@@ -7,66 +7,26 @@
             const isMainPage = true;
         </script>
         <script src="pages/navbar/loadNavbar.js"></script>
-        <!-- Cytoscape.js library -->
-        <script src="cytoscape.min.js"></script>
-        <!-- Import util.js algorithms and AlgoController class -->
-        <script type="module" src="./utils.js"></script>
     </head>
     <body>
         <div class="container">
             <div id="navbar-container"></div>
-            <select id="graphDropdown">
-            </select>
-            <button id="resetBtn">Reset</button>
-            <select id="algoDropdown">
-                <option value="prims">Prim's</option>
-                <option value="kruskals">Kruskal's</option>
-                <option value="boruvkas">Boruvka's</option>
-                <option value="reverse-delete">Reverse Delete</option>
-                <option value="dcprims">Degree-constrained prims</option>
-                <option value="dckruskals">Degree-constrained kruskals</option>
-            </select>
-            <button id="startBtn" title="Start">Start</button>
-            <button id="toStart" title="To Start">
-                <img src="assets/beginning.png">
-            </button>
-            <button id="previous" title="Previous">
-                <img src="assets/back.png">
-            </button>
-            <button id="play" title="Play">
-                <img src="assets/play.png">
-            </button>
-            <button id="pause" title="Pause">
-                <img src="assets/pause.png">
-            </button>
-            <button id="next" title="Next">
-                <img src="assets/next.png">
-            </button>
-            <button id="toEnd" title="To End">
-                <img src="assets/end.png">
-            </button>
-            <br>
-            <br>
-            <label for="Show Rejected Edges:">Show Rejected Edges:</label>
-            <input type="checkbox" id="showRejectedEdgesCheckbox" checked>
-            <br>
-            <label for="nodeDegreeInput">Max Node Degree:</label>
-            <input type="number" id="nodeDegreeInput" min="2">
-            <br>
-            <span>Nodes: </span>
-            <span id="nodeCount"></span>
-            <br>
-            <span>Edges: </span>
-            <span id="edgeCount"></span>
-            <br><br><br><br>
-            <span>Minimum cost: </span>
-            <span id="minCostDisplay"></span>
-            <div id="edgeQueueDisplay"></div>
-
-            <div id="cy"></div>
+            <div class="content">
+                <h1>Minimum Spanning Tree Algo Visualiser</h1>
+                <div id="description">
+                    <p>
+                        This is a visualiser for Minimum Spanning Tree algorithms. To learn about the different algorithms, see below.
+                        If you want to create and edit your own graphs, click on 'My Graphs' in the navbar. You can run algorithms on these graphs
+                        in 'Sandbox' page, and compare algorithms side by side in the 'Compare' page.
+                    </p>
+                </div>
+                <div id="algorithms">
+                    <p>
+                        Algorithms:
+                        Prim's, Kruskal's
+                    </p>
+                </div>
+            </div>
         </div>
-
-        <!-- Initialize cytoscape instance -->
-        <script type="module" src="./script.js"></script>
     </body>
 </html>

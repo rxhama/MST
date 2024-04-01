@@ -1,5 +1,12 @@
 import { AlgoController, primsAlgorithm, kruskalsAlgorithm, boruvkasAlgorithm, reverseDeleteAlgorithm, degreeConstrainedPrims, degreeConstrainedKruskals, newBoruvkasAlgorithm } from '../../utils.js';
 
+let graphs = localStorage.getItem('storedGraphs');
+if (!graphs) {
+    alert('Graphs have been deleted.\nPage will be redirected to the home page to reload initial graphs.');
+    window.location.href = '../../index.html';
+}
+graphs = JSON.parse(graphs);
+
 // Getting the DOM elements for ease of use later on
 const cyContainer = document.getElementById('cy');
 const minCostDisplay = document.getElementById('minCostDisplay');
@@ -22,20 +29,6 @@ algoDisplays.minCostDisplay = minCostDisplay;
 algoDisplays.edgeQueueDisplay = edgeQueueDisplay;
 algoDisplays.cyContainer = cyContainer;
 
-// Loads the initial graphs from initialGraphs.json, if not already loaded
-// and saves them to localStorage
-async function loadInitialGraphs() {
-    if (localStorage.getItem('storedGraphs') == null) {
-        const response = await fetch('initialGraphs.json');
-        const graphs = await response.json();
-        console.log('Graphs loaded from initialGraphs.json');
-        localStorage.setItem('storedGraphs', JSON.stringify(graphs));
-    }
-    else {
-        console.log('Graphs already loaded');
-    }
-}
-
 // Initialise this page's algoController and it's buttons' even listeners
 const algoController = new AlgoController();
 document.getElementById('play').addEventListener('click', () => algoController.play());
@@ -50,24 +43,14 @@ document.getElementById('toEnd').addEventListener('click', () => algoController.
 let cy = cytoscape({
     container: cyContainer, // container to render in
 });
-loadInitialGraphs().then(() => {
-    let graphs = JSON.parse(localStorage.getItem('storedGraphs') || '[]');
-    cy.json(graphs[0].graph);
-    cy.fit();
-    
-    populateDropdown();
-    updateVals();
-});
+cy.json(graphs[0].graph);
+cy.fit();
+
+populateDropdown();
+updateVals();
 
 // Loads the selected graph from the graph dropdown
 function loadGraph(dropdown) {
-    if (!localStorage.getItem('storedGraphs')) {
-        alert('Graphs have been deleted.\nPage will be refreshed to reload initial graphs.');
-        window.location.reload();
-        return;
-    }
-    
-    const graphs = JSON.parse(localStorage.getItem('storedGraphs') || '[]');
     const selectedGraph = graphs[dropdown.value].graph;
     cy.destroy();
     cy = cytoscape({
@@ -83,12 +66,11 @@ graphDropdown.addEventListener('change', e => {
     loadGraph(e.target)
 });
 
-// Populates the graph dropdown with the graphs stored in localStorage
+// Populates the graph dropdown with the graphs retrieved from localStorage
 function populateDropdown() {
     const dropdown = document.getElementById('graphDropdown');
     dropdown.innerHTML = '';
-
-    const graphs = JSON.parse(localStorage.getItem('storedGraphs') || '[]');
+    
     for (let i = 0; i < graphs.length; i++) {
         const option = document.createElement('option');
         option.value = i;

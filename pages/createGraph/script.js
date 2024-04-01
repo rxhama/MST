@@ -1,10 +1,16 @@
-if (!localStorage.getItem('storedGraphs')) {
+let graphs = localStorage.getItem('storedGraphs');
+if (!graphs) {
     alert('Initial graphs have been deleted.\nYou will be redirected to the home page to reload initial graphs.');
     window.location.href = '../../index.html';
 }
+graphs = JSON.parse(graphs);
 
 let drawMode = false;
 const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+
+window.addEventListener('beforeunload', () => {
+    sessionStorage.removeItem('editGraph');
+});
 
 const cyOptions = {
     container: document.getElementById('cy'),
@@ -162,7 +168,25 @@ const cyOptions = {
     }
 };
 
-let cy = cytoscape(cyOptions);
+let graphIndex = sessionStorage.getItem('editGraph');
+
+let cy = cytoscape({
+    container: document.getElementById('cy')
+});
+
+if (graphIndex) {
+    cy.json(graphs[graphIndex].graph);
+}
+else {
+    cy = cytoscape(cyOptions);
+}
+
+function cancel() {
+    if (graphIndex) {
+        sessionStorage.removeItem('editGraph');
+    }
+    window.location.href = '../myGraphs/myGraphs.html';
+}
 
 function deleteGraph() {
     cy.destroy();
@@ -212,16 +236,18 @@ function saveGraph() {
             return;
         }
     }
-
-    const graphs = JSON.parse(localStorage.getItem('storedGraphs') || '[]');
+    
     for (let i = 0; i < graphs.length; i++) {
+        if (graphIndex && graphIndex == i) {
+            continue;
+        }
         if (checkIdenticalElements(cy.json().elements, graphs[i].graph.elements)) {
             alert('Identical graph already saved');
             return;
         }
     }
 
-    const graphName = prompt('Enter graph name');
+    const graphName = prompt('Enter graph name', graphIndex ? graphs[graphIndex].name : '');
     if (graphName == '' || graphName == null) {
         alert('Please enter a graph name');
         return;
@@ -232,19 +258,32 @@ function saveGraph() {
         return;
     }
 
-    for (const graph of graphs) {
-        if (graph.name == graphName) {
+    for (let i = 0; i < graphs.length; i++) {
+        if (graphIndex && graphIndex == i) {
+            continue;
+        }
+        if (graphs[i].name == graphName) {
             alert('Graph name already exists');
             return;
         }
     }
 
     cy.elements().unselect();
-    const newGraph = {};
-    newGraph.name = graphName;
-    newGraph.default = false;
-    newGraph.graph = cy.json();
-    graphs.push(newGraph);
+    
+    if (graphIndex) {
+        graphs[graphIndex].name = graphName;
+        graphs[graphIndex].graph = cy.json();
+        sessionStorage.removeItem('editGraph');
+        window.location.href = '../myGraphs/myGraphs.html';
+    }
+    else {
+        const newGraph = {};
+        newGraph.name = graphName;
+        newGraph.default = false;
+        newGraph.graph = cy.json();
+        graphs.push(newGraph);
+    }
+
     localStorage.setItem('storedGraphs', JSON.stringify(graphs));
 }
 

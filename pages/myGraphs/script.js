@@ -1,5 +1,6 @@
 if (!localStorage.getItem('storedGraphs')) {
-    alert('Graphs have been deleted.\nPlease go back to Home page to load them again.');
+    alert('Graphs have been deleted.\nRedirecting to home page to reload initial graphs.');
+    window.location.href = '../../index.html';
 }
 
 function populateList() {
@@ -17,7 +18,7 @@ function populateList() {
             editBtn.innerText = 'Edit';
             editBtn.addEventListener('click', () => {
                 sessionStorage.setItem('editGraph', i);
-                window.location.href = '../editGraph/editGraph.html';
+                window.location.href = '../createGraph/createGraph.html';
             });
             
             const deleteBtn = document.createElement('button');
