@@ -1,13 +1,14 @@
-if (!localStorage.getItem('storedGraphs')) {
+let graphs = localStorage.getItem('storedGraphs');
+if (!graphs) {
     alert('Graphs have been deleted.\nRedirecting to home page to reload initial graphs.');
     window.location.href = '../../index.html';
 }
+graphs = JSON.parse(graphs);
 
 function populateList() {
     const graphList = document.getElementById('graphList');
     graphList.innerHTML = '';
 
-    const graphs = JSON.parse(localStorage.getItem('storedGraphs') || '[]');
     const list = document.createElement('ul');
 
     for (let i = 0; i < graphs.length; i++) {
@@ -38,3 +39,11 @@ function populateList() {
 }
 
 populateList();
+
+function createGraph() {
+    if (graphs.length >= 20) {
+        alert('A maximum of 20 graphs can be created.\nPlease delete some graphs to create new ones.');
+        return;
+    }
+    window.location.href = '../createGraph/createGraph.html'
+}
