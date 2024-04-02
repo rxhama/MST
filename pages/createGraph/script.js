@@ -282,8 +282,8 @@ function saveGraph() {
         newGraph.default = false;
         newGraph.graph = cy.json();
         graphs.push(newGraph);
-        if (graphs.length >= 20) {
-            alert('Graph saved. A maximum of 20 graphs can be saved\nso no further graphs can be created.\nPlease delete some graphs in order to create new ones.');
+        if (graphs.length >= 30) {
+            alert('Graph saved. A maximum of 30 graphs can be saved\nso no further graphs can be created.\nPlease delete some graphs in order to create new ones.');
             window.location.href = '../myGraphs/myGraphs.html';
         }
     }

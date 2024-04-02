@@ -41,8 +41,8 @@ function populateList() {
 populateList();
 
 function createGraph() {
-    if (graphs.length >= 20) {
-        alert('A maximum of 20 graphs can be created.\nPlease delete some graphs to create new ones.');
+    if (graphs.length >= 30) {
+        alert('A maximum of 30 graphs can be created.\nPlease delete some graphs to create new ones.');
         return;
     }
     window.location.href = '../createGraph/createGraph.html'
