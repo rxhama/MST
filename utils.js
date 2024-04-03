@@ -591,7 +591,7 @@ export function reverseDeleteAlgorithm(graph, showRejectedEdges) {
 * @returns {array} [steps, accepted] - steps = the array of steps to be used by the AlgoController
 * accepted = if the algo was able to find the MST or not
 */
-export function boruvkasAlgorithm(graph, showRejectedEdges) {
+export function boruvkasAlgorithm(graph) {
     const steps = [];
     let mstCost = 0; // Cost of minimum spanning tree at each step
 
@@ -1172,4 +1172,298 @@ export function newBoruvkasAlgorithm(graph, showRejectedEdges) {
     console.log('BORUVKAS COMPLETED!!!');
     
     return [steps, true];
+}
+
+class Ant {
+    constructor(initNode) {
+        this.initNode = initNode;
+        this.currNode = initNode;
+        this.visitedNodes = [this.initNode];
+    }
+
+    reset() {
+        this.currNode = this.initNode;
+        this.visitedNodes = [this.initNode];
+    }
+}
+
+/*
+* Parallel Ant Colony Optimisation Algorithm for DCMST
+*/
+export function pacoAlgorithm(graph, maxDegree) {
+    const ants = [];
+    for (const node of graph.nodes()) {
+        const ant = new Ant(node.data('id'));
+        ants.push(ant);
+    }
+
+    const resetAnts = function() {
+        for (const ant of ants) {
+            ant.reset();
+        }
+    }
+
+    // Number of nodes in the graph
+    const n = graph.nodes().length;
+
+    // Getting the max and min weights in the graph
+    const maxWeight = graph.edges().max(edge => edge.data('weight')).value;
+    const minWeight = graph.edges().min(edge => edge.data('weight')).value;
+
+    // The max and min pheromone levels
+    const maxPheromone = 1000 * ((maxWeight - minWeight) + (maxWeight - minWeight) / 3);
+    const minPheromone = (maxWeight - minWeight) / 3;
+
+    // The rate at which the pheromone evaporates
+    let evapFactor = 0.5;
+    // Factor to enhance pheromone levels of good edges
+    let enhanceFactor = 1.5;
+    // evaporate good edges after no improvements
+    const evapGoodEdges = function() {
+        return Math.random() * 0.2 + 0.1;
+    }
+
+    // Get initial pheromone level of an edge
+    const getIP = function(edgeId) {
+        return (maxWeight - graph.$(`#${edgeId}`).data('weight')) + (maxWeight - minWeight) / 3;
+    }
+
+    // Returns an edge at random, proportionally to the edge's pheromone level
+    const pickRandomEdgeByPheromone = function(connectedEdges) {
+        const totalPheromone = connectedEdges.reduce((total, edge) => total + edge.data('weight'), 0);
+        
+        let rand = Math.random() * totalPheromone;
+        for (let i = 0; i < connectedEdges.length; i++) {
+            const edge = connectedEdges[i];
+            rand -= edge.data('weight');
+            if (rand <= 0) {
+                return edge;
+            }
+        }
+        return connectedEdges[connectedEdges.length - 1];
+    }
+    
+    // Creating the pheromone graph
+    let pheromoneGraph = cytoscape({
+        headless: true,
+        elements: graph.elements().clone().jsons()
+    })
+
+    // Initialise all initial pheromones IP in the pheromone graph
+    for (const edge of pheromoneGraph.edges()) {
+        edge.data('weight', getIP(edge.data('id')));
+    }
+
+    // Keeps track of how many times an edge has been visited by the ants in between each pheromone update
+    const edgeVisits = {};
+    for (const edge of pheromoneGraph.edges()) {
+        edgeVisits[edge.data('id')] = 0;
+    }
+
+    // Resets the edge visits
+    const resetEdgeVisits = function() {
+        for (const edge in edgeVisits) {
+            edgeVisits[edge] = 0;
+        }
+    }
+
+    // Updates the pheromone levels for all the edges in the pheromone graph
+    const updateEdgePheromones = function() {
+        for (const edge of pheromoneGraph.edges()) {
+            const edgeId = edge.data('id');
+            const p = edge.data('weight');
+            edge.data('weight', (1 - evapFactor) * p + edgeVisits[edgeId] * getIP(edgeId));
+            if (edge.data('weight') > maxPheromone) {
+                edge.data('weight', maxPheromone - getIP(edgeId));
+            }
+            if (edge.data('weight') < minPheromone) {
+                edge.data('weight', minPheromone + getIP(edgeId));
+            }
+        }
+
+        resetEdgeVisits();
+    }
+
+    // How many steps/moves the ants will take
+    const steps = 25; // ==== 75 ====
+    const s1 = Math.floor(steps/3);
+    const s2 = Math.floor(2 * steps/3);
+
+    // Keeps track of best tree and its cost
+    let bestTree = null;
+    let minCost = 999999999999999;
+
+    let noImprovement = 0;
+    for (let i = 1; i < 1000; i++) { // ==== 10,000 ====
+        noImprovement++;
+
+        if (noImprovement == 250) { // ==== 2500 ====
+            console.log("No improvement after 2500 cycles");
+            if (bestTree) {
+                graph.nodes().addClass('chosen');
+                for (const edge of bestTree) {
+                    graph.$(`#${edge.data('id')}`).addClass('chosen');
+                }
+                console.log(bestTree.reduce((sum, edge) => sum + edge.data('weight'), 0));
+            }
+            return;
+        }
+
+        if (i % 50 == 0) { // ==== 500 ====
+            console.log("Updating factors");
+            evapFactor *= 0.95;
+            enhanceFactor *= 1.05;
+        }
+
+        if (noImprovement % 10 == 0) { // ==== 100 ====
+            console.log("No improvement. Evaporating good edges");
+            if (bestTree) {
+                console.log("Evaporating good edges");
+                for (const edge of bestTree) {
+                    const edgeId = edge.data('id');
+                    const p = pheromoneGraph.$(`#${edgeId}`).data('weight');
+                    pheromoneGraph.$(`#${edgeId}`).data('weight', p * evapGoodEdges());
+                }
+            }
+            else {
+                console.log("Evaporating all edges");
+                for (const edge of pheromoneGraph.edges()) {
+                    const edgeId = edge.data('id');
+                    const p = pheromoneGraph.$(`#${edgeId}`).data('weight');
+                    pheromoneGraph.$(`#${edgeId}`).data('weight', p * evapGoodEdges());
+                }
+            }
+        }
+
+        for (let s = 0; s < steps; s++) {
+            if (s == s1 || s == s2) {
+                // update pheromones
+                updateEdgePheromones();
+            }
+            for (const ant of ants) {
+                const connectedEdges = pheromoneGraph.$(`#${ant.currNode}`).connectedEdges();
+
+                // if ant visits a node it has visited 5 times, skip the ant's step
+                let attempts = 0;
+                while (attempts < 5) {
+                    // select edge
+                    const edge = pickRandomEdgeByPheromone(connectedEdges);
+                    // get next node
+                    const nextNode = edge.source().data('id') == ant.currNode ? edge.target().data('id') : edge.source().data('id');
+                    if (!ant.visitedNodes.includes(nextNode)) {
+                        // add edge to pheromone update
+                        edgeVisits[edge.data('id')] += 1;
+                        // move ant to next node
+                        ant.currNode = nextNode;
+                        // add node to ants visited nodes
+                        ant.visitedNodes.push(nextNode);
+                        break;
+                    }
+                    else {
+                        attempts++;
+                    }
+                }
+            }
+        }
+        resetAnts();
+
+        // update pheromones
+        updateEdgePheromones();
+        
+        // construct tree
+        
+        let groupDict = {};
+        graph.nodes().forEach(node => {
+            const nodeId = node.data('id');
+            groupDict[nodeId] = graph.collection();
+            groupDict[nodeId] = groupDict[nodeId].union(node);
+        });
+        
+        let edgeQueue = pheromoneGraph.edges().sort(function(a, b) {
+            return b.data('weight') - a.data('weight');
+        });
+
+        let candidateIndex = 0;
+
+        let getEdgeCandidates = function() {
+            let temp = edgeQueue.slice(candidateIndex, 5 * n).map(edge => graph.$(`#${edge.data('id')}`));
+            candidateIndex += 5 * n;
+            temp = temp.sort(function(a, b) {
+                return a.data('weight') - b.data('weight');
+            });
+            return temp;
+        }
+
+        let edgeCandidates = getEdgeCandidates();
+
+        let T = graph.collection();
+        let constructed = true;
+        while (T.length != n - 1) {
+            if (edgeCandidates.length != 0) {
+                const edge = edgeCandidates.shift();
+                const sourceNode = edge.source();
+                const targetNode = edge.target();
+                const sourceId = sourceNode.data('id');
+                const targetId = targetNode.data('id');
+                const sourceDegree = sourceNode.connectedEdges(e => T.contains(e)).length;
+                const targetDegree = targetNode.connectedEdges(e => T.contains(e)).length;
+                if (!T.contains(edge) && !groupDict[sourceId].same(groupDict[targetId]) &&
+                    sourceDegree < maxDegree && targetDegree < maxDegree) {
+                    
+                        T = T.union(edge);
+                        groupDict[sourceId] = groupDict[sourceId].union(groupDict[targetId]);
+                        groupDict[sourceId].forEach(function(node) {
+                            groupDict[node.data('id')] = groupDict[sourceId];
+                        });
+                }
+            }
+            else {
+                edgeCandidates = getEdgeCandidates();
+                if (edgeCandidates.length == 0) {
+                    constructed = false;
+                    break;
+                }
+            }
+        }
+
+        if (constructed) {
+            const treeCost = T.reduce((sum, edge) => sum + edge.data('weight'), 0);
+            if (treeCost < minCost) {
+                console.log(`New best tree found!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ${treeCost}`);
+                minCost = treeCost;
+                bestTree = T;
+                noImprovement = 0;
+                for (const edge of bestTree) {
+                    const edgeId = edge.data('id');
+                    const pheromoneEdge = pheromoneGraph.$(`#${edgeId}`);
+                    const p = pheromoneEdge.data('weight');
+                    pheromoneEdge.data('weight', enhanceFactor * p);
+                    if (pheromoneEdge.data('weight') > maxPheromone) {
+                        pheromoneEdge.data('weight', maxPheromone - getIP(edgeId));
+                    }
+                    if (pheromoneEdge.data('weight') < minPheromone) {
+                        pheromoneEdge.data('weight', minPheromone + getIP(edgeId));
+                    }
+                }
+            }
+        }
+
+        // if tree cost < minCost, update minCost and bestTree
+        // enhance pheromones for edges in best tree B
+        // if no improvement in 100 cycles
+            // evaporate pheromone from edges of the best tree B
+    }
+    if (bestTree) {
+        graph.nodes().addClass('chosen');
+        for (const edge of bestTree) {
+            graph.$(`#${edge.data('id')}`).addClass('chosen');
+        }
+        console.log(bestTree.reduce((sum, edge) => sum + edge.data('weight'), 0));
+        return;
+    }
+    else {
+        console.log('No solution found');
+        return;
+    }
+    return bestTree;
 }

@@ -1,4 +1,4 @@
-import { AlgoController, primsAlgorithm, kruskalsAlgorithm, boruvkasAlgorithm, reverseDeleteAlgorithm, degreeConstrainedPrims, degreeConstrainedKruskals, newBoruvkasAlgorithm } from '../../utils.js';
+import { AlgoController, primsAlgorithm, kruskalsAlgorithm, boruvkasAlgorithm, reverseDeleteAlgorithm, degreeConstrainedPrims, degreeConstrainedKruskals, newBoruvkasAlgorithm, pacoAlgorithm } from '../../utils.js';
 
 let graphs = localStorage.getItem('storedGraphs');
 if (!graphs) {
@@ -45,6 +45,8 @@ let cy = cytoscape({
 });
 cy.json(graphs[0].graph);
 cy.fit();
+
+window.cy = cy;
 
 populateDropdown();
 updateVals();
@@ -102,10 +104,10 @@ function start() {
     }
     else if (selectedAlgo == 'boruvkas') {
         if (cy.nodes().length > 26) {
-            algoController.setSteps(cy, boruvkasAlgorithm(cy, showRejectedEdges), algoDisplays);
+            algoController.setSteps(cy, boruvkasAlgorithm(cy), algoDisplays);
         }
         else {
-            algoController.setSteps(cy, newBoruvkasAlgorithm(cy, showRejectedEdges), algoDisplays);
+            algoController.setSteps(cy, newBoruvkasAlgorithm(cy), algoDisplays);
         }
     }
     else if (selectedAlgo == 'reverse-delete') {
@@ -120,6 +122,9 @@ function start() {
         const steps = degreeConstrainedKruskals(cy, showRejectedEdges,  nodeDegreeInput.value);
         if (!steps) return;
         algoController.setSteps(cy, steps, algoDisplays);
+    }
+    else if (selectedAlgo == 'paco') {
+        algoController.setSteps(cy, pacoAlgorithm(cy, nodeDegreeInput.value), algoDisplays);
     }
 };
 startBtn.addEventListener("click", start);
