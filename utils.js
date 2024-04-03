@@ -1315,26 +1315,6 @@ export function pacoAlgorithm(graph, maxDegree) {
             enhanceFactor *= 1.05;
         }
 
-        if (noImprovement % 10 == 0) { // ==== 100 ====
-            console.log("No improvement. Evaporating good edges");
-            if (bestTree) {
-                console.log("Evaporating good edges");
-                for (const edge of bestTree) {
-                    const edgeId = edge.data('id');
-                    const p = pheromoneGraph.$(`#${edgeId}`).data('weight');
-                    pheromoneGraph.$(`#${edgeId}`).data('weight', p * evapGoodEdges());
-                }
-            }
-            else {
-                console.log("Evaporating all edges");
-                for (const edge of pheromoneGraph.edges()) {
-                    const edgeId = edge.data('id');
-                    const p = pheromoneGraph.$(`#${edgeId}`).data('weight');
-                    pheromoneGraph.$(`#${edgeId}`).data('weight', p * evapGoodEdges());
-                }
-            }
-        }
-
         for (let s = 0; s < steps; s++) {
             if (s == s1 || s == s2) {
                 // update pheromones
@@ -1433,19 +1413,42 @@ export function pacoAlgorithm(graph, maxDegree) {
                 minCost = treeCost;
                 bestTree = T;
                 noImprovement = 0;
-                for (const edge of bestTree) {
-                    const edgeId = edge.data('id');
-                    const pheromoneEdge = pheromoneGraph.$(`#${edgeId}`);
-                    const p = pheromoneEdge.data('weight');
-                    pheromoneEdge.data('weight', enhanceFactor * p);
-                    if (pheromoneEdge.data('weight') > maxPheromone) {
-                        pheromoneEdge.data('weight', maxPheromone - getIP(edgeId));
-                    }
-                    if (pheromoneEdge.data('weight') < minPheromone) {
-                        pheromoneEdge.data('weight', minPheromone + getIP(edgeId));
-                    }
+            }
+        }
+
+        if (bestTree) {
+            for (const edge of bestTree) {
+                const edgeId = edge.data('id');
+                const pheromoneEdge = pheromoneGraph.$(`#${edgeId}`);
+                const p = pheromoneEdge.data('weight');
+                pheromoneEdge.data('weight', enhanceFactor * p);
+                if (pheromoneEdge.data('weight') > maxPheromone) {
+                    pheromoneEdge.data('weight', maxPheromone - getIP(edgeId));
+                }
+                if (pheromoneEdge.data('weight') < minPheromone) {
+                    pheromoneEdge.data('weight', minPheromone + getIP(edgeId));
                 }
             }
+        }
+        
+        if (noImprovement % 10 == 0) { // ==== 100 ====
+            console.log("No improvement. Evaporating good edges");
+            if (bestTree) {
+                console.log("Evaporating good edges");
+                for (const edge of bestTree) {
+                    const edgeId = edge.data('id');
+                    const p = pheromoneGraph.$(`#${edgeId}`).data('weight');
+                    pheromoneGraph.$(`#${edgeId}`).data('weight', p * evapGoodEdges());
+                }
+            }
+            // else {
+            //     console.log("Evaporating all edges");
+            //     for (const edge of pheromoneGraph.edges()) {
+            //         const edgeId = edge.data('id');
+            //         const p = pheromoneGraph.$(`#${edgeId}`).data('weight');
+            //         pheromoneGraph.$(`#${edgeId}`).data('weight', p * evapGoodEdges());
+            //     }
+            // }
         }
 
         // if tree cost < minCost, update minCost and bestTree
@@ -1453,6 +1456,7 @@ export function pacoAlgorithm(graph, maxDegree) {
         // if no improvement in 100 cycles
             // evaporate pheromone from edges of the best tree B
     }
+    
     if (bestTree) {
         graph.nodes().addClass('chosen');
         for (const edge of bestTree) {
