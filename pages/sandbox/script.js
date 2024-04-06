@@ -46,8 +46,6 @@ let cy = cytoscape({
 cy.json(graphs[0].graph);
 cy.fit();
 
-window.cy = cy;
-
 populateDropdown();
 updateVals();
 
