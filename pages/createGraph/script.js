@@ -180,6 +180,7 @@ if (graphIndex) {
 else {
     cy = cytoscape(cyOptions);
 }
+updateVals();
 
 function cancel() {
     if (graphIndex) {
