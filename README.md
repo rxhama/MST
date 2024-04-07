@@ -15,8 +15,7 @@ This system requires Node.js and NPM (Node Package Manager) to be installed:
 
 In your system's terminal, run the following commands. Wait until each process is finished to run the next:
 
-1. Navigate to project folder 'MST' until you see index.html etc.
-   cd MST
+1. Navigate to project folder 'MST' (cd MST) until you are in the directory containing index.html.
 
 5. npm install
 
