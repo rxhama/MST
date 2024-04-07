@@ -23,10 +23,10 @@ In your system's terminal, navigate to the project folder and run the following 
 
 1. npm install
 
-tseting:
-'''
+testing:
+```
 npm install
-'''
+```
 
 ## Run
 
