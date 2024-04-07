@@ -21,7 +21,9 @@ In the following sections, project folder refers to the 'MST' folder/the directo
 
 In your system's terminal, navigate to the project folder and run the following command:
 
-```npm install```
+```
+npm install
+```
 
 ## Run
 
