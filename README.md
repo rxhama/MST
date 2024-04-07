@@ -19,6 +19,10 @@ In your system's terminal, run the following commands. Wait until each process i
 
 5. npm install
 
-6. npx serve
+## Run
 
-7. The URL should be copied to your clipboard, paste it in your browser. If not copied, copy from terminal manually.
+In your system's terminal, navigate to project folder 'MST' until you are in the directory containing index.html.
+
+1. npx serve
+
+The URL should be copied to your clipboard, paste it in your browser. If not copied, copy from terminal manually.
