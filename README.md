@@ -2,13 +2,13 @@
 
 This system requires Node.js and NPM (Node Package Manager) to be installed:
 
-Go to https://nodejs.org/en
+1. Go to https://nodejs.org/en
 
-1. Navigate to 'Download' in the navbar
+2. Navigate to 'Download' in the navbar
 
-2. Select the latest 'LTS' version and select your OS and system architecture
+3. Select the latest 'LTS' version and select your OS and system architecture
 
-3. Once installer is downloaded, run it (run as administrator if possible).
+4. Once installer is downloaded, run it (run as administrator if possible).
    Leave all options as default. Follow the instructions closely.
 
 ## Installation
