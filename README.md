@@ -29,7 +29,9 @@ Once installation process is done, anytime you want to launch the project, just 
 
 In your system's terminal, navigate to project folder and run:
 
-1. npx serve
+```
+npx serve
+```
 
 The URL should be copied to your clipboard, paste it in your browser. If not copied, copy from terminal manually.
 
@@ -38,4 +40,6 @@ The URL should be copied to your clipboard, paste it in your browser. If not cop
 
 If you want to run tests, navigate to project folder and run:
 
-1. npm test
+```
+npm test
+```
