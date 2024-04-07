@@ -1,4 +1,4 @@
-All code in this repository is written and belongs to me, except for the following:
+The entire contents of this repository is written and belongs to me, except for the following:
 
 1. cytoscape.min.js - Cytoscape.js library (https://github.com/cytoscape/cytoscape.js)
 
@@ -9,11 +9,11 @@ All code in this repository is written and belongs to me, except for the followi
 
 This system requires Node.js and NPM (Node Package Manager) to be installed:
 
-1. Go to https://nodejs.org/en
+1. Go to https://nodejs.org/en.
 
-2. Navigate to 'Download' in the navbar
+2. Navigate to 'Download' in the navbar.
 
-3. Select the latest 'LTS' version and select your OS and system architecture
+3. Select the latest 'LTS' version and select your OS and system architecture.
 
 4. Once installer is downloaded, run it (run as administrator if possible).
    Leave all options as default. Follow the instructions closely.
