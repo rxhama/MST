@@ -1,3 +1,10 @@
+All code in this repository is written and belongs to me, except for the following:
+
+1. cytoscape.min.js - Cytoscape.js library (https://github.com/cytoscape/cytoscape.js)
+
+2. Icons in assets/ folder - Were taken from Flaticon (https://www.flaticon.com/free-icons/media-control) 
+
+
 ## Requirements
 
 This system requires Node.js and NPM (Node Package Manager) to be installed:
