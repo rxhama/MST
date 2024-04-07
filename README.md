@@ -9,13 +9,13 @@ Go to https://nodejs.org/en
 2. Select the latest 'LTS' version and select your OS and system architecture
 
 3. Once installer is downloaded, run it (run as administrator if possible).
-   Leave all options as default
+   Leave all options as default.
 
-4. In termianl, navigate to project folder 'MST' until you see index.html etc.
+4. In your system's terminal, navigate to project folder 'MST' until you see index.html etc.
    cd MST
 
 5. Run 'npm install'
 
 6. Once packages have been installed, run 'npx serve'
 
-7. The URL should be copied to your clipboard, paste it in your browser
+7. The URL should be copied to your clipboard, paste it in your browser. If not copied, copy from terminal manually.
