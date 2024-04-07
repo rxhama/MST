@@ -11,7 +11,7 @@ This system requires Node.js and NPM (Node Package Manager) to be installed:
 4. Once installer is downloaded, run it (run as administrator if possible).
    Leave all options as default. Follow the instructions closely.
 
-## Installation
+## First Time Installation
 
 In your system's terminal, run the following commands. Wait until each process is finished to run the next:
 
@@ -20,6 +20,8 @@ In your system's terminal, run the following commands. Wait until each process i
 5. npm install
 
 ## Run
+
+Once installation process is done, anytime you want to launch the project, just follow the instructions in this section.
 
 In your system's terminal, navigate to project folder 'MST' until you are in the directory containing index.html.
 
