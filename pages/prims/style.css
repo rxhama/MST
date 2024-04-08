@@ -10,3 +10,7 @@
     margin: auto;
     border: 1px solid black;
 }
+
+#title {
+    text-align: center;
+}
