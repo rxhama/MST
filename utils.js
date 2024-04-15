@@ -231,6 +231,14 @@ export class AlgoController {
             });
             this.displays.edgeQueueDisplay.appendChild(list);
         }
+
+        // Update explanation display if step has an explanation (for the MST teaching pages)
+        if (step.explanation) {
+            this.displays.explanationDisplay.innerHTML = step.explanation;
+        }
+        else {
+            this.displays.explanationDisplay.innerHTML = '';
+        }
     }
 }
 
