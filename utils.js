@@ -236,9 +236,6 @@ export class AlgoController {
         if (step.explanation) {
             this.displays.explanationDisplay.innerHTML = step.explanation;
         }
-        else {
-            this.displays.explanationDisplay.innerHTML = '';
-        }
     }
 }
 
