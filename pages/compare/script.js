@@ -42,7 +42,6 @@ algoDisplays2.cyContainer = cyContainer2;
 const algoController1 = new AlgoController();
 const algoController2 = new AlgoController();
 const compareController = new CompareController(algoController1, algoController2);
-window.compareController = compareController;
 document.getElementById('play').addEventListener('click', () => compareController.play());
 document.getElementById('pause').addEventListener('click', () => compareController.pause());
 document.getElementById('next').addEventListener('click', () => compareController.next());
