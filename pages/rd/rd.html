@@ -15,7 +15,55 @@
         <div class="container">
             <div id="navbar-container"></div>
             <h1 id="title">Reverse-Delete</h1>
-            <div id="cy"></div>
+            <p id="algo-desc">
+                The Reverse-Delete algorithm is a greedy MST algorithm. It is essentially the reverse of
+                <br><a href="../kruskals/kruskals.html">Kruskal's algorithm</a> (see page for explanation
+                of Kruskal's algorithm).<br>It initially sorts all the edges of the graph in
+                descending order of their weights into an edge queue, and all edges of the graph
+                are already in the MST. At each step, the edge at the front of the edge queue
+                (highest weight) is popped from the edge queue. If removing this edge
+                from the MST does not further disconnect the graph (i.e. split it into more than 1
+                group/component), then the edge is removed from the current MST, else the edge is
+                discarded and we move on. This process continues until the MST has V - 1 edges,
+                where V is the number of nodes/vertices in the graph.
+                <br>
+                <br>
+                Look below for an example run of the Reverse-Delete algorithm:
+            </p>
+            <div class="bigContainer">
+                <div id="cy"></div>
+                <div class="displays">
+                    <div class="left-column">
+                        <span>Minimum cost:</span>
+                        <div id="minCostDisplay" class="top-box"></div>
+                        <span>Edge queue:</span>
+                        <div id="edgeQueueDisplay" class="bottom-box"></div>
+                    </div>
+                    <div id="explanationDisplay"></div>
+                </div>
+            </div>
+            <div class="media-buttons">
+                <button class="btn" id="toStart" title="To Start">
+                    <img src="../../assets/beginning.png">
+                </button>
+                <button class="btn" id="previous" title="Previous">
+                    <img src="../../assets/back.png">
+                </button>
+                <button class="btn" id="play" title="Play">
+                    <img src="../../assets/play.png">
+                </button>
+                <button class="btn" id="pause" title="Pause">
+                    <img src="../../assets/pause.png">
+                </button>
+                <button class="btn" id="next" title="Next">
+                    <img src="../../assets/next.png">
+                </button>
+                <button class="btn" id="toEnd" title="To End">
+                    <img src="../../assets/end.png">
+                </button>
+            </div>
         </div>
+
+        <script type="module" src="./script.js"></script>
     </body>
 </html>

@@ -47,8 +47,8 @@ cy.elements().unselectify();
 
 let steps = kruskalsAlgorithm(cy, true);
 steps[0][0].explanation = `The edges of the graph have been sorted in<br>
-                            non-decreasing order into the edge queue<br>
-                            (yellow lines) on the left.<br><br>
+                            ascending order (based on their weights) into<br>
+                            the edge queue (yellow lines) on the left.<br><br>
                             We will take the first edge hg with a weight of 1<br>
                             from the edge queue.`;
 steps[0][1].explanation = `Adding the edge hg to the MST doesn't create<br>

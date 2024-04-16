@@ -1,4 +1,4 @@
-import { AlgoController, primsAlgorithm } from '../../utils.js'; // REMOVE KRUSKALSSS??????????????????????????
+import { AlgoController, primsAlgorithm } from '../../utils.js';
 
 let graphs = localStorage.getItem('storedGraphs');
 if (!graphs) {

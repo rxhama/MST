@@ -1,4 +1,4 @@
-import { AlgoController, newBoruvkasAlgorithm } from '../../utils.js'; // REMOVE KRUSKALSSS??????????????????????????
+import { AlgoController, newBoruvkasAlgorithm } from '../../utils.js';
 
 let graphs = localStorage.getItem('storedGraphs');
 if (!graphs) {
