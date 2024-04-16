@@ -15,7 +15,52 @@
         <div class="container">
             <div id="navbar-container"></div>
             <h1 id="title">Degree-Constrained Kruskal's</h1>
-            <div id="cy"></div>
+            <p id="algo-desc">
+                <span style="font-weight: bold;">Pre-requisites:</span> <a href="../kruskals/kruskals.html">Kruskal's algorithm</a> (see for description
+                of standard Kruskal's. This will build upon that).<br><br>
+                Kruskal's algorithm is a greedy MST algorithm. It initially sorts all the edges of the graph in
+                ascending order of their weights into an edge queue. At each step, the edge at the front of
+                the edge queue (lowest weight) is popped from the edge queue. If adding this edge does not create a cycle
+                in the current MST, it is added to the MST, else it is discarded. This keeps repeating until the
+                MST has V - 1 edges, where V is the number of nodes/vertices in the graph.
+                <br>
+                <br>
+                Look below for an example run of Kruskal's algorithm:
+            </p>
+            <div class="bigContainer">
+                <div id="cy"></div>
+                <div class="displays">
+                    <div class="left-column">
+                        <span>Minimum cost:</span>
+                        <div id="minCostDisplay" class="top-box"></div>
+                        <span>Edge queue:</span>
+                        <div id="edgeQueueDisplay" class="bottom-box"></div>
+                    </div>
+                    <div id="explanationDisplay"></div>
+                </div>
+            </div>
+            <div class="media-buttons">
+                <button class="btn" id="toStart" title="To Start">
+                    <img src="../../assets/beginning.png">
+                </button>
+                <button class="btn" id="previous" title="Previous">
+                    <img src="../../assets/back.png">
+                </button>
+                <button class="btn" id="play" title="Play">
+                    <img src="../../assets/play.png">
+                </button>
+                <button class="btn" id="pause" title="Pause">
+                    <img src="../../assets/pause.png">
+                </button>
+                <button class="btn" id="next" title="Next">
+                    <img src="../../assets/next.png">
+                </button>
+                <button class="btn" id="toEnd" title="To End">
+                    <img src="../../assets/end.png">
+                </button>
+            </div>
         </div>
+
+        <script type="module" src="./script.js"></script>
     </body>
 </html>

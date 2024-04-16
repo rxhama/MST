@@ -15,7 +15,112 @@
         <div class="container">
             <div id="navbar-container"></div>
             <h1 id="title">Degree-Constrained Prim's</h1>
-            <div id="cy"></div>
+            <p id="algo-desc">
+                <span style="font-weight: bold;">Pre-requisites:</span> <a href="../prims/prims.html">Prim's algorithm</a> (see for description
+                of standard Prim's. This will build upon that).<br><br>
+
+                This Degree-Constrained Prim's algorithm is a greedy algorithm for the DCMST
+                (Degree-Constrained Minimum Spanning Tree problem). It's a variation of Prim's algorithm
+                with an extra constraint of node degree (number of outgoing edges from a node). Given a
+                node degree n, the algorithm tries to find the MST of the graph where each node has a
+                degree <= n.
+                <br>
+                <br>
+                The logic is the same as Prim's algorithm, but at each step, not only is there a cycle check,
+                but also a check if adding the edge will violate the degree constraint for the nodes of
+                the edge. Due to it's greedy nature, it chases local optimums and may not always find
+                an MST as it can get caught at dead ends. The termination conditions are the same as Prim's,
+                i.e. when the number of edges in the MST = V - 1, where V is the number of nodes/vertices in
+                the graph.
+                <br>
+                <br>
+                Degree-Constrained Prim's starting at node a with degree constraint = 2:
+            </p>
+            <div class="bigContainer">
+                <div id="cy"></div>
+                <div class="displays">
+                    <div class="left-column">
+                        <span>Minimum cost:</span>
+                        <div id="minCostDisplay" class="top-box"></div>
+                        <span>Edge queue:</span>
+                        <div id="edgeQueueDisplay" class="bottom-box"></div>
+                    </div>
+                    <div id="explanationDisplay"></div>
+                </div>
+            </div>
+            <div class="media-buttons">
+                <button class="btn" id="toStart" title="To Start">
+                    <img src="../../assets/beginning.png">
+                </button>
+                <button class="btn" id="previous" title="Previous">
+                    <img src="../../assets/back.png">
+                </button>
+                <button class="btn" id="play" title="Play">
+                    <img src="../../assets/play.png">
+                </button>
+                <button class="btn" id="pause" title="Pause">
+                    <img src="../../assets/pause.png">
+                </button>
+                <button class="btn" id="next" title="Next">
+                    <img src="../../assets/next.png">
+                </button>
+                <button class="btn" id="toEnd" title="To End">
+                    <img src="../../assets/end.png">
+                </button>
+            </div>
+
+            <span id="second-one" class="centered">However, we can have a different result by changing
+                parameters. Here is the same example with the<br>same degree constraint (2), but with a starting
+                node of e:
+            </span>
+
+            <div class="bigContainer">
+                <div id="cy1"></div>
+                <div class="displays">
+                    <div class="left-column">
+                        <span>Minimum cost:</span>
+                        <div id="minCostDisplay1" class="top-box"></div>
+                        <span>Edge queue:</span>
+                        <div id="edgeQueueDisplay1" class="bottom-box"></div>
+                    </div>
+                    <div id="explanationDisplay1" class="right-box"></div>
+                </div>
+            </div>
+            <div class="media-buttons">
+                <button class="btn" id="toStart1" title="To Start">
+                    <img src="../../assets/beginning.png">
+                </button>
+                <button class="btn" id="previous1" title="Previous">
+                    <img src="../../assets/back.png">
+                </button>
+                <button class="btn" id="play1" title="Play">
+                    <img src="../../assets/play.png">
+                </button>
+                <button class="btn" id="pause1" title="Pause">
+                    <img src="../../assets/pause.png">
+                </button>
+                <button class="btn" id="next1" title="Next">
+                    <img src="../../assets/next.png">
+                </button>
+                <button class="btn" id="toEnd1" title="To End">
+                    <img src="../../assets/end.png">
+                </button>
+            </div>
+
+            <p>
+                As we can see, DC Prim's can find a DCMST, but due to its greedy nature,
+                it sometimes cannot. We saw that changing the starting node can lead
+                to different results.
+                <br>
+                <br>
+                If you want to run DC Prim's with custom starting nodes and degree constraints
+                on different/custom graphs, navigate to the <a href="../sandbox/sandbox.html">Sanbox</a> page in the navbar.
+                <br>
+                <br>
+                <br>
+            </p>
         </div>
+
+        <script type="module" src="./script.js"></script>
     </body>
 </html>
