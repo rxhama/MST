@@ -95,6 +95,7 @@ steps[0][8].explanation = `Edge cf is added to the MST, merging groups<br>
                             The algorithm is now finished as there is only<br>
                             one group remaining/the number of edges in the<br>
                             MST is equal to V - 1, where V is the number of<br>
-                            nodes/vertices in the graph.`;
+                            nodes/vertices in the graph.<br><br>
+                            The MST's cost is ${steps[0][steps[0].length - 1].mstCost}.`;
 
 algoController.setSteps(cy, steps, algoDisplays);

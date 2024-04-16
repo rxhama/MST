@@ -84,6 +84,7 @@ steps[0][10].explanation = `Adding edge bc to the MST creates a cycle, so it is<
 steps[0][11].explanation = `Edge de does not create a cycle, so it is added<br>
                             to the MST.<br><br>
                             The MST is now complete, as all nodes are connected<br>
-                            and there are V - 1 edges. We can stop here.`;
+                            and there are V - 1 edges. We can stop here.<br><br>
+                            The MST's cost is ${steps[0][steps[0].length - 1].mstCost}.`;
 
 algoController.setSteps(cy, steps, algoDisplays);

@@ -93,6 +93,7 @@ steps[0][9].explanation = `Removing edge ig from the MST did not<br>
                             is removed from the MST.<br><br>
                             The process is finished and the MST is now<br>
                             complete, as it has V - 1 edges, where V is<br>
-                            the number of nodes/vertices in the graph.`;
+                            the number of nodes/vertices in the graph.<br><br>
+                            The MST's cost is ${steps[0][steps[0].length - 1].mstCost}.`;
 
 algoController.setSteps(cy, steps, algoDisplays);
