@@ -1,12 +1,72 @@
-/* Basic styling for the graph container */
-#cy {
-    width: 60vw;
-    height: 60vh;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    margin: auto;
+html, body {
+    height: 100%;
+    /* width: 100%; */
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+.container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.bigger-container {
+    width: 100%;
+    height: 450px;
+    display: flex;
+}
+
+.big-container {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    justify-content: center;
     border: 1px solid black;
+}
+
+.displays {
+    display: flex;
+    flex-direction: column;
+    width: 15%;
+    height: 100%;
+}
+
+.displays div {
+    border: 1px solid black;
+}
+
+.mstDisplay {
+    height: 20%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 5px solid red;
+}
+
+.eqDisplay {
+    height: 80%;
+}
+
+/* Basic styling for the graph container */
+.cy {
+    width: 85%;
+    height: 100%;
+    border: 1px solid black;
+}
+
+#navbar-container {
+    width: 100%;
+}
+
+.media-buttons {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.btn {
+    margin: 2px;
 }

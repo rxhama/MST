@@ -8,15 +8,18 @@ if (!graphs) {
 graphs = JSON.parse(graphs);
 
 // Getting the DOM elements for ease of use later on
-const cyContainer = document.getElementById('cy');
-const minCostDisplay = document.getElementById('minCostDisplay');
-const edgeQueueDisplay = document.getElementById('edgeQueueDisplay');
+const cyContainer1 = document.getElementById('cy1');
+const minCostDisplay1 = document.getElementById('minCostDisplay1');
+const edgeQueueDisplay1 = document.getElementById('edgeQueueDisplay1');
+const cyContainer2 = document.getElementById('cy2');
+const minCostDisplay2 = document.getElementById('minCostDisplay2');
+const edgeQueueDisplay2 = document.getElementById('edgeQueueDisplay2');
 const graphDropdown = document.getElementById('graphDropdown');
 const algoDropdown = document.getElementById('algoDropdown');
 const resetBtn = document.getElementById('resetBtn');
 const startBtn = document.getElementById('startBtn');
-const nodeCount = document.getElementById('nodeCount');
-const edgeCount = document.getElementById('edgeCount');
+const nodeCount = document.getElementById('nodeCount'); // removeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+const edgeCount = document.getElementById('edgeCount'); // removeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 const nodeDegreeInput = document.getElementById('nodeDegreeInput');
 const showRejectedEdgesCheckbox = document.getElementById('showRejectedEdgesCheckbox');
 
@@ -24,10 +27,15 @@ showRejectedEdgesCheckbox.addEventListener('change', reset);
 nodeDegreeInput.addEventListener('change', reset);
 
 // These are the displays that are passed to the algoController
-const algoDisplays = {};
-algoDisplays.minCostDisplay = minCostDisplay;
-algoDisplays.edgeQueueDisplay = edgeQueueDisplay;
-algoDisplays.cyContainer = cyContainer;
+const algoDisplays1 = {};
+algoDisplays1.minCostDisplay = minCostDisplay1;
+algoDisplays1.edgeQueueDisplay = edgeQueueDisplay1;
+algoDisplays1.cyContainer = cyContainer1;
+
+const algoDisplays2 = {};
+algoDisplays2.minCostDisplay = minCostDisplay2;
+algoDisplays2.edgeQueueDisplay = edgeQueueDisplay2;
+algoDisplays2.cyContainer = cyContainer2;
 
 // Initialise this page's algoController and it's buttons' even listeners
 const algoController = new AlgoController();
@@ -40,11 +48,17 @@ document.getElementById('toEnd').addEventListener('click', () => algoController.
 
 // Initialises the cytoscape instance and loads the first graph from localStorage
 // Only done once loadInitialGraphs has finished
-let cy = cytoscape({
-    container: cyContainer, // container to render in
+let cy1 = cytoscape({
+    container: cyContainer1, // container to render in
 });
-cy.json(graphs[0].graph);
-cy.fit();
+cy1.json(graphs[0].graph);
+cy1.fit();
+
+let cy2 = cytoscape({
+    container: cyContainer2, // container to render in
+});
+cy2.json(graphs[0].graph);
+cy2.fit();
 
 populateDropdown();
 updateVals();
@@ -52,12 +66,20 @@ updateVals();
 // Loads the selected graph from the graph dropdown
 function loadGraph(dropdown) {
     const selectedGraph = graphs[dropdown.value].graph;
-    cy.destroy();
-    cy = cytoscape({
-        container: cyContainer
+    // cy1
+    cy1.destroy();
+    cy1 = cytoscape({
+        container: cyContainer1
     });
-    cy.json(selectedGraph);
-    cy.fit();
+    cy1.json(selectedGraph);
+    cy1.fit();
+    // cy2
+    cy2.destroy();
+    cy2 = cytoscape({
+        container: cyContainer2
+    });
+    cy2.json(selectedGraph);
+    cy2.fit();
     
     updateVals();
 }
@@ -93,36 +115,38 @@ function start() {
     const selectedAlgo = algoDropdown.value;
     const showRejectedEdges = showRejectedEdgesCheckbox.checked;
     if (selectedAlgo == 'prims') {
-        const steps = primsAlgorithm(cy, showRejectedEdges);
+        const steps = primsAlgorithm(cy1, showRejectedEdges);
         if (!steps) return;
-        algoController.setSteps(cy, steps, algoDisplays);
+        algoController.setSteps(cy1, steps, algoDisplays1);
     }
     else if (selectedAlgo == 'kruskals') {
-        algoController.setSteps(cy, kruskalsAlgorithm(cy, showRejectedEdges), algoDisplays);
+        algoController.setSteps(cy1, kruskalsAlgorithm(cy1, showRejectedEdges), algoDisplays1);
     }
     else if (selectedAlgo == 'boruvkas') {
-        if (cy.nodes().length > 26) {
-            algoController.setSteps(cy, boruvkasAlgorithm(cy), algoDisplays);
+        if (cy1.nodes().length > 26) {
+            algoController.setSteps(cy1, boruvkasAlgorithm(cy1), algoDisplays1);
         }
         else {
-            algoController.setSteps(cy, newBoruvkasAlgorithm(cy), algoDisplays);
+            algoController.setSteps(cy1, newBoruvkasAlgorithm(cy1), algoDisplays1);
         }
     }
     else if (selectedAlgo == 'reverse-delete') {
-        algoController.setSteps(cy, reverseDeleteAlgorithm(cy, showRejectedEdges), algoDisplays);
+        algoController.setSteps(cy1, reverseDeleteAlgorithm(cy1, showRejectedEdges), algoDisplays1);
     }
     else if (selectedAlgo == 'dcprims') {
-        const steps = degreeConstrainedPrims(cy, showRejectedEdges,  nodeDegreeInput.value);
+        const steps = degreeConstrainedPrims(cy1, showRejectedEdges,  nodeDegreeInput.value);
         if (!steps) return;
-        algoController.setSteps(cy, steps, algoDisplays);
+        algoController.setSteps(cy1, steps, algoDisplays1);
     }
     else if (selectedAlgo == 'dckruskals') {
-        const steps = degreeConstrainedKruskals(cy, showRejectedEdges,  nodeDegreeInput.value);
+        const steps = degreeConstrainedKruskals(cy1, showRejectedEdges,  nodeDegreeInput.value);
         if (!steps) return;
-        algoController.setSteps(cy, steps, algoDisplays);
+        algoController.setSteps(cy1, steps, algoDisplays1);
     }
     else if (selectedAlgo == 'paco') {
-        algoController.setSteps(cy, pacoAlgorithm(cy, nodeDegreeInput.value), algoDisplays);
+        const steps = pacoAlgorithm(cy1, nodeDegreeInput.value);
+        if (!steps) return;
+        algoController.setSteps(cy1, steps, algoDisplays1);
     }
 };
 startBtn.addEventListener("click", start);
@@ -130,10 +154,10 @@ startBtn.addEventListener("click", start);
 // Updates the node/edge count, mstCost and edgeQueue DOM elements' inner text
 // to reflect the current graph
 function updateVals() {
-    nodeCount.innerText = cy.nodes().length;
-    edgeCount.innerText = cy.edges().length;
-    minCostDisplay.innerText = 0;
-    edgeQueueDisplay.innerText = '';
+    nodeCount.innerText = cy1.nodes().length;
+    edgeCount.innerText = cy1.edges().length;
+    minCostDisplay1.innerText = 0;
+    edgeQueueDisplay1.innerText = '';
 }
 
 // To verify kruskals

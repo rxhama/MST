@@ -31,7 +31,6 @@ algoDisplays.cyContainer = cyContainer;
 
 // Initialise this page's algoController and it's buttons' even listeners
 const algoController = new AlgoController();
-window.algoController = algoController;
 document.getElementById('play').addEventListener('click', () => algoController.play());
 document.getElementById('pause').addEventListener('click', () => algoController.pause());
 document.getElementById('next').addEventListener('click', () => algoController.next());
