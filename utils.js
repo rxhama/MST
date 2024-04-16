@@ -1196,6 +1196,18 @@ class Ant {
 * Parallel Ant Colony Optimisation Algorithm for DCMST
 */
 export function pacoAlgorithm(graph, maxDegree) {
+    if (maxDegree <= 1) {
+        alert('Max degree must be greater than 1');
+        return null;
+    }
+
+    const aniSteps = [];
+    const initStep = {};
+    initStep.changes = {};
+    initStep.edgeQueue = [];
+    initStep.mstCost = 0;
+    aniSteps.push(initStep);
+
     const ants = [];
     for (const node of graph.nodes()) {
         const ant = new Ant(node.data('id'));
@@ -1294,6 +1306,10 @@ export function pacoAlgorithm(graph, maxDegree) {
     const s1 = Math.floor(steps/3);
     const s2 = Math.floor(2 * steps/3);
 
+    const step = {};
+    step.changes = {};
+    step.mstCost = 0;
+
     // Keeps track of best tree and its cost
     let bestTree = null;
     let minCost = 999999999999999;
@@ -1305,13 +1321,19 @@ export function pacoAlgorithm(graph, maxDegree) {
         if (noImprovement == 250) { // ==== 2500 ====
             console.log("No improvement after 2500 cycles");
             if (bestTree) {
-                graph.nodes().addClass('chosen');
+                graph.nodes().forEach(node => {
+                    step.changes[node.data('id')] = [{add:true, class:'chosen'}];
+                })
                 for (const edge of bestTree) {
-                    graph.$(`#${edge.data('id')}`).addClass('chosen');
+                    step.changes[edge.data('id')] = [{add:true, class:'chosen'}];
                 }
-                console.log(bestTree.reduce((sum, edge) => sum + edge.data('weight'), 0));
+                step.mstCost = bestTree.reduce((sum, edge) => sum + edge.data('weight'), 0);
+                step.edgeQueue = [];
+                aniSteps.push(step);
+                return [aniSteps, true];
+
             }
-            return;
+            return [aniSteps, false];
         }
 
         if (i % 50 == 0) { // ==== 500 ====
@@ -1463,16 +1485,21 @@ export function pacoAlgorithm(graph, maxDegree) {
     }
     
     if (bestTree) {
-        graph.nodes().addClass('chosen');
+        graph.nodes().forEach(node => {
+            step.changes[node.data('id')] = [{add:true, class:'chosen'}];
+        })
         for (const edge of bestTree) {
-            graph.$(`#${edge.data('id')}`).addClass('chosen');
+            step.changes[edge.data('id')] = [{add:true, class:'chosen'}];
         }
-        console.log(bestTree.reduce((sum, edge) => sum + edge.data('weight'), 0));
-        return;
+        step.mstCost = bestTree.reduce((sum, edge) => sum + edge.data('weight'), 0);
+        step.edgeQueue = [];
+        aniSteps.push(step);
+
+        return [aniSteps, true];
     }
     else {
         console.log('No solution found');
-        return;
+        return [steps, false];
     }
-    return bestTree;
+    // return bestTree;
 }

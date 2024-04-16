@@ -31,6 +31,7 @@ algoDisplays.cyContainer = cyContainer;
 
 // Initialise this page's algoController and it's buttons' even listeners
 const algoController = new AlgoController();
+window.algoController = algoController;
 document.getElementById('play').addEventListener('click', () => algoController.play());
 document.getElementById('pause').addEventListener('click', () => algoController.pause());
 document.getElementById('next').addEventListener('click', () => algoController.next());
@@ -122,7 +123,9 @@ function start() {
         algoController.setSteps(cy, steps, algoDisplays);
     }
     else if (selectedAlgo == 'paco') {
-        algoController.setSteps(cy, pacoAlgorithm(cy, nodeDegreeInput.value), algoDisplays);
+        const steps = pacoAlgorithm(cy, nodeDegreeInput.value);
+        if (!steps) return;
+        algoController.setSteps(cy, steps, algoDisplays);
     }
 };
 startBtn.addEventListener("click", start);
