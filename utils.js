@@ -239,6 +239,235 @@ export class AlgoController {
     }
 }
 
+// export class CompareController {
+//     constructor(ac1, ac2) {
+//         this.ac1 = ac1;
+//         this.ac2 = ac2;
+//         this.currentIndex = 0;
+//     }
+
+//     reset() {
+//         this.ac1.reset();
+//         this.ac2.reset();
+//         this.currentIndex = 0;
+//     }
+
+//     setSteps(graph1, steps1, displays1, graph2, steps2, displays2) {
+//         this.ac1.setSteps(graph1, steps1, displays1);
+//         this.ac2.setSteps(graph2, steps2, displays2);
+//         this.currentIndex = 0;
+//     }
+
+//     play() {
+//         if (this.ac1.steps && this.currentIndex < this.ac1.steps.length) {
+//             this.ac1.play();
+//         }
+//         if (this.ac2.steps && this.currentIndex < this.ac2.steps.length) {
+//             this.ac2.play();
+//         }
+//     }
+
+//     pause() {
+//         this.ac1.pause();
+//         this.ac2.pause();
+//     }
+
+//     next() {
+//         const maxIndex1 = this.ac1.steps ? this.ac1.steps.length : 0;
+//         const maxIndex2 = this.ac2.steps ? this.ac2.steps.length : 0;
+//         const maxSteps = Math.max(maxIndex1, maxIndex2);
+
+//         if (this.currentIndex < maxSteps) {
+//             if (this.ac1.steps && this.currentIndex < this.ac1.steps.length) {
+//                 this.ac1.next();
+//             }
+//             if (this.ac1.steps && this.currentIndex < this.ac2.steps.length) {
+//                 this.ac2.next();
+//             }
+//             this.currentIndex++;
+//         }
+//     }
+
+//     previous() {
+//         if (this.currentIndex > 0) {
+//             this.currentIndex--;
+//             if (this.ac1.steps && this.currentIndex < this.ac1.steps.length) {
+//                 this.ac1.previous();
+//             }
+//             if (this.ac2.steps && this.currentIndex < this.ac2.steps.length) {
+//                 this.ac2.previous();
+//             }
+//         }
+//     }
+
+//     toStart() {
+//         this.ac1.toStart();
+//         this.ac2.toStart();
+//         this.currentIndex = 0;
+//     }
+
+//     toEnd() {
+//         const maxSteps = Math.max(this.ac1.steps ? this.ac1.steps.length : 0, this.ac2.steps ? this.ac2.steps.length : 0);
+//         while (this.currentIndex < maxSteps) {
+//             this.next();
+//         }
+//     }
+// }
+
+// test
+// reset() {
+//     this.ac1.reset();
+//     this.ac2.reset();
+//     this.currentIndex = 0;
+//     this.playing = false;
+//     if (this.timeout) {
+//         clearTimeout(this.timeout);
+//         this.timeout = null;
+//     }
+// }
+
+// setSteps(graph1, steps1, displays1, graph2, steps2, displays2) {
+//     this.ac1.setSteps(graph1, steps1, displays1);
+//     this.ac2.setSteps(graph2, steps2, displays2);
+//     this.currentIndex = 0;
+// }
+// test
+
+/*
+* Similar to AlgoController, but for handling two algo controllers and algorithms at once
+*/
+export class CompareController {
+    constructor(algoController1, algoController2) {
+        this.ac1 = algoController1;
+        this.ac2 = algoController2;
+        this.currentIndex = 0;
+        this.playing = false;
+        this.speed = 1000;
+        this.timeout = null;
+    }
+
+    reset() {
+        this.ac1.reset();
+        this.ac2.reset();
+        this.currentIndex = 0;
+        this.playing = false;
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+        }
+    }
+    
+    setSteps(graph1, steps1, displays1, graph2, steps2, displays2) {
+        this.ac1.setSteps(graph1, steps1, displays1);
+        this.ac2.setSteps(graph2, steps2, displays2);
+        this.currentIndex = 0;
+    }
+
+    play() {
+        if (!this.playing && (this.currentIndex < Math.max(this.ac1.steps.length, this.ac2.steps.length))) {
+            this.playing = true;
+            this.playSteps();
+        }
+    }
+
+    playSteps() {
+        if (this.currentIndex < this.ac1.steps.length) {
+            this.ac1.executeStep(this.currentIndex);
+            if (this.currentIndex == this.ac1.steps.length - 1) {
+                this.ac1.mark();
+            }
+        }
+        if (this.currentIndex < this.ac2.steps.length) {
+            this.ac2.executeStep(this.currentIndex);
+            if (this.currentIndex == this.ac2.steps.length - 1) {
+                this.ac2.mark();
+            }
+        }
+
+        this.currentIndex++;
+        if (this.currentIndex < Math.max(this.ac1.steps.length, this.ac2.steps.length)) {
+            this.timeout = setTimeout(() => this.playSteps(), this.speed);
+        } else {
+            this.pause();
+        }
+    }
+
+    pause() {
+        clearTimeout(this.timeout);
+        this.playing = false;
+        this.ac1.pause();
+        this.ac2.pause();
+    }
+
+    next() {
+        if (this.currentIndex < Math.max(this.ac1.steps.length, this.ac2.steps.length)) {
+            if (this.currentIndex < this.ac1.steps.length) {
+                this.ac1.executeStep(this.currentIndex);
+                if (this.currentIndex == this.ac1.steps.length - 1) {
+                    this.ac1.mark();
+                }
+            }
+            if (this.currentIndex < this.ac2.steps.length) {
+                this.ac2.executeStep(this.currentIndex);
+                if (this.currentIndex == this.ac2.steps.length - 1) {
+                    this.ac2.mark();
+                }
+            }
+            this.currentIndex++;
+        }
+    }
+
+    previous() {
+        if (this.currentIndex > 0) {
+            this.currentIndex--;
+            if (this.currentIndex < this.ac1.steps.length) {
+                this.ac1.undoStep(this.currentIndex);
+                if (this.currentIndex == this.ac1.steps.length - 1) {
+                    this.ac1.unmark();
+                }
+            }
+            if (this.currentIndex < this.ac2.steps.length) {
+                this.ac2.undoStep(this.currentIndex);
+                if (this.currentIndex == this.ac2.steps.length - 1) {
+                    this.ac2.unmark();
+                }
+            }
+        }
+    }
+
+    toStart() {
+        this.pause();
+
+        // Cycle backwards through the steps of each algorithm to undo them all
+        while (this.currentIndex > 0) {
+            this.currentIndex--;
+            if (this.currentIndex < this.ac1.steps.length) {
+                this.ac1.undoStep(this.currentIndex);
+            }
+            if (this.currentIndex < this.ac2.steps.length) {
+                this.ac2.undoStep(this.currentIndex);
+            }
+        }
+
+        this.ac1.unmark();
+        this.ac2.unmark();
+        this.ac1.toStart();
+        this.ac2.toStart();
+    }
+
+    toEnd() {
+        this.pause();
+        while (this.currentIndex < Math.max(this.ac1.steps.length, this.ac2.steps.length)) {
+            this.next();
+        }
+    }
+}
+
+
+
+
+
+
 /*
 * Prims Algorithm
 * @param {object} graph - The cytoscape graph passed through

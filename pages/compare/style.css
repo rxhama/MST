@@ -20,11 +20,10 @@ html, body {
 }
 
 .big-container {
-    flex: 1;
+    width: 50%;
     height: 100%;
     display: flex;
     justify-content: center;
-    border: 1px solid black;
 }
 
 .displays {
@@ -32,6 +31,7 @@ html, body {
     flex-direction: column;
     width: 15%;
     height: 100%;
+    border: 1px solid black;
 }
 
 .displays div {
@@ -43,11 +43,13 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 5px solid red;
 }
 
 .eqDisplay {
     height: 80%;
+    max-width: 100%;
+    overflow: auto;
+    white-space: nowrap;
 }
 
 /* Basic styling for the graph container */
@@ -65,6 +67,7 @@ html, body {
     width: 100%;
     display: flex;
     justify-content: center;
+    margin: 20px 0;
 }
 
 .btn {
