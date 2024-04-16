@@ -1,5 +1,91 @@
+html, body {
+    height: 100%;
+    /* width: 100%; */
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.bigContainer {
+    width: 100%;
+    height: 450px;
+    display: flex;
+    /* flex-direction: column; */
+    justify-content: center;
+}
+
+.displays {
+    display: flex;
+    width: 50%;
+    height: 100%;
+    /* margin: 20px auto; */
+}
+
+/* remove this */
+.displays div {
+    border: 1px solid black;
+}
+
+.left-column {
+    display: flex;
+    flex-direction: column;
+    width: 20%;
+    height: 100%;
+}
+
+#minCostDisplay {
+    height: 20%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#edgeQueueDisplay {
+    height: 80%;
+}
+
+#explanationDisplay {
+    width: 80%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 100%;
+}
+
+#navbar-container {
+    width: 100%;
+}
+
+#title {
+    text-align: center;
+    width: 100%;
+}
+
+#algo-desc {
+    text-align: center;
+    width: 80%;
+}
+
+.media-buttons {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.btn {
+    margin: 2px;
+}
+
 /* Basic styling for the graph container */
-#cy {
+/* #cy {
     width: 60vw;
     height: 60vh;
     position: absolute;
@@ -9,8 +95,13 @@
     bottom: 0;
     margin: auto;
     border: 1px solid black;
-}
+} */
 
-#title {
-    text-align: center;
+#cy {
+    /* width: 60vw; */
+    width: 50%;
+    /* height: 60vh; */
+    height: 100%;
+    /* margin: 20px auto; */
+    border: 1px solid black;
 }
