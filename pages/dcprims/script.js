@@ -232,6 +232,10 @@ steps1[0][12].explanation = `Edge bc creates a cycle and also violates the<br>
 steps1[0][13].explanation = `Edge fe doesn't create a cycle or violate the<br>
                             degree constraint. It's added to the DCMST.<br><br>
                             The algorithm has has finished as it has found<br>
-                            DCMST with degree constraint of 2.`;
+                            DCMST with degree constraint of 2.<br><br>
+                            DCMST Cost: ${steps1[0][steps1[0].length - 1].mstCost}<br>
+                            Standard MST Cost with no constraints: 37<br><br>
+                            We can see how the DCMST cost has to sometimes<br>
+                            take costlier edges to satisfy the degree constraint.`;
 
 algoController1.setSteps(cy1, steps1, algoDisplays1);
