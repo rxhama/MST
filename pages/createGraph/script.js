@@ -412,21 +412,27 @@ function addEdge() {
     updateVals();
 }
 
+// Generates a graph with set number of nodes (taken from node input in page) and edges between all nodes
 function generateGraph() {
     deleteGraph();
 
     const nodeCount = document.getElementById('nodeCountInput').value;
 
-    if (nodeCount < 1 || nodeCount > 100) {
-        alert('Please enter a number between 1 and 100');
+    if (nodeCount < 1 || nodeCount > 26) {
+        alert('Please enter a number between 1 and 26');
         return;
     }
 
     // Generate nodes with random position in cy container
     for (let i = 0; i < nodeCount; i++) {
+        const nextId = nextAvailableId();
+        if (!nextId) {
+            alert('MAX NODES');
+            return;
+        }
         cy.add({
             group: 'nodes',
-            data: { id: crypto.randomUUID() },
+            data: { id: nextId },
             position: { x : Math.random() * cy.container().clientWidth, y : Math.random() * cy.container().clientHeight}
         });
     }
@@ -436,13 +442,15 @@ function generateGraph() {
     // Generate edges between all nodes
     for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
+            const sourceTargetList = [nodes[i].data('id'), nodes[j].data('id')].sort();
+            const newEdgeId = sourceTargetList.join('');
             cy.add({
                 group: 'edges',
                 data: {
-                    id: crypto.randomUUID(),
+                    id: newEdgeId,
                     source: nodes[i].data('id'),
                     target: nodes[j].data('id'),
-                    weight: Math.floor(Math.random() * 10000)
+                    weight: Math.ceil(Math.random() * 100) // Math.floor() could possibly return 0, ceiling ensures it's at least 1
                 }
             });
         }
@@ -456,6 +464,7 @@ function updateVals() {
     document.getElementById('edgeCount').innerText = cy.edges().length;
 }
 
+// Returns the next available ID in alphabetical order
 function nextAvailableId() {
     const existingIds = cy.nodes().map(node => node.data('id')).sort();
 
