@@ -16,7 +16,7 @@
             <div id="navbar-container"></div>
             <h1 id="title">Degree-Constrained Kruskal's</h1>
             <p id="algo-desc">
-                <span style="font-weight: bold;">Pre-requisites:</span> <a href="../kruskals/kruskals.html">Kruskal's algorithm</a> (see for description
+                <strong>Pre-requisites:</strong> <a href="../kruskals/kruskals.html">Kruskal's algorithm</a> (see for description
                 of standard Prim's. This will build upon that).<br><br>
 
                 This Degree-Constrained Kruskal's algorithm is a greedy algorithm for the DCMST
@@ -34,7 +34,7 @@
                 the graph.
                 <br>
                 <br>
-                Degree-Constrained Kruskal's with degree constraint = 2:
+                Degree-Constrained Kruskal's with <strong>degree constraint = 2</strong>:
             </p>
             <div class="bigContainer">
                 <div id="cy"></div>
@@ -71,7 +71,7 @@
 
             <span id="second-one" class="centered">The algorithm with a degree constraint of 2 failed to
                 find a DCMST, as we can see above. However, we can have a different result by changing
-                this degree constraint. Here is the same graph but with a degree constraint = 3:
+                this degree constraint. Here is the same graph but with a <strong>degree constraint = 3</strong>:
             </span>
 
             <div class="bigContainer">
@@ -107,7 +107,18 @@
                 </button>
             </div>
 
-
+            <p>
+                As we can see, DC Kruskal's can find a DCMST, but due to its greedy nature,
+                it sometimes cannot. We saw that changing the degree constraint parameter can lead
+                to different results and edge-selection behaviour.
+                <br>
+                <br>
+                If you want to run DC Kruskal's with custom degree constraints
+                on different/custom graphs, navigate to the <a href="../sandbox/sandbox.html">Sanbox</a> page in the navbar.
+                <br>
+                <br>
+                <br>
+            </p>
         </div>
 
         <script type="module" src="./script.js"></script>
