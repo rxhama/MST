@@ -28,7 +28,6 @@ html, body {
     /* margin: 20px auto; */
 }
 
-/* remove this */
 .displays div {
     border: 1px solid black;
 }
@@ -40,18 +39,31 @@ html, body {
     height: 100%;
 }
 
-#minCostDisplay {
+.top-box {
     height: 20%;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-#edgeQueueDisplay {
+.bottom-box {
     height: 80%;
 }
 
+.centered {
+    text-align: center;
+}
+
 #explanationDisplay {
+    width: 80%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 100%;
+}
+
+#explanationDisplay1 {
     width: 80%;
     height: 100%;
     display: flex;
@@ -104,4 +116,18 @@ html, body {
     height: 100%;
     /* margin: 20px auto; */
     border: 1px solid black;
+}
+
+#cy1 {
+    /* width: 60vw; */
+    width: 50%;
+    /* height: 60vh; */
+    height: 100%;
+    /* margin: 20px auto; */
+    border: 1px solid black;
+}
+
+#second-one {
+    width: 80%;
+    margin: 40px;
 }

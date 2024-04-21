@@ -401,6 +401,7 @@ export class CompareController {
 
     next() {
         if (this.currentIndex < Math.max(this.ac1.steps.length, this.ac2.steps.length)) {
+            this.pause();
             if (this.currentIndex < this.ac1.steps.length) {
                 this.ac1.executeStep(this.currentIndex);
                 if (this.currentIndex == this.ac1.steps.length - 1) {
@@ -419,6 +420,7 @@ export class CompareController {
 
     previous() {
         if (this.currentIndex > 0) {
+            this.pause();
             this.currentIndex--;
             if (this.currentIndex < this.ac1.steps.length) {
                 this.ac1.undoStep(this.currentIndex);

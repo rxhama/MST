@@ -21,16 +21,16 @@
 
                 This Degree-Constrained Prim's algorithm is a greedy algorithm for the DCMST
                 (Degree-Constrained Minimum Spanning Tree problem). It's a variation of Prim's algorithm
-                with an extra constraint of node degree (number of outgoing edges from a node). Given a
-                node degree n, the algorithm tries to find the MST of the graph where each node has a
-                degree <= n.
+                with an extra constraint of node degree (number of outgoing edges from a node), and aims
+                to find the cheapest possible spanning tree while adhering to this constraint. Given a node
+                degree n, the algorithm tries to find the DCMST of the graph where each node has a degree <= n.
                 <br>
                 <br>
                 The logic is the same as Prim's algorithm, but at each step, not only is there a cycle check,
                 but also a check if adding the edge will violate the degree constraint for the nodes of
                 the edge. Due to it's greedy nature, it chases local optimums and may not always find
-                an MST as it can get caught at dead ends. The termination conditions are the same as Prim's,
-                i.e. when the number of edges in the MST = V - 1, where V is the number of nodes/vertices in
+                a DCMST as it can get caught at dead ends. The termination conditions are the same as Prim's,
+                i.e. when the number of edges in the DCMST = V - 1, where V is the number of nodes/vertices in
                 the graph.
                 <br>
                 <br>

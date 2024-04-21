@@ -141,9 +141,10 @@ steps[0][12].explanation = `Edge bh creates a cycle and also violates the<br>
 steps[0][13].explanation = `Edge df does not create cycle, but it violates the<br>
                             degree constraint of node f. We do not add it to<br>
                             the DCMST.<br><br>
-                            We have no more edges in the edge queue to consider,<br>
-                            so the algorithm failed to find a DCMST with the given<br>
-                            parameters: starting node and degree constraint.<br><br>
+                            We have no more edges in the edge queue to consider,
+                            and the DCMST isn't complete, so the algorithm<br>
+                            failed to find a DCMST with the given parameters:<br>
+                            starting node and degree constraint.<br><br>
                             Look below for another example but with a different<br>
                             starting node.`;
 
@@ -231,8 +232,8 @@ steps1[0][12].explanation = `Edge bc creates a cycle and also violates the<br>
                             Next edge: fe (10).`;
 steps1[0][13].explanation = `Edge fe doesn't create a cycle or violate the<br>
                             degree constraint. It's added to the DCMST.<br><br>
-                            The algorithm has has finished as it has found<br>
-                            DCMST with degree constraint of 2.<br><br>
+                            The algorithm has finished and has found<br>
+                            a DCMST with degree constraint of 2.<br><br>
                             DCMST Cost: ${steps1[0][steps1[0].length - 1].mstCost}<br>
                             Standard MST Cost with no constraints: 37<br><br>
                             We can see how the DCMST cost has to sometimes<br>

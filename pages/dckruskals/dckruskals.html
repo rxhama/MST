@@ -17,15 +17,24 @@
             <h1 id="title">Degree-Constrained Kruskal's</h1>
             <p id="algo-desc">
                 <span style="font-weight: bold;">Pre-requisites:</span> <a href="../kruskals/kruskals.html">Kruskal's algorithm</a> (see for description
-                of standard Kruskal's. This will build upon that).<br><br>
-                Kruskal's algorithm is a greedy MST algorithm. It initially sorts all the edges of the graph in
-                ascending order of their weights into an edge queue. At each step, the edge at the front of
-                the edge queue (lowest weight) is popped from the edge queue. If adding this edge does not create a cycle
-                in the current MST, it is added to the MST, else it is discarded. This keeps repeating until the
-                MST has V - 1 edges, where V is the number of nodes/vertices in the graph.
+                of standard Prim's. This will build upon that).<br><br>
+
+                This Degree-Constrained Kruskal's algorithm is a greedy algorithm for the DCMST
+                (Degree-Constrained Minimum Spanning Tree problem). It's a variation of Kruskal's algorithm
+                with an extra constraint of node degree (number of outgoing edges from a node), and aims
+                to find the cheapest possible spanning tree while adhering to this constraint. Given a node
+                degree n, the algorithm tries to find the DCMST of the graph where each node has a degree <= n.
                 <br>
                 <br>
-                Look below for an example run of Kruskal's algorithm:
+                The logic is the same as Kruskal's algorithm, but at each step, not only is there a cycle check,
+                but also a check if adding the edge will violate the degree constraint for the nodes of
+                the edge. Due to it's greedy nature, it chases local optimums and may not always find
+                a DCMST as it can get caught at dead ends. The termination conditions are the same as Kruskal's,
+                i.e. when the number of edges in the DCMST = V - 1, where V is the number of nodes/vertices in
+                the graph.
+                <br>
+                <br>
+                Degree-Constrained Kruskal's with degree constraint = 2:
             </p>
             <div class="bigContainer">
                 <div id="cy"></div>
@@ -59,6 +68,46 @@
                     <img src="../../assets/end.png">
                 </button>
             </div>
+
+            <span id="second-one" class="centered">The algorithm with a degree constraint of 2 failed to
+                find a DCMST, as we can see above. However, we can have a different result by changing
+                this degree constraint. Here is the same graph but with a degree constraint = 3:
+            </span>
+
+            <div class="bigContainer">
+                <div id="cy1"></div>
+                <div class="displays">
+                    <div class="left-column">
+                        <span>Minimum cost:</span>
+                        <div id="minCostDisplay1" class="top-box"></div>
+                        <span>Edge queue:</span>
+                        <div id="edgeQueueDisplay1" class="bottom-box"></div>
+                    </div>
+                    <div id="explanationDisplay1" class="right-box"></div>
+                </div>
+            </div>
+            <div class="media-buttons">
+                <button class="btn" id="toStart1" title="To Start">
+                    <img src="../../assets/beginning.png">
+                </button>
+                <button class="btn" id="previous1" title="Previous">
+                    <img src="../../assets/back.png">
+                </button>
+                <button class="btn" id="play1" title="Play">
+                    <img src="../../assets/play.png">
+                </button>
+                <button class="btn" id="pause1" title="Pause">
+                    <img src="../../assets/pause.png">
+                </button>
+                <button class="btn" id="next1" title="Next">
+                    <img src="../../assets/next.png">
+                </button>
+                <button class="btn" id="toEnd1" title="To End">
+                    <img src="../../assets/end.png">
+                </button>
+            </div>
+
+
         </div>
 
         <script type="module" src="./script.js"></script>
