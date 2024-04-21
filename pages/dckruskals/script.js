@@ -209,6 +209,6 @@ steps1[0][11].explanation = `Edge de doesn't create a cycle and doesn't violate<
                             already satifies the degree constraint of 3,<br>
                             this DCMST is the same as the standard MST.<br><br>
                             See Degree-Constrained Prim's to see how DCMSTs<br>
-                            may usually have higher costs than standard MSTs.`;
+                            usually have higher costs than standard MSTs.`;
 
 algoController1.setSteps(cy1, steps1, algoDisplays1);
