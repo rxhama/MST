@@ -1325,6 +1325,7 @@ export function degreeConstrainedKruskals(graph, showRejectedEdges, maxDegree) {
         if (showRejectedEdges) {
             if (edgeQueue.empty()) {
                 console.log('No more edges to choose from');
+                console.log([steps, false]);
                 return [steps, false];
             }
 
@@ -1347,6 +1348,7 @@ export function degreeConstrainedKruskals(graph, showRejectedEdges, maxDegree) {
             while (nextEdge == null) {
                 if (edgeQueue.empty()) {
                     console.log('No more edges to choose from');
+                    console.log([steps, false]);
                     return [steps, false];
                 }
 
@@ -1407,6 +1409,7 @@ export function degreeConstrainedKruskals(graph, showRejectedEdges, maxDegree) {
     }
     console.log('DEGREE CONSTRAINED KRUSKALS COMPLETED!!!');
     
+    console.log([steps, true]);
     return [steps, true];
 }
 
