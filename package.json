@@ -10,7 +10,7 @@
   "author": "",
   "license": "",
   "dependencies": {
-    "serve": "^14.2.1"
+    "serve": "^14.2.2"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.24.3",
