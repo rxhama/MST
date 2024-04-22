@@ -19,8 +19,8 @@ const algoDropdown1 = document.getElementById('algoDropdown1');
 const algoDropdown2 = document.getElementById('algoDropdown2');
 const resetBtn = document.getElementById('resetBtn');
 const startBtn = document.getElementById('startBtn');
-const nodeCount = document.getElementById('nodeCount'); // removeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-const edgeCount = document.getElementById('edgeCount'); // removeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+const nodeCount = document.getElementById('nodeCount');
+const edgeCount = document.getElementById('edgeCount');
 const nodeDegreeInput = document.getElementById('nodeDegreeInput');
 const showRejectedEdgesCheckbox = document.getElementById('showRejectedEdgesCheckbox');
 
@@ -55,12 +55,20 @@ let cy1 = cytoscape({
 });
 cy1.json(graphs[0].graph);
 cy1.fit();
+cy1.userZoomingEnabled(false);
+cy1.userPanningEnabled(false);
+cy1.nodes().ungrabify();
+cy1.edges().unselectify();
 
 let cy2 = cytoscape({
     container: cyContainer2, // container to render in
 });
 cy2.json(graphs[0].graph);
 cy2.fit();
+cy2.userZoomingEnabled(false);
+cy2.userPanningEnabled(false);
+cy2.nodes().ungrabify();
+cy2.edges().unselectify();
 
 populateDropdown();
 updateVals();
@@ -75,6 +83,11 @@ function loadGraph(dropdown) {
     });
     cy1.json(selectedGraph);
     cy1.fit();
+    cy1.userZoomingEnabled(false);
+    cy1.userPanningEnabled(false);
+    cy1.nodes().ungrabify();
+    cy1.edges().unselectify();
+
     // cy2
     cy2.destroy();
     cy2 = cytoscape({
@@ -82,6 +95,10 @@ function loadGraph(dropdown) {
     });
     cy2.json(selectedGraph);
     cy2.fit();
+    cy2.userZoomingEnabled(false);
+    cy2.userPanningEnabled(false);
+    cy2.nodes().ungrabify();
+    cy2.edges().unselectify();
     
     updateVals();
 }
@@ -299,8 +316,8 @@ function calculateStepsForAlgorithm(algo, cyInstance, showRejectedEdges) {
 // Updates the node/edge count, mstCost and edgeQueue DOM elements' inner text
 // to reflect the current graph
 function updateVals() {
-    // nodeCount.innerText = cy1.nodes().length;
-    // edgeCount.innerText = cy1.edges().length;
+    nodeCount.innerText = cy1.nodes().length;
+    edgeCount.innerText = cy1.edges().length;
     minCostDisplay1.innerText = 0;
     edgeQueueDisplay1.innerText = '';
     minCostDisplay2.innerText = 0;

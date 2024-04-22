@@ -180,6 +180,7 @@ if (graphIndex) {
 else {
     cy = cytoscape(cyOptions);
 }
+cy.fit();
 updateVals();
 
 function cancel() {
@@ -272,12 +273,14 @@ function saveGraph() {
     cy.elements().unselect();
     
     if (graphIndex) {
+        cy.fit();
         graphs[graphIndex].name = graphName;
         graphs[graphIndex].graph = cy.json();
         sessionStorage.removeItem('editGraph');
         window.location.href = '../myGraphs/myGraphs.html';
     }
     else {
+        cy.fit();
         const newGraph = {};
         newGraph.name = graphName;
         newGraph.default = false;
@@ -489,4 +492,8 @@ function getEuclideanDistance(node1, node2) {
     const distance = Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
     
     return distance;
+}
+
+function recenter() {
+    cy.fit();
 }

@@ -35,13 +35,13 @@ export class AlgoController {
     /*
     * Updates AlgoController's fields with new data
     * @param {object} graph - The graph to be used
-    * @param {array} result - result[0] is the steps array, result[1] is a boolean saying if the algo could find the MST or not
+    * @param {array} results - results[0] is the steps array, results[1] is a boolean saying if the algo could find the MST or not
     * @param {object} displays - The displays to be updated
     */
-    setSteps(graph, result, displays) {
+    setSteps(graph, results, displays) {
         this.graph = graph;
-        this.steps = result[0];
-        this.accepted = result[1];
+        this.steps = results[0];
+        this.accepted = results[1];
         this.displays = displays;
         this.currentIndex = 0;
         this.playing = false;
@@ -219,17 +219,21 @@ export class AlgoController {
 
     // Updates the displays with the current step information (mstCost, edgeQueue, etc.)
     updateDisplays(step) {
-        this.displays.minCostDisplay.innerText = step.mstCost;
-        this.displays.edgeQueueDisplay.innerText = '';
-        if (step.edgeQueue.length > 0) {
-            const list = document.createElement('ul');
-            list.style.listStyleType = 'none';
-            step.edgeQueue.forEach(edge => {
-                const item = document.createElement('li');
-                item.innerText = edge;
-                list.appendChild(item);
-            });
-            this.displays.edgeQueueDisplay.appendChild(list);
+        if (this.displays.minCostDisplay) {
+            this.displays.minCostDisplay.innerText = step.mstCost;
+        }
+        if (this.displays.edgeQueueDisplay) {
+            this.displays.edgeQueueDisplay.innerText = '';
+            if (step.edgeQueue.length > 0) {
+                const list = document.createElement('ul');
+                list.style.listStyleType = 'none';
+                step.edgeQueue.forEach(edge => {
+                    const item = document.createElement('li');
+                    item.innerText = edge;
+                    list.appendChild(item);
+                });
+                this.displays.edgeQueueDisplay.appendChild(list);
+            }
         }
 
         // Update explanation display if step has an explanation (for the MST teaching pages)
@@ -364,6 +368,8 @@ export class CompareController {
     }
 
     play() {
+        if (!this.ac1.steps || !this.ac2.steps) return;
+
         if (!this.playing && (this.currentIndex < Math.max(this.ac1.steps.length, this.ac2.steps.length))) {
             this.playing = true;
             this.playSteps();
@@ -393,6 +399,8 @@ export class CompareController {
     }
 
     pause() {
+        if (!this.ac1.steps || !this.ac2.steps) return;
+
         clearTimeout(this.timeout);
         this.playing = false;
         this.ac1.pause();
@@ -400,6 +408,8 @@ export class CompareController {
     }
 
     next() {
+        if (!this.ac1.steps || !this.ac2.steps) return;
+
         if (this.currentIndex < Math.max(this.ac1.steps.length, this.ac2.steps.length)) {
             this.pause();
             if (this.currentIndex < this.ac1.steps.length) {
@@ -419,6 +429,8 @@ export class CompareController {
     }
 
     previous() {
+        if (!this.ac1.steps || !this.ac2.steps) return;
+
         if (this.currentIndex > 0) {
             this.pause();
             this.currentIndex--;
@@ -438,6 +450,8 @@ export class CompareController {
     }
 
     toStart() {
+        if (!this.ac1.steps || !this.ac2.steps) return;
+
         this.pause();
 
         // Cycle backwards through the steps of each algorithm to undo them all
@@ -458,12 +472,167 @@ export class CompareController {
     }
 
     toEnd() {
+        if (!this.ac1.steps || !this.ac2.steps) return;
+
         this.pause();
         while (this.currentIndex < Math.max(this.ac1.steps.length, this.ac2.steps.length)) {
             this.next();
         }
     }
 }
+
+export class PacoController {
+    constructor(algoController, algoController1, algoController2, algoController3, algoController4) {
+        this.ac = algoController;
+        this.ac1 = algoController1;
+        this.ac2 = algoController2;
+        this.ac3 = algoController3;
+        this.ac4 = algoController4;
+        this.currentIndex = 0;
+        this.playing = false;
+        this.speed = 1000;
+        this.timeout = null;
+    }
+
+    reset() {
+        this.ac.reset();
+        this.ac1.reset();
+        this.ac2.reset();
+        this.ac3.reset();
+        this.ac4.reset();
+        this.currentIndex = 0;
+        this.playing = false;
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+        }
+    }
+    
+    setSteps(list) {
+        this.ac.setSteps(list[0].graph, list[0].steps, list[0].displays);
+        this.ac1.setSteps(list[1].graph, list[1].steps, list[1].displays);
+        this.ac2.setSteps(list[2].graph, list[2].steps, list[2].displays);
+        this.ac3.setSteps(list[3].graph, list[3].steps, list[3].displays);
+        this.ac4.setSteps(list[4].graph, list[4].steps, list[4].displays);
+        this.currentIndex = 0;
+    }
+
+    play() {
+        if (!this.ac.steps) return;
+
+        if (!this.playing && this.currentIndex < this.ac.steps.length) {
+            this.playing = true;
+            this.playSteps();
+        }
+    }
+
+    playSteps() {
+        if (this.currentIndex < this.ac.steps.length) {
+            this.ac.executeStep(this.currentIndex);
+            this.ac1.executeStep(this.currentIndex);
+            this.ac2.executeStep(this.currentIndex);
+            this.ac3.executeStep(this.currentIndex);
+            this.ac4.executeStep(this.currentIndex);
+            if (this.currentIndex == this.ac.steps.length - 1) {
+                this.ac.mark();
+            }
+        }
+
+        this.currentIndex++;
+        if (this.currentIndex < this.ac.steps.length) {
+            this.timeout = setTimeout(() => this.playSteps(), this.speed);
+        } else {
+            this.pause();
+        }
+    }
+
+    pause() {
+        if (!this.ac.steps) return;
+
+        clearTimeout(this.timeout);
+        this.playing = false;
+        this.ac.pause();
+        this.ac1.pause();
+        this.ac2.pause();
+        this.ac3.pause();
+        this.ac4.pause();
+    }
+
+    next() {
+        if (!this.ac.steps) return;
+
+        if (this.currentIndex < this.ac.steps.length) {
+            this.pause();
+            if (this.currentIndex < this.ac.steps.length) {
+                this.ac.executeStep(this.currentIndex);
+                this.ac1.executeStep(this.currentIndex);
+                this.ac2.executeStep(this.currentIndex);
+                this.ac3.executeStep(this.currentIndex);
+                this.ac4.executeStep(this.currentIndex);
+                if (this.currentIndex == this.ac.steps.length - 1) {
+                    this.ac.mark();
+                }
+            }
+            this.currentIndex++;
+        }
+    }
+
+    previous() {
+        if (!this.ac.steps) return;
+
+        if (this.currentIndex > 0) {
+            this.pause();
+            this.currentIndex--;
+            if (this.currentIndex < this.ac.steps.length) {
+                this.ac.undoStep(this.currentIndex);
+                this.ac1.undoStep(this.currentIndex);
+                this.ac2.undoStep(this.currentIndex);
+                this.ac3.undoStep(this.currentIndex);
+                this.ac4.undoStep(this.currentIndex);
+                if (this.currentIndex == this.ac.steps.length - 1) {
+                    this.ac.unmark();
+                }
+            }
+        }
+    }
+
+    toStart() {
+        if (!this.ac.steps) return;
+
+        this.pause();
+
+        // Cycle backwards through the steps of each algorithm to undo them all
+        while (this.currentIndex > 0) {
+            this.currentIndex--;
+            
+            if (this.currentIndex < this.ac.steps.length) {
+                this.ac.undoStep(this.currentIndex);
+                this.ac1.undoStep(this.currentIndex);
+                this.ac2.undoStep(this.currentIndex);
+                this.ac3.undoStep(this.currentIndex);
+                this.ac4.undoStep(this.currentIndex);
+            }
+        }
+
+        this.ac.unmark();
+        this.ac.toStart();
+        this.ac1.toStart();
+        this.ac2.toStart();
+        this.ac3.toStart();
+        this.ac4.toStart();
+    }
+
+    toEnd() {
+        if (!this.ac.steps) return;
+
+        this.pause();
+        while (this.currentIndex < this.ac.steps.length) {
+            this.next();
+        }
+    }
+}
+
+
 
 
 
@@ -991,7 +1160,7 @@ export function newBoruvkasAlgorithm(graph, showRejectedEdges) {
     const initStep = {};
     initStep.changes = {};
     initStep.mstCost = mstCost;
-    initStep.edgeQueue = Object.values(groupDict).map(result => result[0]).map(group => group.nodes().map(node => node.data('id')));
+    initStep.edgeQueue = Object.values(groupDict).map(results => results[0]).map(group => group.nodes().map(node => node.data('id')));
     steps.push(initStep);
 
     while(edgeCount < targetEdgeCount) {
@@ -1080,7 +1249,7 @@ export function newBoruvkasAlgorithm(graph, showRejectedEdges) {
             // Converting groupDict vals to list and removing duplicates,
             // then converting those vals (cytoscape collections) to list of node ids
             // to display at each step
-            const elementCollections = Object.values(groupDict).map(result => result[0]);
+            const elementCollections = Object.values(groupDict).map(results => results[0]);
             let uniqueGroups = [];
             elementCollections.forEach(collection => {
                 if (!uniqueGroups.some(group => group.same(collection))) {
@@ -1435,12 +1604,12 @@ export function pacoAlgorithm(graph, maxDegree) {
         return null;
     }
 
-    const aniSteps = [];
+    const results = [];
     const initStep = {};
     initStep.changes = {};
     initStep.edgeQueue = [];
     initStep.mstCost = 0;
-    aniSteps.push(initStep);
+    results.push(initStep);
 
     const ants = [];
     for (const node of graph.nodes()) {
@@ -1563,11 +1732,13 @@ export function pacoAlgorithm(graph, maxDegree) {
                 }
                 step.mstCost = bestTree.reduce((sum, edge) => sum + edge.data('weight'), 0);
                 step.edgeQueue = [];
-                aniSteps.push(step);
-                return [aniSteps, true];
+                results.push(step);
+                alert('PACO Complete: DCMST Found!')
+                return [results, true];
 
             }
-            return [aniSteps, false];
+            alert('PACO Complete: No DCMST Found');
+            return [results, false];
         }
 
         if (i % 50 == 0) { // ==== 500 ====
@@ -1727,12 +1898,409 @@ export function pacoAlgorithm(graph, maxDegree) {
         }
         step.mstCost = bestTree.reduce((sum, edge) => sum + edge.data('weight'), 0);
         step.edgeQueue = [];
-        aniSteps.push(step);
+        results.push(step);
 
-        return [aniSteps, true];
+        alert('PACO Complete: DCMST Found!')
+        return [results, true];
     }
     else {
-        console.log('No solution found');
+        console.log('PACO Complete: No DCMST Found');
+        return [steps, false];
+    }
+    // return bestTree;
+}
+
+export function newPacoAlgorithm(graph, maxDegree) {
+    if (maxDegree <= 1) {
+        alert('Max degree must be greater than 1');
+        return null;
+    }
+
+    if (graph.nodes().length > 4) {
+        if (graph.nodes(':selected').length != 4) {
+            graph.elements().unselect();
+            alert('Please select 4 starting nodes for each ant');
+            return null;
+        }
+    }
+
+    const node1 = graph.nodes(':selected')[0].data('id');
+    const node2 = graph.nodes(':selected')[1].data('id');
+    const node3 = graph.nodes(':selected')[2].data('id');
+    const node4 = graph.nodes(':selected')[3].data('id');
+
+    graph.elements().unselect();
+
+    let results = [
+        [[], true],
+        [[], true],
+        [[], true],
+        [[], true],
+        [[], true]
+    ];
+
+    const initStep = {};
+    initStep.changes = {};
+    initStep.edgeQueue = [];
+    initStep.mstCost = 0;
+    for (const result of results) {
+        result[0].push(initStep);
+    }
+
+    let ant1, ant2, ant3, ant4;
+
+    const ants = [];
+    for (const node of graph.nodes()) {
+        const ant = new Ant(node.data('id'));
+        ants.push(ant);
+
+        switch (node.data('id')) {
+            case node1:
+                ant1 = ant;
+                break;
+            case node2:
+                ant2 = ant;
+                break;
+            case node3:
+                ant3 = ant;
+                break;
+            case node4:
+                ant4 = ant;
+                break;
+        }
+    }
+
+    const resetAnts = function() {
+        for (const ant of ants) {
+            ant.reset();
+        }
+    }
+
+    // Number of nodes in the graph
+    const n = graph.nodes().length;
+
+    // Getting the max and min weights in the graph
+    const maxWeight = graph.edges().max(edge => edge.data('weight')).value;
+    const minWeight = graph.edges().min(edge => edge.data('weight')).value;
+
+    // The max and min pheromone levels
+    const maxPheromone = 1000 * ((maxWeight - minWeight) + (maxWeight - minWeight) / 3);
+    const minPheromone = (maxWeight - minWeight) / 3;
+
+    // The rate at which the pheromone evaporates
+    let evapFactor = 0.5;
+    // Factor to enhance pheromone levels of good edges
+    let enhanceFactor = 1.5;
+    // evaporate good edges after no improvements
+    const evapGoodEdges = function() {
+        return Math.random() * 0.2 + 0.1;
+    }
+
+    // Get initial pheromone level of an edge
+    const getIP = function(edgeId) {
+        return (maxWeight - graph.$(`#${edgeId}`).data('weight')) + (maxWeight - minWeight) / 3;
+    }
+
+    // Returns an edge at random, proportionally to the edge's pheromone level
+    const pickRandomEdgeByPheromone = function(connectedEdges) {
+        const totalPheromone = connectedEdges.reduce((total, edge) => total + edge.data('weight'), 0);
+        
+        let rand = Math.random() * totalPheromone;
+        for (let i = 0; i < connectedEdges.length; i++) {
+            const edge = connectedEdges[i];
+            rand -= edge.data('weight');
+            if (rand <= 0) {
+                return edge;
+            }
+        }
+        return connectedEdges[connectedEdges.length - 1];
+    }
+    
+    // Creating the pheromone graph
+    let pheromoneGraph = cytoscape({
+        headless: true,
+        elements: graph.elements().clone().jsons()
+    })
+
+    // Initialise all initial pheromones IP in the pheromone graph
+    for (const edge of pheromoneGraph.edges()) {
+        edge.data('weight', getIP(edge.data('id')));
+    }
+
+    // Keeps track of how many times an edge has been visited by the ants in between each pheromone update
+    const edgeVisits = {};
+    for (const edge of pheromoneGraph.edges()) {
+        edgeVisits[edge.data('id')] = 0;
+    }
+
+    // Resets the edge visits
+    const resetEdgeVisits = function() {
+        for (const edge in edgeVisits) {
+            edgeVisits[edge] = 0;
+        }
+    }
+
+    // Updates the pheromone levels for all the edges in the pheromone graph
+    const updateEdgePheromones = function() {
+        for (const edge of pheromoneGraph.edges()) {
+            const edgeId = edge.data('id');
+            const p = edge.data('weight');
+            edge.data('weight', (1 - evapFactor) * p + edgeVisits[edgeId] * getIP(edgeId));
+            if (edge.data('weight') > maxPheromone) {
+                edge.data('weight', maxPheromone - getIP(edgeId));
+            }
+            if (edge.data('weight') < minPheromone) {
+                edge.data('weight', minPheromone + getIP(edgeId));
+            }
+        }
+
+        resetEdgeVisits();
+    }
+
+    // How many steps/moves the ants will take
+    const steps = 25; // ==== 75 ====
+    const s1 = Math.floor(steps/3);
+    const s2 = Math.floor(2 * steps/3);
+
+    const step = {};
+    step.changes = {};
+    step.mstCost = 0;
+
+    let cySteps, ant1steps, ant2steps, ant3steps, ant4steps;
+
+    // Keeps track of best tree and its cost
+    let bestTree = null;
+    let minCost = 999999999999999;
+
+    let noImprovement = 0;
+    for (let i = 1; i < 1000; i++) { // ==== 10,000 ====
+        noImprovement++;
+        // Initialise starting node animations
+        cySteps = [
+            {mstCost: 0, edgeQueue: 0, changes: {}}
+        ];
+        ant1steps = [{
+            mstCost: 0,
+            edgeQueue: 0,
+            changes: {}
+        }];
+        ant1steps[0].changes[ant1.initNode] = [{add:true, class:'chosen'}];
+        ant2steps = [{
+            mstCost: 0,
+            edgeQueue: 0,
+            changes: {}
+        }];
+        ant2steps[0].changes[ant2.initNode] = [{add:true, class:'chosen'}];
+        ant3steps = [{
+            mstCost: 0,
+            edgeQueue: 0,
+            changes: {}
+        }];
+        ant3steps[0].changes[ant3.initNode] = [{add:true, class:'chosen'}];
+        ant4steps = [{
+            mstCost: 0,
+            edgeQueue: 0,
+            changes: {}
+        }];
+        ant4steps[0].changes[ant4.initNode] = [{add:true, class:'chosen'}];
+
+        results[0][0].push(cySteps);
+        results[1][0].push(ant1steps);
+        results[2][0].push(ant2steps);
+        results[3][0].push(ant3steps);
+        results[4][0].push(ant4steps);
+        
+        return results;
+
+        // step.changes[node.data('id')] = [{add:true, class:'chosen'}];
+
+        if (noImprovement == 250) { // ==== 2500 ====
+            console.log("No improvement after 2500 cycles");
+            if (bestTree) {
+                graph.nodes().forEach(node => {
+                    step.changes[node.data('id')] = [{add:true, class:'chosen'}];
+                })
+                for (const edge of bestTree) {
+                    step.changes[edge.data('id')] = [{add:true, class:'chosen'}];
+                }
+                step.mstCost = bestTree.reduce((sum, edge) => sum + edge.data('weight'), 0);
+                step.edgeQueue = [];
+                results.push(step);
+
+                alert('PACO Complete: DCMST Found!')
+                return [results, true];
+
+            }
+            alert('PACO Complete: No DCMST Found');
+            return [results, false];
+        }
+
+        if (i % 50 == 0) { // ==== 500 ====
+            console.log("Updating factors");
+            evapFactor *= 0.95;
+            enhanceFactor *= 1.05;
+        }
+
+        
+
+        for (let s = 0; s < steps; s++) {
+            if (s == s1 || s == s2) {
+                // update pheromones
+                updateEdgePheromones();
+            }
+            for (const ant of ants) {
+                const connectedEdges = pheromoneGraph.$(`#${ant.currNode}`).connectedEdges();
+
+                // if ant visits a node it has visited 5 times, skip the ant's step
+                let attempts = 0;
+                while (attempts < 5) {
+                    // select edge
+                    const edge = pickRandomEdgeByPheromone(connectedEdges);
+                    // get next node
+                    const nextNode = edge.source().data('id') == ant.currNode ? edge.target().data('id') : edge.source().data('id');
+                    if (!ant.visitedNodes.includes(nextNode)) {
+                        // add edge to pheromone update
+                        edgeVisits[edge.data('id')] += 1;
+                        // move ant to next node
+                        ant.currNode = nextNode;
+                        // add node to ants visited nodes
+                        ant.visitedNodes.push(nextNode);
+                        break;
+                    }
+                    else {
+                        attempts++;
+                    }
+                }
+            }
+        }
+        resetAnts();
+
+        // update pheromones
+        updateEdgePheromones();
+        
+        // construct tree
+        
+        let groupDict = {};
+        graph.nodes().forEach(node => {
+            const nodeId = node.data('id');
+            groupDict[nodeId] = graph.collection();
+            groupDict[nodeId] = groupDict[nodeId].union(node);
+        });
+        
+        let edgeQueue = pheromoneGraph.edges().sort(function(a, b) {
+            return b.data('weight') - a.data('weight');
+        });
+
+        let candidateIndex = 0;
+
+        let getEdgeCandidates = function() {
+            let temp = edgeQueue.slice(candidateIndex, 5 * n).map(edge => graph.$(`#${edge.data('id')}`));
+            candidateIndex += 5 * n;
+            temp = temp.sort(function(a, b) {
+                return a.data('weight') - b.data('weight');
+            });
+            return temp;
+        }
+
+        let edgeCandidates = getEdgeCandidates();
+
+        let T = graph.collection();
+        let constructed = true;
+        while (T.length != n - 1) {
+            if (edgeCandidates.length != 0) {
+                const edge = edgeCandidates.shift();
+                const sourceNode = edge.source();
+                const targetNode = edge.target();
+                const sourceId = sourceNode.data('id');
+                const targetId = targetNode.data('id');
+                const sourceDegree = sourceNode.connectedEdges(e => T.contains(e)).length;
+                const targetDegree = targetNode.connectedEdges(e => T.contains(e)).length;
+                if (!T.contains(edge) && !groupDict[sourceId].same(groupDict[targetId]) &&
+                    sourceDegree < maxDegree && targetDegree < maxDegree) {
+                    
+                        T = T.union(edge);
+                        groupDict[sourceId] = groupDict[sourceId].union(groupDict[targetId]);
+                        groupDict[sourceId].forEach(function(node) {
+                            groupDict[node.data('id')] = groupDict[sourceId];
+                        });
+                }
+            }
+            else {
+                edgeCandidates = getEdgeCandidates();
+                if (edgeCandidates.length == 0) {
+                    constructed = false;
+                    break;
+                }
+            }
+        }
+
+        if (constructed) {
+            const treeCost = T.reduce((sum, edge) => sum + edge.data('weight'), 0);
+            if (treeCost < minCost) {
+                console.log(`New best tree found!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ${treeCost}`);
+                minCost = treeCost;
+                bestTree = T;
+                noImprovement = 0;
+            }
+        }
+
+        if (bestTree) {
+            for (const edge of bestTree) {
+                const edgeId = edge.data('id');
+                const pheromoneEdge = pheromoneGraph.$(`#${edgeId}`);
+                const p = pheromoneEdge.data('weight');
+                pheromoneEdge.data('weight', enhanceFactor * p);
+                if (pheromoneEdge.data('weight') > maxPheromone) {
+                    pheromoneEdge.data('weight', maxPheromone - getIP(edgeId));
+                }
+                if (pheromoneEdge.data('weight') < minPheromone) {
+                    pheromoneEdge.data('weight', minPheromone + getIP(edgeId));
+                }
+            }
+        }
+        
+        if (noImprovement % 10 == 0) { // ==== 100 ====
+            console.log("No improvement. Evaporating good edges");
+            if (bestTree) {
+                console.log("Evaporating good edges");
+                for (const edge of bestTree) {
+                    const edgeId = edge.data('id');
+                    const p = pheromoneGraph.$(`#${edgeId}`).data('weight');
+                    pheromoneGraph.$(`#${edgeId}`).data('weight', p * evapGoodEdges());
+                }
+            }
+            // else {
+            //     console.log("Evaporating all edges");
+            //     for (const edge of pheromoneGraph.edges()) {
+            //         const edgeId = edge.data('id');
+            //         const p = pheromoneGraph.$(`#${edgeId}`).data('weight');
+            //         pheromoneGraph.$(`#${edgeId}`).data('weight', p * evapGoodEdges());
+            //     }
+            // }
+        }
+
+        // if tree cost < minCost, update minCost and bestTree
+        // enhance pheromones for edges in best tree B
+        // if no improvement in 100 cycles
+            // evaporate pheromone from edges of the best tree B
+    }
+    
+    if (bestTree) {
+        graph.nodes().forEach(node => {
+            step.changes[node.data('id')] = [{add:true, class:'chosen'}];
+        })
+        for (const edge of bestTree) {
+            step.changes[edge.data('id')] = [{add:true, class:'chosen'}];
+        }
+        step.mstCost = bestTree.reduce((sum, edge) => sum + edge.data('weight'), 0);
+        step.edgeQueue = [];
+        results.push(step);
+
+        alert('PACO Complete: DCMST Found!')
+        return [results, true];
+    }
+    else {
+        console.log('PACO Complete: No DCMST Found');
         return [steps, false];
     }
     // return bestTree;

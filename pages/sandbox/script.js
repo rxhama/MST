@@ -45,6 +45,10 @@ let cy = cytoscape({
 });
 cy.json(graphs[0].graph);
 cy.fit();
+cy.userZoomingEnabled(false);
+cy.userPanningEnabled(false);
+cy.nodes().ungrabify();
+cy.edges().unselectify();
 
 populateDropdown();
 updateVals();
@@ -58,6 +62,10 @@ function loadGraph(dropdown) {
     });
     cy.json(selectedGraph);
     cy.fit();
+    cy.userZoomingEnabled(false);
+    cy.userPanningEnabled(false);
+    cy.nodes().ungrabify();
+    cy.edges().unselectify();
     
     updateVals();
 }
