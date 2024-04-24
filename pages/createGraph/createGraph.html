@@ -15,16 +15,14 @@
             <div id="navbar-container"></div>
             <button id="cancelBtn" onclick="cancel()">Cancel</button>
             <button id="clearBtn" onclick="deleteGraph()">Clear Graph</button>
-            <button id="recenterBtn" onclick="recenter()">Recenter</button>
+            <button id="recenterBtn" title="Recenter graph" onclick="recenter()">Recenter</button>
             <button id="saveGraphBtn" onclick="saveGraph()">Save</button>
-            <input type="number" id="edgeWeightInput" placeholder="Enter weight..." min="1" max="100"></input>
-            <button id="addEdgeBtn" onclick="addEdge()">Add Edge</button>
             <br>
-            <button id="addNodeBtn" onclick="addNode()">+</button>
-            <button id="removeElementBtn" onclick="removeElement()">-</button>
-            <button id="generateGraphBtn" onclick="generateGraph()">Gen</button>
+            <button id="addNodeBtn" title="Add new node" onclick="addNode()" class="add-remove-btns">+</button>
+            <button id="removeElementBtn" title="Delete selected elements"onclick="removeElement()" class="add-remove-btns">-</button>
             <label for="nodeCountInput">Node Count:</label>
             <input type="number" id="nodeCountInput" name="nodeCountInput" value="26" min="1" max="26">
+            <button id="generateGraphBtn" title="Generate graph with entered number of nodes and edges between every node" onclick="generateGraph()">Gen</button>
             <br>
             <div class="options">
                 <span>Weights:</span>
@@ -32,8 +30,11 @@
                 <input type="radio" id="random" value="random" name="edgeOptionGroup" checked>
                 <label for="euclidean">Euclidean</label>
                 <input type="radio" id="euclidean" value="euclidean" name="edgeOptionGroup">
+                <br>
+                <label for="custom">Custom</label>
+                <input type="radio" id="custom" value="custom" name="edgeOptionGroup">
             </div>
-            <button id="drawBtn" onclick="toggleDraw()">Draw Edge Mode: OFF</button>
+            <button id="addEdgeBtn" onclick="addEdge()">Add Edge</button>
             <br>
             <span>Nodes: </span>
             <span id="nodeCount"></span>

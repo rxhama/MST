@@ -5,7 +5,7 @@ if (!graphs) {
 }
 graphs = JSON.parse(graphs);
 
-let drawMode = false;
+// To help keep track of already used node IDs and create new ones
 const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
 window.addEventListener('beforeunload', () => {
@@ -348,70 +348,59 @@ function addEdge() {
         return;
     }
 
-    // maybe remove this
-    if (drawMode) {
-        const choice = document.querySelector('input[name="edgeOptionGroup"]:checked').value;
-        if (choice == 'random') {
-            cy.add({
-                group: 'edges',
-                data: {
-                    id: newEdgeId,
-                    source: cy.nodes(':selected')[0].data('id'),
-                    target: cy.nodes(':selected')[1].data('id'),
-                    weight: Math.floor(Math.random() * 100)
-                }
-            });
-
-            cy.elements().unselect();
-            weightInput.value = '';
+    const choice = document.querySelector('input[name="edgeOptionGroup"]:checked').value;
+    if (choice == 'random') {
+        cy.add({
+            group: 'edges',
+            data: {
+                id: newEdgeId,
+                source: cy.nodes(':selected')[0].data('id'),
+                target: cy.nodes(':selected')[1].data('id'),
+                weight: Math.ceil(Math.random() * 100)
+            }
+        });
+    }
+    else if (choice == 'euclidean') {
+        cy.add({
+            group: 'edges',
+            data: {
+                id: newEdgeId,
+                source: cy.nodes(':selected')[0].data('id'),
+                target: cy.nodes(':selected')[1].data('id'),
+                weight: Math.floor(0.1 * getEuclideanDistance(cy.nodes(':selected')[0], cy.nodes(':selected')[1]))
+            }
+        });
+    }
+    else if (choice == 'custom') {
+        const edgeWeight = prompt('Enter edge weight between 1 - 100');
+        if (edgeWeight == '') {
+            alert('Please enter a weight');
             return;
         }
-        else if (choice == 'euclidean') {
-            cy.add({
-                group: 'edges',
-                data: {
-                    id: newEdgeId,
-                    source: cy.nodes(':selected')[0].data('id'),
-                    target: cy.nodes(':selected')[1].data('id'),
-                    weight: Math.floor(0.1 * getEuclideanDistance(cy.nodes(':selected')[0], cy.nodes(':selected')[1]))
-                }
-            });
 
-            cy.elements().unselect();
-            weightInput.value = '';
+        const weight = parseInt(edgeWeight);
+        if (isNaN(weight)) {
+            alert('Please enter a number, no letters or special characters');
             return;
         }
-    }
-    
-    if (weightInput.value == '') {
-        alert('Please enter valid a weight');
-        return;
-    }
 
-    const weight = parseInt(weightInput.value);
-    if (isNaN(weight)) {
-        alert('Please enter a number, no letters or special characters');
-        return;
-    }
-
-    if (weightInput.value < 1 || weightInput.value > 100) {
-        alert('Please enter a number between 1 and 100');
-        return;
-    }
-
-    cy.add({
-        group: 'edges',
-        data: {
-            id: newEdgeId,
-            source: cy.nodes(':selected')[0].data('id'),
-            target: cy.nodes(':selected')[1].data('id'),
-            weight: weight
+        if (weight < 1 || weight > 100) {
+            alert('Please enter a number between 1 and 100');
+            return;
         }
-    });
+
+        cy.add({
+            group: 'edges',
+            data: {
+                id: newEdgeId,
+                source: cy.nodes(':selected')[0].data('id'),
+                target: cy.nodes(':selected')[1].data('id'),
+                weight: weight
+            }
+        });
+    }
 
     cy.elements().unselect();
-    weightInput.value = '';
-
     updateVals();
 }
 
