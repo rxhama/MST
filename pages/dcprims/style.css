@@ -52,6 +52,8 @@ html, body {
 
 .centered {
     text-align: center;
+    width: 80%;
+    margin: 40px;
 }
 
 #explanationDisplay {
@@ -125,9 +127,4 @@ html, body {
     height: 100%;
     /* margin: 20px auto; */
     border: 1px solid black;
-}
-
-#second-one {
-    width: 80%;
-    margin: 40px;
 }

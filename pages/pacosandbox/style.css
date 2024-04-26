@@ -1,6 +1,5 @@
 html, body {
     height: 100%;
-    /* width: 100%; */
     margin: 0;
     padding: 0;
     overflow-x: hidden;
@@ -11,6 +10,92 @@ html, body {
     flex-direction: column;
     align-items: center;
     width: 100%;
+}
+
+.media-buttons {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.btn {
+    margin: 2px;
+}
+
+.bottom-box {
+    display: flex;
+    width: 80%;
+    height: 40vh;
+}
+
+#explanation-box {
+    width: 50%;
+    height: 100%;
+    border: 1px solid black;
+}
+
+.ant-boxes {
+    display: flex;
+    border: 1px solid black;
+    width: 100%;
+    height: 100%;
+}
+
+.half-box {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 50%;
+}
+
+.ant-box {
+    height: 50%;
+    width: 100%;
+    border: 1px solid black;
+}
+
+.box-title {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+}
+
+.top-box {
+    width: 80%;
+    height: 40vh;
+    display: flex;
+}
+
+.side-box {
+    width: 30%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid black;
+}
+
+.bestTreeContainer {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.inner-box {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+.minCosts {
+    display: flex;
+}
+
+.minCost {
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
 }
 
 #minCostDisplay {
@@ -29,55 +114,13 @@ html, body {
     width: 100%;
 }
 
-.media-buttons {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-}
-
-.btn {
-    margin: 2px;
-}
-
-/* Basic styling for the graph container */
-/* #cy {
-    width: 60vw;
-    height: 60vh;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    margin: auto;
-    border: 1px solid black;
-} */
-
 #cy {
-    /* width: 60vw; */
-    width: 80%;
-    /* height: 60vh; */
-    /* height: 100%; */
-    height: 40vh;
-    /* margin: 20px auto; */
-    border: 1px solid black;
-}
-
-.ant-boxes {
-    display: flex;
-    border: 1px solid black;
-    width: 80%;
-    height: 40vh;
-}
-
-.half-box {
-    display: flex;
-    flex-direction: column;
+    width: 70%;
     height: 100%;
-    width: 50%;
+    border: 1px solid black;
 }
 
-.ant-box {
-    height: 50%;
+#cy2 {
+    height: 100%;
     width: 100%;
-    border: 1px solid black;
 }

@@ -32,6 +32,22 @@ export class AlgoController {
         }
     }
 
+    // For PACO, same as normal reset but doesn't unmark the graph container
+    softReset() {
+        if (!this.graph) return;
+
+        this.graph = null;
+        this.steps = null;
+        this.accepted = null;
+        this.displays = null;
+        this.currentIndex = null;
+        this.playing = null;
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+        }
+    }
+
     /*
     * Updates AlgoController's fields with new data
     * @param {object} graph - The graph to be used
@@ -83,22 +99,24 @@ export class AlgoController {
         }
 
         const step = this.steps[index];
-        Object.entries(step.changes).forEach(([id, classNames]) => {
-            classNames.forEach(className => {
-                if (className.add) {
-                    if (className.class == 'outlined' || className.class == 'rejected') {
-                        this.graph.$(`#${id}`).flashClass(className.class, 0.5 * this.speed);
+        if (step.changes) {
+            Object.entries(step.changes).forEach(([id, classNames]) => {
+                classNames.forEach(className => {
+                    if (className.add) {
+                        if (className.class == 'outlined' || className.class == 'rejected') {
+                            this.graph.$(`#${id}`).flashClass(className.class, 0.5 * this.speed);
+                        }
+                        else {
+                            this.graph.$(`#${id}`).addClass(className.class);
+                        }
                     }
                     else {
-                        this.graph.$(`#${id}`).addClass(className.class);
+                        this.graph.$(`#${id}`).removeClass(className.class);
                     }
-                }
-                else {
-                    this.graph.$(`#${id}`).removeClass(className.class);
-                }
-            })
-        });
-
+                })
+            });
+    
+        }
         this.updateDisplays(step);
     }
 
@@ -111,16 +129,18 @@ export class AlgoController {
         }
 
         const step = this.steps[index];
-        Object.entries(step.changes).forEach(([id, classNames]) => {
-            classNames.forEach(className => {
-                if (className.add) {
-                    this.graph.$(`#${id}`).removeClass(className.class);
-                }
-                else {
-                    this.graph.$(`#${id}`).addClass(className.class);
-                }
+        if (step.changes) {
+            Object.entries(step.changes).forEach(([id, classNames]) => {
+                classNames.forEach(className => {
+                    if (className.add) {
+                        this.graph.$(`#${id}`).removeClass(className.class);
+                    }
+                    else {
+                        this.graph.$(`#${id}`).addClass(className.class);
+                    }
+                })
             })
-        })
+        }
         if (index < 1) {
             this.updateDisplays(this.steps[0]);
         }
@@ -220,7 +240,9 @@ export class AlgoController {
     // Updates the displays with the current step information (mstCost, edgeQueue, etc.)
     updateDisplays(step) {
         if (this.displays.minCostDisplay) {
-            this.displays.minCostDisplay.innerText = step.mstCost;
+            if (step.mstCost) {
+                this.displays.minCostDisplay.innerText = step.mstCost;
+            }
         }
         if (this.displays.edgeQueueDisplay) {
             this.displays.edgeQueueDisplay.innerText = '';
@@ -242,100 +264,6 @@ export class AlgoController {
         }
     }
 }
-
-// export class CompareController {
-//     constructor(ac1, ac2) {
-//         this.ac1 = ac1;
-//         this.ac2 = ac2;
-//         this.currentIndex = 0;
-//     }
-
-//     reset() {
-//         this.ac1.reset();
-//         this.ac2.reset();
-//         this.currentIndex = 0;
-//     }
-
-//     setSteps(graph1, steps1, displays1, graph2, steps2, displays2) {
-//         this.ac1.setSteps(graph1, steps1, displays1);
-//         this.ac2.setSteps(graph2, steps2, displays2);
-//         this.currentIndex = 0;
-//     }
-
-//     play() {
-//         if (this.ac1.steps && this.currentIndex < this.ac1.steps.length) {
-//             this.ac1.play();
-//         }
-//         if (this.ac2.steps && this.currentIndex < this.ac2.steps.length) {
-//             this.ac2.play();
-//         }
-//     }
-
-//     pause() {
-//         this.ac1.pause();
-//         this.ac2.pause();
-//     }
-
-//     next() {
-//         const maxIndex1 = this.ac1.steps ? this.ac1.steps.length : 0;
-//         const maxIndex2 = this.ac2.steps ? this.ac2.steps.length : 0;
-//         const maxSteps = Math.max(maxIndex1, maxIndex2);
-
-//         if (this.currentIndex < maxSteps) {
-//             if (this.ac1.steps && this.currentIndex < this.ac1.steps.length) {
-//                 this.ac1.next();
-//             }
-//             if (this.ac1.steps && this.currentIndex < this.ac2.steps.length) {
-//                 this.ac2.next();
-//             }
-//             this.currentIndex++;
-//         }
-//     }
-
-//     previous() {
-//         if (this.currentIndex > 0) {
-//             this.currentIndex--;
-//             if (this.ac1.steps && this.currentIndex < this.ac1.steps.length) {
-//                 this.ac1.previous();
-//             }
-//             if (this.ac2.steps && this.currentIndex < this.ac2.steps.length) {
-//                 this.ac2.previous();
-//             }
-//         }
-//     }
-
-//     toStart() {
-//         this.ac1.toStart();
-//         this.ac2.toStart();
-//         this.currentIndex = 0;
-//     }
-
-//     toEnd() {
-//         const maxSteps = Math.max(this.ac1.steps ? this.ac1.steps.length : 0, this.ac2.steps ? this.ac2.steps.length : 0);
-//         while (this.currentIndex < maxSteps) {
-//             this.next();
-//         }
-//     }
-// }
-
-// test
-// reset() {
-//     this.ac1.reset();
-//     this.ac2.reset();
-//     this.currentIndex = 0;
-//     this.playing = false;
-//     if (this.timeout) {
-//         clearTimeout(this.timeout);
-//         this.timeout = null;
-//     }
-// }
-
-// setSteps(graph1, steps1, displays1, graph2, steps2, displays2) {
-//     this.ac1.setSteps(graph1, steps1, displays1);
-//     this.ac2.setSteps(graph2, steps2, displays2);
-//     this.currentIndex = 0;
-// }
-// test
 
 /*
 * Similar to AlgoController, but for handling two algo controllers and algorithms at once
@@ -481,13 +409,163 @@ export class CompareController {
     }
 }
 
+/*
+* Similar to CompareController, but for having 1 main graph window and 4 ant graph windows
+*/
+// export class PacoController {
+//     constructor(algoController, algoController1, algoController2, algoController3, algoController4) {
+//         this.ac = algoController;
+//         this.ac1 = algoController1;
+//         this.ac2 = algoController2;
+//         this.ac3 = algoController3;
+//         this.ac4 = algoController4;
+//         this.currentIndex = 0;
+//         this.playing = false;
+//         this.speed = 1000;
+//         this.timeout = null;
+//     }
+
+//     reset() {
+//         this.ac.reset();
+//         this.ac1.reset();
+//         this.ac2.reset();
+//         this.ac3.reset();
+//         this.ac4.reset();
+//         this.currentIndex = 0;
+//         this.playing = false;
+//         if (this.timeout) {
+//             clearTimeout(this.timeout);
+//             this.timeout = null;
+//         }
+//     }
+    
+//     setSteps(list) {
+//         this.ac.setSteps(list[0].graph, list[0].steps, list[0].displays);
+//         this.ac1.setSteps(list[1].graph, list[1].steps, list[1].displays);
+//         this.ac2.setSteps(list[2].graph, list[2].steps, list[2].displays);
+//         this.ac3.setSteps(list[3].graph, list[3].steps, list[3].displays);
+//         this.ac4.setSteps(list[4].graph, list[4].steps, list[4].displays);
+//         this.currentIndex = 0;
+//     }
+
+//     play() {
+//         if (!this.ac.steps) return;
+
+//         if (!this.playing && this.currentIndex < this.ac.steps.length) {
+//             this.playing = true;
+//             this.playSteps();
+//         }
+//     }
+
+//     playSteps() {
+//         if (this.currentIndex < this.ac.steps.length) {
+//             this.ac.executeStep(this.currentIndex);
+//             this.ac1.executeStep(this.currentIndex);
+//             this.ac2.executeStep(this.currentIndex);
+//             this.ac3.executeStep(this.currentIndex);
+//             this.ac4.executeStep(this.currentIndex);
+//             if (this.currentIndex == this.ac.steps.length - 1) {
+//                 this.ac.mark();
+//             }
+//         }
+
+//         this.currentIndex++;
+//         if (this.currentIndex < this.ac.steps.length) {
+//             this.timeout = setTimeout(() => this.playSteps(), this.speed);
+//         } else {
+//             this.pause();
+//         }
+//     }
+
+//     pause() {
+//         if (!this.ac.steps) return;
+
+//         clearTimeout(this.timeout);
+//         this.playing = false;
+//         this.ac.pause();
+//         this.ac1.pause();
+//         this.ac2.pause();
+//         this.ac3.pause();
+//         this.ac4.pause();
+//     }
+
+//     next() {
+//         if (!this.ac.steps) return;
+
+//         if (this.currentIndex < this.ac.steps.length) {
+//             this.pause();
+//             if (this.currentIndex < this.ac.steps.length) {
+//                 this.ac.executeStep(this.currentIndex);
+//                 this.ac1.executeStep(this.currentIndex);
+//                 this.ac2.executeStep(this.currentIndex);
+//                 this.ac3.executeStep(this.currentIndex);
+//                 this.ac4.executeStep(this.currentIndex);
+//                 if (this.currentIndex == this.ac.steps.length - 1) {
+//                     this.ac.mark();
+//                 }
+//             }
+//             this.currentIndex++;
+//         }
+//     }
+
+//     previous() {
+//         if (!this.ac.steps) return;
+
+//         if (this.currentIndex > 0) {
+//             this.pause();
+//             this.currentIndex--;
+//             if (this.currentIndex < this.ac.steps.length) {
+//                 this.ac.undoStep(this.currentIndex);
+//                 this.ac1.undoStep(this.currentIndex);
+//                 this.ac2.undoStep(this.currentIndex);
+//                 this.ac3.undoStep(this.currentIndex);
+//                 this.ac4.undoStep(this.currentIndex);
+//                 if (this.currentIndex == this.ac.steps.length - 1) {
+//                     this.ac.unmark();
+//                 }
+//             }
+//         }
+//     }
+
+//     toStart() {
+//         if (!this.ac.steps) return;
+
+//         this.pause();
+
+//         // Cycle backwards through the steps of each algorithm to undo them all
+//         while (this.currentIndex > 0) {
+//             this.currentIndex--;
+            
+//             if (this.currentIndex < this.ac.steps.length) {
+//                 this.ac.undoStep(this.currentIndex);
+//                 this.ac1.undoStep(this.currentIndex);
+//                 this.ac2.undoStep(this.currentIndex);
+//                 this.ac3.undoStep(this.currentIndex);
+//                 this.ac4.undoStep(this.currentIndex);
+//             }
+//         }
+
+//         this.ac.unmark();
+//         this.ac.toStart();
+//         this.ac1.toStart();
+//         this.ac2.toStart();
+//         this.ac3.toStart();
+//         this.ac4.toStart();
+//     }
+
+//     toEnd() {
+//         if (!this.ac.steps) return;
+
+//         this.pause();
+//         while (this.currentIndex < this.ac.steps.length) {
+//             this.next();
+//         }
+//     }
+// }
+
 export class PacoController {
-    constructor(algoController, algoController1, algoController2, algoController3, algoController4) {
-        this.ac = algoController;
-        this.ac1 = algoController1;
-        this.ac2 = algoController2;
-        this.ac3 = algoController3;
-        this.ac4 = algoController4;
+    constructor(list) {
+        this.acs = list;
         this.currentIndex = 0;
         this.playing = false;
         this.speed = 1000;
@@ -495,11 +573,10 @@ export class PacoController {
     }
 
     reset() {
-        this.ac.reset();
-        this.ac1.reset();
-        this.ac2.reset();
-        this.ac3.reset();
-        this.ac4.reset();
+        this.acs[0].reset();
+        for (let i = 1; i < this.acs.length; i++) {
+            this.acs[i].softReset();
+        }
         this.currentIndex = 0;
         this.playing = false;
         if (this.timeout) {
@@ -509,37 +586,33 @@ export class PacoController {
     }
     
     setSteps(list) {
-        this.ac.setSteps(list[0].graph, list[0].steps, list[0].displays);
-        this.ac1.setSteps(list[1].graph, list[1].steps, list[1].displays);
-        this.ac2.setSteps(list[2].graph, list[2].steps, list[2].displays);
-        this.ac3.setSteps(list[3].graph, list[3].steps, list[3].displays);
-        this.ac4.setSteps(list[4].graph, list[4].steps, list[4].displays);
+        for (let i = 0; i < list.length; i++) {
+            this.acs[i].setSteps(list[i].graph, list[i].steps, list[i].displays);
+        }
         this.currentIndex = 0;
     }
 
     play() {
-        if (!this.ac.steps) return;
+        if (!this.acs[0].steps) return;
 
-        if (!this.playing && this.currentIndex < this.ac.steps.length) {
+        if (!this.playing && this.currentIndex < this.acs[0].steps.length) {
             this.playing = true;
             this.playSteps();
         }
     }
 
     playSteps() {
-        if (this.currentIndex < this.ac.steps.length) {
-            this.ac.executeStep(this.currentIndex);
-            this.ac1.executeStep(this.currentIndex);
-            this.ac2.executeStep(this.currentIndex);
-            this.ac3.executeStep(this.currentIndex);
-            this.ac4.executeStep(this.currentIndex);
-            if (this.currentIndex == this.ac.steps.length - 1) {
-                this.ac.mark();
+        if (this.currentIndex < this.acs[0].steps.length) {
+            for (const g of this.acs) {
+                g.executeStep(this.currentIndex);
+            }
+            if (this.currentIndex == this.acs[0].steps.length - 1) {
+                this.acs[0].mark();
             }
         }
 
         this.currentIndex++;
-        if (this.currentIndex < this.ac.steps.length) {
+        if (this.currentIndex < this.acs[0].steps.length) {
             this.timeout = setTimeout(() => this.playSteps(), this.speed);
         } else {
             this.pause();
@@ -547,30 +620,26 @@ export class PacoController {
     }
 
     pause() {
-        if (!this.ac.steps) return;
+        if (!this.acs[0].steps) return;
 
         clearTimeout(this.timeout);
         this.playing = false;
-        this.ac.pause();
-        this.ac1.pause();
-        this.ac2.pause();
-        this.ac3.pause();
-        this.ac4.pause();
+        for (const g of this.acs) {
+            g.pause();
+        }
     }
 
     next() {
-        if (!this.ac.steps) return;
+        if (!this.acs[0].steps) return;
 
-        if (this.currentIndex < this.ac.steps.length) {
+        if (this.currentIndex < this.acs[0].steps.length) {
             this.pause();
-            if (this.currentIndex < this.ac.steps.length) {
-                this.ac.executeStep(this.currentIndex);
-                this.ac1.executeStep(this.currentIndex);
-                this.ac2.executeStep(this.currentIndex);
-                this.ac3.executeStep(this.currentIndex);
-                this.ac4.executeStep(this.currentIndex);
-                if (this.currentIndex == this.ac.steps.length - 1) {
-                    this.ac.mark();
+            if (this.currentIndex < this.acs[0].steps.length) {
+                for (const g of this.acs) {
+                    g.executeStep(this.currentIndex);
+                }
+                if (this.currentIndex == this.acs[0].steps.length - 1) {
+                    this.acs[0].mark();
                 }
             }
             this.currentIndex++;
@@ -578,26 +647,24 @@ export class PacoController {
     }
 
     previous() {
-        if (!this.ac.steps) return;
+        if (!this.acs[0].steps) return;
 
         if (this.currentIndex > 0) {
             this.pause();
             this.currentIndex--;
-            if (this.currentIndex < this.ac.steps.length) {
-                this.ac.undoStep(this.currentIndex);
-                this.ac1.undoStep(this.currentIndex);
-                this.ac2.undoStep(this.currentIndex);
-                this.ac3.undoStep(this.currentIndex);
-                this.ac4.undoStep(this.currentIndex);
-                if (this.currentIndex == this.ac.steps.length - 1) {
-                    this.ac.unmark();
+            if (this.currentIndex < this.acs[0].steps.length) {
+                for (const g of this.acs) {
+                    g.undoStep(this.currentIndex);
+                }
+                if (this.currentIndex == this.acs[0].steps.length - 1) {
+                    this.acs[0].unmark();
                 }
             }
         }
     }
 
     toStart() {
-        if (!this.ac.steps) return;
+        if (!this.acs[0].steps) return;
 
         this.pause();
 
@@ -605,39 +672,28 @@ export class PacoController {
         while (this.currentIndex > 0) {
             this.currentIndex--;
             
-            if (this.currentIndex < this.ac.steps.length) {
-                this.ac.undoStep(this.currentIndex);
-                this.ac1.undoStep(this.currentIndex);
-                this.ac2.undoStep(this.currentIndex);
-                this.ac3.undoStep(this.currentIndex);
-                this.ac4.undoStep(this.currentIndex);
+            if (this.currentIndex < this.acs[0].steps.length) {
+                for (const g of this.acs) {
+                    g.undoStep(this.currentIndex);
+                }
             }
         }
 
-        this.ac.unmark();
-        this.ac.toStart();
-        this.ac1.toStart();
-        this.ac2.toStart();
-        this.ac3.toStart();
-        this.ac4.toStart();
+        this.acs[0].unmark();
+        for (const g of this.acs) {
+            g.toStart();
+        }
     }
 
     toEnd() {
-        if (!this.ac.steps) return;
+        if (!this.acs[0].steps) return;
 
         this.pause();
-        while (this.currentIndex < this.ac.steps.length) {
+        while (this.currentIndex < this.acs[0].steps.length) {
             this.next();
         }
     }
 }
-
-
-
-
-
-
-
 
 /*
 * Prims Algorithm
@@ -1584,6 +1640,7 @@ export function degreeConstrainedKruskals(graph, showRejectedEdges, maxDegree) {
 
 class Ant {
     constructor(initNode) {
+        this.tracked = false;
         this.initNode = initNode;
         this.currNode = initNode;
         this.visitedNodes = [this.initNode];
@@ -1722,7 +1779,7 @@ export function pacoAlgorithm(graph, maxDegree) {
         noImprovement++;
 
         if (noImprovement == 250) { // ==== 2500 ====
-            console.log("No improvement after 2500 cycles");
+            console.log("No improvement after 250 cycles");
             if (bestTree) {
                 graph.nodes().forEach(node => {
                     step.changes[node.data('id')] = [{add:true, class:'chosen'}];
@@ -1931,7 +1988,13 @@ export function newPacoAlgorithm(graph, maxDegree) {
 
     graph.elements().unselect();
 
+    let edgeWeights = {};
+    for (const edge of graph.edges()) {
+        edgeWeights[edge.data('id')] = edge.data('weight');
+    }
+
     let results = [
+        [[], true],
         [[], true],
         [[], true],
         [[], true],
@@ -1957,18 +2020,24 @@ export function newPacoAlgorithm(graph, maxDegree) {
         switch (node.data('id')) {
             case node1:
                 ant1 = ant;
+                ant1.tracked = true;
                 break;
             case node2:
                 ant2 = ant;
+                ant2.tracked = true;
                 break;
             case node3:
                 ant3 = ant;
+                ant3.tracked = true;
                 break;
             case node4:
                 ant4 = ant;
+                ant4.tracked = true;
                 break;
         }
     }
+
+    const trackedAnts = [ant1, ant2, ant3, ant4];
 
     const resetAnts = function() {
         for (const ant of ants) {
@@ -2062,11 +2131,35 @@ export function newPacoAlgorithm(graph, maxDegree) {
     const s1 = Math.floor(steps/3);
     const s2 = Math.floor(2 * steps/3);
 
+    // Steps which will be displayed
+    const ss1 = Math.floor(steps/4);
+    const ss2 = Math.floor(2 * steps/4);
+    const ss3 = Math.floor(3 * steps/4);
+    const ss4 = steps;
+
     const step = {};
     step.changes = {};
     step.mstCost = 0;
 
-    let cySteps, ant1steps, ant2steps, ant3steps, ant4steps;
+    let cySteps, bestTreeSteps;
+    let ant1steps, ant2steps, ant3steps, ant4steps;
+
+    let allSteps = [cySteps, ant1steps, ant2steps, ant3steps, ant4steps, bestTreeSteps];
+
+    const resetAllSteps = function() {
+        allSteps = [cySteps, ant1steps, ant2steps, ant3steps, ant4steps, bestTreeSteps];
+    }
+
+    const pushEmptySteps = function() {
+        const maxLength = Math.max(...allSteps.map(steps => steps.length));
+        for (let i = 0; i < allSteps.length; i++) {
+            const stepsToAdd = maxLength - allSteps[i].length;
+            for (let j = 0; j < stepsToAdd; j++) {
+                allSteps[i].push({changes: {}});
+            }
+        }
+    }
+    
 
     // Keeps track of best tree and its cost
     let bestTree = null;
@@ -2075,47 +2168,45 @@ export function newPacoAlgorithm(graph, maxDegree) {
     let noImprovement = 0;
     for (let i = 1; i < 1000; i++) { // ==== 10,000 ====
         noImprovement++;
+
+
+
+
         // Initialise starting node animations
-        cySteps = [
-            {mstCost: 0, edgeQueue: 0, changes: {}}
-        ];
+        cySteps = [{mstCost: 0, edgeQueue: 0, changes: {}}];
+        bestTreeSteps = [{changes: {}}];
         ant1steps = [{
-            mstCost: 0,
-            edgeQueue: 0,
             changes: {}
         }];
         ant1steps[0].changes[ant1.initNode] = [{add:true, class:'chosen'}];
         ant2steps = [{
-            mstCost: 0,
-            edgeQueue: 0,
             changes: {}
         }];
         ant2steps[0].changes[ant2.initNode] = [{add:true, class:'chosen'}];
         ant3steps = [{
-            mstCost: 0,
-            edgeQueue: 0,
             changes: {}
         }];
         ant3steps[0].changes[ant3.initNode] = [{add:true, class:'chosen'}];
         ant4steps = [{
-            mstCost: 0,
-            edgeQueue: 0,
             changes: {}
         }];
         ant4steps[0].changes[ant4.initNode] = [{add:true, class:'chosen'}];
 
-        results[0][0].push(cySteps);
-        results[1][0].push(ant1steps);
-        results[2][0].push(ant2steps);
-        results[3][0].push(ant3steps);
-        results[4][0].push(ant4steps);
-        
-        return results;
+        // if (i == ss1 || i == ss2 || i == ss3 || i == ss4 || NEW BEST TREE) {
+        //     results[0][0].push(...cySteps);
+        //     results[1][0].push(...ant1steps);
+        //     results[2][0].push(...ant2steps);
+        //     results[3][0].push(...ant3steps);
+        //     results[4][0].push(...ant4steps);
+        //     results[5][0].push(...bestTreeSteps);
+        // }
 
-        // step.changes[node.data('id')] = [{add:true, class:'chosen'}];
+        resetAllSteps();
+
+        
 
         if (noImprovement == 250) { // ==== 2500 ====
-            console.log("No improvement after 2500 cycles");
+            console.log("No improvement after 250 cycles");
             if (bestTree) {
                 graph.nodes().forEach(node => {
                     step.changes[node.data('id')] = [{add:true, class:'chosen'}];
@@ -2128,11 +2219,16 @@ export function newPacoAlgorithm(graph, maxDegree) {
                 results.push(step);
 
                 alert('PACO Complete: DCMST Found!')
-                return [results, true];
+                results[0][0][results[0][0].length - 1].mstCost = minCost;
+                return results;
 
             }
             alert('PACO Complete: No DCMST Found');
-            return [results, false];
+            for (const result of results) {
+                result[1] = false;
+            }
+            results[0][0][results[0][0].length - 1].mstCost = 0;
+            return results;
         }
 
         if (i % 50 == 0) { // ==== 500 ====
@@ -2164,7 +2260,17 @@ export function newPacoAlgorithm(graph, maxDegree) {
                         // move ant to next node
                         ant.currNode = nextNode;
                         // add node to ants visited nodes
-                        ant.visitedNodes.push(nextNode);
+                        ant.visitedNodes.push(nextNode)
+                        if (trackedAnts.includes(ant)) {
+                            allSteps[trackedAnts.indexOf(ant) + 1].push(
+                                {
+                                    changes: {
+                                        [ant.currNode]: [{add: true, class: 'chosen'}],
+                                        [edge.data('id')]: [{add: true, class: 'chosen'}]
+                                    }
+                                }
+                            );
+                        }
                         break;
                     }
                     else {
@@ -2173,7 +2279,23 @@ export function newPacoAlgorithm(graph, maxDegree) {
                 }
             }
         }
+        pushEmptySteps();
         resetAnts();
+
+        for (let i = 1; i < allSteps.length - 1; i++) {
+            const eles = allSteps[i].reduce((acc, step) => {
+                const keys = Object.keys(step.changes);
+                return acc.concat(keys);
+            }, []);
+
+            let newStep = {changes: {}};
+            for (const ele of eles) {
+                newStep.changes[ele] = [{add: false, class: 'chosen'}];
+            }
+            allSteps[i].push(newStep);
+        }
+
+        pushEmptySteps();
 
         // update pheromones
         updateEdgePheromones();
@@ -2206,6 +2328,7 @@ export function newPacoAlgorithm(graph, maxDegree) {
 
         let T = graph.collection();
         let constructed = true;
+        let mstCost = 0;
         while (T.length != n - 1) {
             if (edgeCandidates.length != 0) {
                 const edge = edgeCandidates.shift();
@@ -2223,6 +2346,12 @@ export function newPacoAlgorithm(graph, maxDegree) {
                         groupDict[sourceId].forEach(function(node) {
                             groupDict[node.data('id')] = groupDict[sourceId];
                         });
+                        mstCost += edge.data('weight');
+                        let newStep = {mstCost: mstCost, changes: {}, edgeQueue: []};
+                        newStep.changes[edge.data('id')] = [{add: true, class: 'chosen'}];
+                        newStep.changes[sourceId] = [{add: true, class: 'chosen'}];
+                        newStep.changes[targetId] = [{add: true, class: 'chosen'}];
+                        allSteps[0].push(newStep);
                 }
             }
             else {
@@ -2234,14 +2363,76 @@ export function newPacoAlgorithm(graph, maxDegree) {
             }
         }
 
+        pushEmptySteps();
+        /////////////////////////////////////////////////////
+        // for (let i = 0; i < allSteps.length; i++) {
+        //     results[i][0].push(...allSteps[i]);
+        // }
+        // return results;
+        /////////////////////////////////////////////////////
+        //////////// WORKS SO FAR //////////////////
+        // NEED TO:
+        // - IS SUCCESSFULLY CONSTRUCTED, ANOTHER ANI MAKING ALL ELES GREEN
+        //      ELSE MAKE ALL RED
+        // - ADD EDGES OF MST TO BEST TREE IF IS CONSTRUCTED: //////// LIKE ABOVE!!!!!!!
+        // const eles = allSteps[i].reduce((acc, step) => {
+        //     const keys = Object.keys(step.changes);
+        //     return acc.concat(keys);
+        // }, []);
+
+        // let newStep = {changes: {}};
+        // for (const ele of eles) {
+        //     newStep.changes[ele] = [{add: false, class: 'chosen'}];
+        // }
+        // allSteps[i].push(newStep);
+        
+        // REMEMBER, SHOW STEPS FOR ITERATIONS ss1, ss2, ss3, ss4 AND THOSE WHERE NEW BEST TREE FOUND
+        
+        let newBestTree = false;
         if (constructed) {
             const treeCost = T.reduce((sum, edge) => sum + edge.data('weight'), 0);
             if (treeCost < minCost) {
+                newBestTree = true;
+
                 console.log(`New best tree found!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ${treeCost}`);
                 minCost = treeCost;
                 bestTree = T;
                 noImprovement = 0;
+
+                let newStep = {mstCost: treeCost, edgeQueue: [], changes: {}};
+                for (const ele of bestTree) {
+                    newStep.changes[ele.data('id')] = [{add: false, class: 'chosen'}];
+                }
+                for (const node of graph.nodes()) {
+                    newStep.changes[node.data('id')] = [{add: false, class: 'chosen'}];
+                }
+
+                let newStep1 = {mstCost: treeCost, edgeQueue: [], changes: {}};
+                for (const ele of T) {
+                    newStep1.changes[ele.data('id')] = [{add: true, class: 'chosen'}];
+                }
+                for (const node of graph.nodes()) {
+                    newStep1.changes[node.data('id')] = [{add: true, class: 'chosen'}];
+                }
+                allSteps[5].push(newStep);
+                allSteps[5].push(newStep1);
             }
+        }
+        
+        let newStep = {mstCost: mstCost, edgeQueue: [], changes: {}};
+        for (const ele of T) {
+            newStep.changes[ele.data('id')] = [{add: false, class: 'chosen'}];
+        }
+        for (const node of graph.nodes()) {
+            newStep.changes[node.data('id')] = [{add: false, class: 'chosen'}];
+        }
+        allSteps[0].push(newStep);
+
+        pushEmptySteps();
+
+        if (i == ss1 || i == ss2 || i == ss3 || i == ss4 || newBestTree)
+        for (let i = 0; i < allSteps.length; i++) {
+            results[i][0].push(...allSteps[i]);
         }
 
         if (bestTree) {
@@ -2297,11 +2488,16 @@ export function newPacoAlgorithm(graph, maxDegree) {
         results.push(step);
 
         alert('PACO Complete: DCMST Found!')
-        return [results, true];
+        results[0][0][results[0][0].length - 1].mstCost = minCost;
+        return results;
     }
     else {
         console.log('PACO Complete: No DCMST Found');
-        return [steps, false];
+        for (const result of results) {
+            result[1] = false;
+        }
+        results[0][0][results[0][0].length - 1].mstCost = 0;
+        return results;
     }
     // return bestTree;
 }

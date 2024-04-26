@@ -181,6 +181,7 @@ else {
     cy = cytoscape(cyOptions);
 }
 cy.fit();
+window.cy = cy;
 updateVals();
 
 function cancel() {

@@ -9,11 +9,13 @@ graphs = JSON.parse(graphs);
 
 // Getting the DOM elements for ease of use later on
 const cyContainer = document.getElementById('cy');
-const ant1 = document.getElementById('ant1');
-const ant2 = document.getElementById('ant2');
-const ant3 = document.getElementById('ant3');
-const ant4 = document.getElementById('ant4');
+const ant1Container = document.getElementById('ant1');
+const ant2Container = document.getElementById('ant2');
+const ant3Container = document.getElementById('ant3');
+const ant4Container = document.getElementById('ant4');
+const bestTreeContainer = document.getElementById('cy2');
 const minCostDisplay = document.getElementById('minCostDisplay');
+const minCostDisplay2 = document.getElementById('minCostDisplay2');
 const graphDropdown = document.getElementById('graphDropdown');
 const resetBtn = document.getElementById('resetBtn');
 const startBtn = document.getElementById('startBtn');
@@ -28,27 +30,43 @@ const algoDisplays = {};
 algoDisplays.minCostDisplay = minCostDisplay;
 algoDisplays.cyContainer = cyContainer;
 const algoDisplays1 = {};
-algoDisplays1.cyContainer = ant1;
+algoDisplays1.cyContainer = ant1Container;
 const algoDisplays2 = {};
-algoDisplays2.cyContainer = ant2;
+algoDisplays2.cyContainer = ant2Container;
 const algoDisplays3 = {};
-algoDisplays3.cyContainer = ant3;
+algoDisplays3.cyContainer = ant3Container;
 const algoDisplays4 = {};
-algoDisplays4.cyContainer = ant4;
+algoDisplays4.cyContainer = ant4Container;
+const algoDisplays5 = {};
+algoDisplays5.cyContainer = bestTreeContainer;
+algoDisplays5.minCostDisplay = minCostDisplay2;
+
+let algoDisplaysList = [
+    algoDisplays,
+    algoDisplays1,
+    algoDisplays2,
+    algoDisplays3,
+    algoDisplays4,
+    algoDisplays5
+];
 
 // Initialise this page's algoController and it's buttons' even listeners
-const algoController = new AlgoController();
-const algoController1 = new AlgoController();
-const algoController2 = new AlgoController();
-const algoController3 = new AlgoController();
-const algoController4 = new AlgoController();
-const pacoController = new PacoController(
-    algoController,
-    algoController1,
-    algoController2,
-    algoController3,
-    algoController4
-);
+const mainAC = new AlgoController();
+const ant1AC = new AlgoController();
+const ant2AC = new AlgoController();
+const ant3AC = new AlgoController();
+const ant4AC = new AlgoController();
+const bestTreeAC = new AlgoController();
+let ACs = [
+    mainAC,
+    ant1AC,
+    ant2AC,
+    ant3AC,
+    ant4AC,
+    bestTreeAC
+];
+const pacoController = new PacoController(ACs);
+window.pacoController = pacoController;
 document.getElementById('play').addEventListener('click', () => pacoController.play());
 document.getElementById('pause').addEventListener('click', () => pacoController.pause());
 document.getElementById('next').addEventListener('click', () => pacoController.next());
@@ -64,25 +82,34 @@ let cy = cytoscape({
     container: cyContainer, // container to render in
 });
 // Ant 1 graph
-let cy1 = cytoscape({
-    container: ant1
+let ant1 = cytoscape({
+    container: ant1Container
 });
 // Ant 2 graph
-let cy2 = cytoscape({
-    container: ant2
+let ant2 = cytoscape({
+    container: ant2Container
 });
 // Ant 3 graph
-let cy3 = cytoscape({
-    container: ant3
+let ant3 = cytoscape({
+    container: ant3Container
 });
 // Ant 4 graph
-let cy4 = cytoscape({
-    container: ant4
+let ant4 = cytoscape({
+    container: ant4Container
 });
-let cyGraphs = [cy, cy1, cy2, cy3, cy4];
+// Best tree graph
+let cy2 = cytoscape({
+    container: bestTreeContainer
+})
+
+let cyGraphs = [cy, ant1, ant2, ant3, ant4, cy2];
 
 for (let i = 0; i < cyGraphs.length; i++) {
-    cyGraphs[i].json(graphs[0].graph);
+    let graph = graphs[0].graph;
+    if (i == 5) {
+        graph = JSON.parse(JSON.stringify(graph));
+    }
+    cyGraphs[i].json(graph);
     cyGraphs[i].fit();
     cyGraphs[i].userZoomingEnabled(false);
     cyGraphs[i].userPanningEnabled(false);
@@ -107,19 +134,26 @@ function loadGraph(dropdown) {
         container: cyContainer
     });
     cyGraphs[1] = cytoscape({
-        container: ant1
+        container: ant1Container
     });
     cyGraphs[2] = cytoscape({
-        container: ant2
+        container: ant2Container
     });
     cyGraphs[3] = cytoscape({
-        container: ant3
+        container: ant3Container
     });
     cyGraphs[4] = cytoscape({
-        container: ant4
+        container: ant4Container
     });
+    cyGraphs[5] = cytoscape({
+        container: bestTreeContainer
+    })
     for (let i = 0; i < cyGraphs.length; i++) {
-        cyGraphs[i].json(selectedGraph);
+        let graph = selectedGraph;
+        if (i == 5) {
+            graph = JSON.parse(JSON.stringify(selectedGraph));
+        }
+        cyGraphs[i].json(graph);
         cyGraphs[i].fit();
         cyGraphs[i].userZoomingEnabled(false);
         cyGraphs[i].userPanningEnabled(false);
@@ -167,9 +201,11 @@ function start() {
         {graph: cyGraphs[1], steps: steps[1], displays: algoDisplays1},
         {graph: cyGraphs[2], steps: steps[2], displays: algoDisplays2},
         {graph: cyGraphs[3], steps: steps[3], displays: algoDisplays3},
-        {graph: cyGraphs[4], steps: steps[4], displays: algoDisplays4}
+        {graph: cyGraphs[4], steps: steps[4], displays: algoDisplays4},
+        {graph: cyGraphs[5], steps: steps[5], displays: algoDisplays5}
     ];
     pacoController.setSteps(list);
+    console.log(`Steps set!`);
 };
 startBtn.addEventListener("click", start);
 

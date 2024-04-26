@@ -16,19 +16,98 @@
         <div class="container">
             <div id="navbar-container"></div>
             <h1 id="title">Parallel Ant Colony Optimisation for DCMST</h1>
-            <div id="cy"></div>
-            <div class="antBoxes">
-                <div class="halfBox">
-                    <div id="cy2" class="cyBox"></div>
-                    <div id="cy3" class="cyBox"></div>
+            <p id="algo-desc">
+                <strong>Pre-requisites:</strong> <a href="../dckruskals/dckruskals.html">
+                    Degree-Constrained Kruskal's algorithm</a> (see for description
+                of Degree-Constrained Kruskal's. This algorithm uses it in its construction phases).<br><br>
+
+                For a full description of this algorithm, see the <a href="https://doi.org/10.1145/1143997.1144000">
+                original paper here</a>.<br><br>
+
+                PACO (Parallel Ant Colony Optimisation for DCMST) is a algorithm that consits of ant agents.
+                In the <strong>exploration phase</strong>, the ants traverse the graph in parallel and at
+                <strong>random, but proportional to the phermone levels</strong>. Updates are then made
+                to the edge pheromones based on how many times it was traversed.<br><br>
+                In the <strong>construction</strong> phase, the highest pheromone edges are taken and sorted
+                by their weights in ascending order, where Degree-Constrained Kruskal's is then applied, to
+                attemp to try and find a DCMST. If found, the best tree is saved.<br><br>
+                The algorithm consists of many cycles, each one having an exploration and construction phase.
+                <br>
+                Every time a spanning tree is built in the construction phase, it is compared with the best
+                tree found so far, and replaces it if it has a lower cost. In the end, the algorithm should
+                return a good DCMST solution.<br><br>
+                See an example below with a node <strong>degree constraint = 2</strong>, and we will be tracking ants starting
+                on nodes <strong>b</strong>, <strong>o</strong>, <strong>t</strong>, and <strong>h</strong>.
+                <br>
+                <br>
+            </p>
+            <div class="media-buttons">
+                <button class="btn" id="toStart" title="To Start">
+                    <img src="../../assets/beginning.png">
+                </button>
+                <button class="btn" id="previous" title="Previous">
+                    <img src="../../assets/back.png">
+                </button>
+                <button class="btn" id="play" title="Play">
+                    <img src="../../assets/play.png">
+                </button>
+                <button class="btn" id="pause" title="Pause">
+                    <img src="../../assets/pause.png">
+                </button>
+                <button class="btn" id="next" title="Next">
+                    <img src="../../assets/next.png">
+                </button>
+                <button class="btn" id="toEnd" title="To End">
+                    <img src="../../assets/end.png">
+                </button>
+            </div>
+            <br>
+            <div class="minCosts">
+                <div class="minCost">
+                    <span>Minimum cost:</span>
+                    <div id="minCostDisplay"></div>
                 </div>
-                <div class="halfBox">
-                    <div id="cy4" class="cyBox"></div>
-                    <div id="cy5" class="cyBox"></div>
+                <div class="minCost">
+                    <span>Minimum cost of best tree so far:</span>
+                    <div id="minCostDisplay2"></div>
                 </div>
             </div>
+            <div class="top-box">
+                <div id="cy">
+                    <span class="box-title">Main</span>
+                </div>
+                <div class="side-box">
+                    <div class="bestTreeContainer">
+                        <span>Best Tree So Far</span>
+                        <div id="cy2"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom-box">
+                <div id="explanation-box"></div>
+                <div class="ant-boxes">
+                    <div class="half-box">
+                        <div id="ant1" class="ant-box">
+                            <span class="box-title">Ant 1</span>
+                        </div>
+                        <div id="ant2" class="ant-box">
+                            <span class="box-title">Ant 2</span>
+                        </div>
+                    </div>
+                    <div class="half-box">
+                        <div id="ant3" class="ant-box">
+                            <span class="box-title">Ant 3</span>
+                        </div>
+                        <div id="ant4" class="ant-box">
+                            <span class="box-title">Ant 4</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <br>
         </div>
 
-        <script src="./script.js"></script>
+        <script type="module" src="./script.js"></script>
     </body>
 </html>
