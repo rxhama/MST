@@ -1825,7 +1825,7 @@ export function newPacoAlgorithm(graph, maxDegree) {
     if (graph.nodes().length > 4) {
         if (graph.nodes(':selected').length != 4) {
             graph.elements().unselect();
-            alert('Please select 4 starting nodes for each ant');
+            alert('Please select 4 starting nodes (one for each ant)');
             return null;
         }
     }
