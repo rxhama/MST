@@ -54,6 +54,7 @@ npm test
 ```
 
 ## User guide and tips
+Most of the UI and system is self-explanatory and easy to use. Here are some things worth nothing:
 
 - In the sandbox, comparison or PACO sandbox pages, calculate steps must be clicked before any playback happens (nothing
 will happen if calculate steps isn't pressed). The steps must be loaded into the Algorithm Controller.
