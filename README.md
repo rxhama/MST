@@ -70,3 +70,8 @@ other than the graph creation page, you can click and drag your mouse to highlig
 multiple nodes (or even edges).
 However if in the graph creation page, simple dragging clicking will not work as it will move the graph around. You must hold SHIFT or CTRL and then click
 and drag, or alternatively hold SHIFT or CTRL and click nodes to select/unselect
+
+- In graph creation page, the '+' button creates a node in the middle of the screen. '-' button deletes all selected elements
+
+- In the graph creation page, to create edges, only 2 nodes must be selected (look at bullet point above this), and then add edge button must be pressed.
+To delete elements (nodes or edges), once again select all elememts you want to delete then press the '-' button.
