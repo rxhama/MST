@@ -52,3 +52,21 @@ If you want to run tests, navigate to project folder and run:
 ```
 npm test
 ```
+
+## User guide and tips
+
+- In the sandbox, comparison or PACO sandbox pages, calculate steps must be clicked before any playback happens (nothing
+will happen if calculate steps isn't pressed). The steps must be loaded into the Algorithm Controller.
+
+- Changing the graph, algorithm or any options should always reset the Algorithm Controller. There is no need to press calculate steps
+multiple times when the steps are already calculated, it may lead to differences/out of sync animations, edge queue or MST cost
+
+- If running any PACO algorithm in sandbox, comparison or PACO sandbox pages, after pressing calculate, please wait. The algorithm
+runs many cycles and takes a couple of seconds to complete. When complete, you will be alerted that the algorithm has completed. You may
+then use the media controls to play the steps.
+
+- In the graph creation page as well as some pages like sandbox etc., 1 or more nodes may need to be selected. To do this, if it's any page
+other than the graph creation page, you can click and drag your mouse to highlight the nodes, or hold SHIFT or CTRL and click nodes to select/unselect
+multiple nodes (or even edges).
+However if in the graph creation page, simple dragging clicking will not work as it will move the graph around. You must hold SHIFT or CTRL and then click
+and drag, or alternatively hold SHIFT or CTRL and click nodes to select/unselect
